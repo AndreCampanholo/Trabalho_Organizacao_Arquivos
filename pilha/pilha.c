@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 struct no {
-    int rrn;
+    int byte_offset;
     NO* anterior;
 };
 
@@ -62,10 +62,10 @@ int pilha_topo(PILHA *pilha) {
     if(pilha == NULL || pilha->topo == NULL) {
         return NULL;
     }
-    return pilha->topo->rrn;
+    return pilha->topo->byte_offset;
 };
 
-bool pilha_empilhar(PILHA *pilha, int rrn) {
+bool pilha_empilhar(PILHA *pilha, int byte_offset) {
     if(pilha == NULL || pilha_cheia(pilha)) {
         return false;
     } else {
@@ -73,7 +73,7 @@ bool pilha_empilhar(PILHA *pilha, int rrn) {
         NO *aux;
         aux = pilha->topo;
         pilha->topo = novo;
-        novo->rrn = rrn;
+        novo->byte_offset = byte_offset;
         pilha->topo->anterior = aux;
         aux = NULL;
         pilha->tamanho++;
@@ -87,12 +87,12 @@ int pilha_desempilhar(PILHA *pilha) {
     } else {
         NO *aux;
         aux = pilha->topo;
-        int rrn = aux->rrn;
+        int byte_offset = aux->byte_offset;
         pilha->topo = pilha->topo->anterior;
         aux->anterior = NULL;
         pilha->tamanho--;
         free(aux);
         aux = NULL;
-        return rrn;
+        return byte_offset;
     }
 };
