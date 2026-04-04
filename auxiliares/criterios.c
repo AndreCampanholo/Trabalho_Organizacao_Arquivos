@@ -53,7 +53,7 @@ int ler_criterio(Criterio *criterio) {
 
     if (str_campo_texto[0] == '\0') {
         criterio->ehNulo = 1;
-        criterio->valorInteiro = -1; // Valor arbitrário para indicar nulo em campos inteiros;
+        criterio->valorInteiro = VALOR_NULO_INTEIRO; // Valor para indicar nulo em campos inteiros;
         criterio->valorTexto[0] = '\0';
     } else {
         criterio->ehNulo = 0;
@@ -67,3 +67,105 @@ int ler_criterio(Criterio *criterio) {
     return 1;
 }
 
+int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade) {
+    for (int i = 0; i < quantidade; i++) {
+        if (campo_eh_texto(criterios[i].nome)) {
+            int tamanho = 0;
+            int eh_valido = 0;
+            const char *texto = obter_campos_textos(registro, criterios[i].nome, &tamanho, &ok);
+            if (!eh_valido) return 0;
+
+            if (criterios[i].ehNulo) {
+                if (tamanho != 0) return 0;
+            } else {
+                if (tamanho == 0) return 0;
+                if (strcmp(texto, criterios[i].valorTexto) != 0) return 0;
+            }
+        } else {
+            int eh_valido = 0;
+            int valor = obter_campos_inteiros(registro, criterios[i].nome, &eh_valido);
+            if (!eh_valido) return 0;
+
+            if (criterios[i].ehNulo) {
+                if (valor != VALOR_NULO_INTEIRO) return 0;
+            } else {
+                if (valor != criterios[i].valorInteiro) return 0;
+            }
+        }
+    }
+
+    return 1;
+}
+
+void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio) {
+    if (strcmp(criterio->nome, "codEstacao") == 0) {
+        registro->codEstacao = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+    } else if (strcmp(criterio->nome, "codLinha") == 0) {
+        registro->codLinha = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+    } else if (strcmp(criterio->nome, "codProxEstacao") == 0) {
+        registro->codProxEstacao = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+    } else if (strcmp(criterio->nome, "distProxEstacao") == 0) {
+        registro->distProxEstacao = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+    } else if (strcmp(criterio->nome, "codLinhaIntegra") == 0) {
+        registro->codLinhaIntegra = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+    } else if (strcmp(criterio->nome, "codEstIntegra") == 0) {
+        registro->codEstIntegra = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+    } else if (strcmp(criterio->nome, "nomeEstacao") == 0) {
+        if (criterio->ehNulo) {
+            registro->tamNomeEstacao = 0;
+            registro->nomeEstacao[0] = '\0';
+        } else {
+            strncpy(registro->nomeEstacao, criterio->valorTexto, TAMANHO_TEXTO - 1);
+            registro->nomeEstacao[TAMANHO_TEXTO - 1] = '\0';
+            registro->tamNomeEstacao = (int)strlen(registro->nomeEstacao);
+        }
+    } else if (strcmp(criterio->nome, "nomeLinha") == 0) {
+        if (criterio->ehNulo) {
+            registro->tamNomeLinha = 0;
+            registro->nomeLinha[0] = '\0';
+        } else {
+            strncpy(registro->nomeLinha, criterio->valorTexto, TAMANHO_TEXTO - 1);
+            registro->nomeLinha[TAMANHO_TEXTO - 1] = '\0';
+            registro->tamNomeLinha = (int)strlen(registro->nomeLinha);
+        }
+    }
+}
+
+void imprimir_registro(Registro *registro) {
+    printf("%d ", registro->codEstacao);
+
+    if (texto_nulo(registro->nomeEstacao, registro->tamNomeEstacao))
+        printf("NULO ");
+    else
+        printf("%s ", registro->nomeEstacao);
+
+    if (registro->codLinha == VALOR_NULO_INTEIRO)
+        printf("NULO ");
+    else
+        printf("%d ", registro->codLinha);
+
+    if (texto_nulo(registro->nomeLinha, registro->tamNomeLinha))
+        printf("NULO ");
+    else
+        printf("%s ", registro->nomeLinha);
+
+    if (registro->codProxEstacao == VALOR_NULO_INTEIRO)
+        printf("NULO ");
+    else
+        printf("%d ", registro->codProxEstacao);
+
+    if (registro->distProxEstacao == VALOR_NULO_INTEIRO)
+        printf("NULO ");
+    else
+        printf("%d ", registro->distProxEstacao);
+
+    if (registro->codLinhaIntegra == VALOR_NULO_INTEIRO)
+        printf("NULO ");
+    else
+        printf("%d ", registro->codLinhaIntegra);
+
+    if (registro->codEstIntegra == VALOR_NULO_INTEIRO)
+        printf("NULO\n");
+    else
+        printf("%d\n", registro->codEstIntegra);
+}

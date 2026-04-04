@@ -12,6 +12,8 @@
 // Limite máximo de pares (nomeCampo, valorCampo) que podem ser informados como critérios por vez
 #define MAX_CRITERIOS 8
 
+#define VALOR_NULO_INTEIRO -1
+
 #define MSG_FALHA "Falha no processamento do arquivo."
 #define MSG_INEXISTENTE "Registro inexistente."
 
