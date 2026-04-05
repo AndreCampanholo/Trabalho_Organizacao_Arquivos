@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "../pilha/pilha.h"
+#include "../funcionalidades/funcionalidades.h"
 
 int main(void)
 {

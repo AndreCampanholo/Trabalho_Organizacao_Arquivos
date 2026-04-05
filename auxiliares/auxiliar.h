@@ -71,6 +71,10 @@ void inicializar_estacoes_vistas(EstacoesVistas *estacoes);
 void liberar_estacoes_vistas(EstacoesVistas *estacoes);
 bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes);
 
+bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes);
+
+void int_ou_nulo(int valor);
+
 bool campo_nulo (char *valor, int tamanho);
 
 bool campo_eh_texto(char *nome_campo);
