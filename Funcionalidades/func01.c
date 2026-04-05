@@ -33,6 +33,15 @@ void criar_tabela(char *nome_csv, char *nome_bin)
     while (ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho, &estacoes))
         ;
 
+    if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
+    {
+        printf("%s\n", "Falha no processamento do arquivo.");
+        liberar_estacoes_vistas(&estacoes);
+        fclose(arquivo_csv);
+        fclose(arquivo_bin);
+        return;
+    }
+
     // Seta o status no cabeçalho para consistente
     cabecalho.status = '1';
     escrever_cabecalho(arquivo_bin, &cabecalho);

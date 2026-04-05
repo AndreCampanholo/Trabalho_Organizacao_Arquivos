@@ -75,6 +75,8 @@ void inicializar_estacoes_vistas(EstacoesVistas *estacoes);
 
 void liberar_estacoes_vistas(EstacoesVistas *estacoes);
 
+bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro, int bytes_restantes);
+
 bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes);
 
 bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes);

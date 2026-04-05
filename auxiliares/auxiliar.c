@@ -229,10 +229,6 @@ bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Estacoes
     campo = strtok(NULL, ",");
     registro.codEstIntegra = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
 
-    // Só incrementa 'nroEstacoes' se 'nomeEstacao' não estiver no vetor de nomes da struct 'estacoes'
-    if (nova_estacao(registro.nomeEstacao, estacoes))
-        cabecalho->nroEstacoes++;
-
     // Valores dos indicadores de tamanho dos campos de tamanho variável
     registro.tamNomeEstacao = strlen(registro.nomeEstacao);
     registro.tamNomeLinha = strlen(registro.nomeLinha);
@@ -240,11 +236,6 @@ bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Estacoes
     escrever_registro(bin, &registro);
 
     cabecalho->proxRRN++;
-
-    if (registro.codLinhaIntegra != -1 && registro.codEstIntegra != -1)
-    {
-        cabecalho->nroParesEstacoes++;
-    }
 
     return true;
 }
@@ -308,6 +299,16 @@ bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
     estacoes->nomes[estacoes->quantidade] = (char *)malloc(strlen(novo_nome) + 1);
     strcpy(estacoes->nomes[estacoes->quantidade], novo_nome);
     estacoes->quantidade++;
+    return true;
+}
+
+bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro, int bytes_restantes) {
+    char lixo = '$';
+    for(int i = 0; i < bytes_restantes; i++) {
+        if(fwrite(&lixo, sizeof(char), 1, arquivo) != 1) {
+            return false;
+        }
+    }
     return true;
 }
 

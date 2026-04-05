@@ -169,7 +169,6 @@ void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
         else
         {
             strncpy(registro->nomeEstacao, criterio->valorTexto, TAMANHO_CAMPO_VARIAVEL - 1);
-            registro->nomeEstacao[TAMANHO_CAMPO_VARIAVEL - 1] = '\0';
             registro->tamNomeEstacao = (int)strlen(registro->nomeEstacao);
         }
     }
@@ -186,6 +185,12 @@ void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
             registro->nomeLinha[TAMANHO_CAMPO_VARIAVEL - 1] = '\0';
             registro->tamNomeLinha = (int)strlen(registro->nomeLinha);
         }
+    }
+
+    int bytes_usados = 37 + registro.tamNomeEstacao + registro.tamNomeLinha;
+    int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
+    if(!preencher_campos_variaveis_lixo(registro, bytes_restantes)){
+        printf("%s\n", MSG_FALHA);
     }
 }
 
