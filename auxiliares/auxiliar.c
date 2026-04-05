@@ -5,26 +5,74 @@ long rrn_para_offset(int rrn)
     return TAMANHO_CABECALHO + (long)rrn * TAMANHO_REGISTRO;
 }
 
-int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita) {
+int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita)
+{
     *arquivo = fopen(nome_arquivo, modo);
-    if (*arquivo == NULL) return 0;
+    if (*arquivo == NULL)
+        return 0;
 
-    if (!ler_cabecalho(*arquivo, cabecalho)) {
+    if (!ler_cabecalho(*arquivo, cabecalho))
+    {
         fclose(*arquivo);
         return 0;
     }
 
-    if (cabecalho->status != '1') {
+    if (cabecalho->status != '1')
+    {
         fclose(*arquivo);
         return 0;
     }
 
-    if (eh_escrita) {
+    if (eh_escrita)
+    {
         cabecalho->status = '0';
         escrever_cabecalho(*arquivo, cabecalho);
     }
 
     return 1;
+}
+
+int abrir_binario_escrita(FILE **arquivo, char *nome_arquivo, Cabecalho *cabecalho)
+{
+    return abrir_binario(arquivo, nome_arquivo, "r+b", cabecalho, 1);
+}
+
+void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
+{
+    cabecalho->status = '1';
+    escrever_cabecalho(arquivo, cabecalho);
+    fclose(arquivo);
+}
+
+int ler_lista_criterios(Criterio *criterios, int *quantidade, int minimo)
+{
+    if (scanf("%d", quantidade) != 1 || *quantidade < minimo || *quantidade > MAX_CRITERIOS)
+    {
+        return 0;
+    }
+
+    for (int i = 0; i < *quantidade; i++)
+    {
+        if (!ler_criterio(&criterios[i]))
+        {
+            return 0;
+        }
+    }
+
+    return 1;
+}
+
+void normalizar_campos_texto_registro(Registro *registro)
+{
+    if (registro->tamNomeEstacao >= 0 && registro->tamNomeEstacao < TAMANHO_CAMPO_VARIAVEL)
+    {
+        registro->nomeEstacao[registro->tamNomeEstacao] = '\0';
+    }
+
+    if (registro->tamNomeLinha >= 0 && registro->tamNomeLinha < TAMANHO_CAMPO_VARIAVEL)
+    {
+        registro->nomeLinha[registro->tamNomeLinha] = '\0';
+    }
 }
 
 int ler_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
@@ -119,7 +167,8 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 
     if (fwrite(&registro->tamNomeEstacao, sizeof(int), 1, arquivo) != 1)
         return 0;
-    if (registro->tamNomeEstacao > 0) {
+    if (registro->tamNomeEstacao > 0)
+    {
         if (fwrite(registro->nomeEstacao, sizeof(char), (size_t)registro->tamNomeEstacao, arquivo) !=
             (size_t)registro->tamNomeEstacao)
             return 0;
@@ -129,7 +178,8 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 
     if (fwrite(&registro->tamNomeLinha, sizeof(int), 1, arquivo) != 1)
         return 0;
-    if (registro->tamNomeLinha > 0 && registro->tamNomeLinha <= bytes_disponiveis) {
+    if (registro->tamNomeLinha > 0 && registro->tamNomeLinha <= bytes_disponiveis)
+    {
         if (fwrite(registro->nomeLinha, sizeof(char), (size_t)registro->tamNomeLinha, arquivo) !=
             (size_t)registro->tamNomeLinha)
             return 0;
@@ -137,7 +187,8 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 
     int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
     char lixo = '$';
-    for (int i = bytes_usados; i < TAMANHO_REGISTRO; i++) {
+    for (int i = bytes_usados; i < TAMANHO_REGISTRO; i++)
+    {
         if (fwrite(&lixo, sizeof(char), 1, arquivo) != 1)
             return 0;
     }
@@ -146,24 +197,25 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 }
 
 // Lê registros do arquivo .csv e escreve-os no .bin
-bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes) {
+bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes)
+{
     // Variáveis auxiliares
     char linha[512];
     char *campo;
-    int lixoQtd;
 
     Registro registro;
     registro.removido = '0';
     registro.proximo = -1;
 
     // Se não houverem mais linhas de registros no csv, retorna false
-    if (fgets(linha, sizeof(linha), csv) == NULL) return false;
+    if (fgets(linha, sizeof(linha), csv) == NULL)
+        return false;
 
     // Atribuição dos valores do csv às variáveis por meio da tokenização de 'linha' nas virgulas (",")
     campo = strtok(linha, ",");
-    registro.codEstacao = atoi(campo);    
+    registro.codEstacao = atoi(campo);
     campo = strtok(NULL, ",");
-    strcpy(registro.nomeEstacao,campo);
+    strcpy(registro.nomeEstacao, campo);
     campo = strtok(NULL, ",");
     registro.codLinha = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
     campo = strtok(NULL, ",");
@@ -184,18 +236,13 @@ bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Estacoes
     // Valores dos indicadores de tamanho dos campos de tamanho variável
     registro.tamNomeEstacao = strlen(registro.nomeEstacao);
     registro.tamNomeLinha = strlen(registro.nomeLinha);
-    
+
     escrever_registro(bin, &registro);
-    
-    lixoQtd = 43 - registro.tamNomeEstacao - registro.tamNomeLinha;
-    for (int i = 0; i < lixoQtd; i++) {
-        char lixo = '$';
-        fwrite(&lixo, sizeof(char), 1, bin);
-    }
 
     cabecalho->proxRRN++;
 
-    if (registro.codLinhaIntegra != -1 && registro.codEstIntegra != -1) {
+    if (registro.codLinhaIntegra != -1 && registro.codEstIntegra != -1)
+    {
         cabecalho->nroParesEstacoes++;
     }
 
@@ -203,23 +250,34 @@ bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Estacoes
 }
 
 // Imprime NULO caso o valor do campo seja -1 ou o valor caso contrário
-void int_ou_nulo(int valor) {
+void int_ou_nulo(int valor)
+{
     if (valor == -1)
         printf("NULO ");
     else
         printf("%d ", valor);
 }
 
+int inteiro_ou_nulo(char *valor)
+{
+    if (strcmp(valor, "NULO") == 0)
+        return FLAG_CAMPO_NULO;
+    return atoi(valor);
+}
+
 // Inicialização dos campos das struct
-void inicializar_estacoes_vistas(EstacoesVistas *estacoes) {
+void inicializar_estacoes_vistas(EstacoesVistas *estacoes)
+{
     estacoes->nomes = NULL;
     estacoes->quantidade = 0;
     estacoes->capacidade = 0;
 }
 
 // Liberação de memória do vetor de nomes de estações
-void liberar_estacoes_vistas(EstacoesVistas *estacoes) {
-    for (int i = 0; i < estacoes->quantidade; i++) {
+void liberar_estacoes_vistas(EstacoesVistas *estacoes)
+{
+    for (int i = 0; i < estacoes->quantidade; i++)
+    {
         free(estacoes->nomes[i]);
     }
     free(estacoes->nomes);
@@ -228,16 +286,21 @@ void liberar_estacoes_vistas(EstacoesVistas *estacoes) {
 // Verifica se uma estação já foi vista (mesmo nome)
 // Entrada: nome da estação a ser verificada e struct de estações vistas
 // Saída: true se a estação for nova (não repetida), false caso contrário
-bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes) {
-    if (novo_nome == NULL) return false;
+bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
+{
+    if (novo_nome == NULL)
+        return false;
 
-    for (int i = 0; i < estacoes->quantidade; i++) {
-        if (strcmp(estacoes->nomes[i], novo_nome) == 0) {
+    for (int i = 0; i < estacoes->quantidade; i++)
+    {
+        if (strcmp(estacoes->nomes[i], novo_nome) == 0)
+        {
             return false;
         }
     }
 
-    if (estacoes->quantidade == estacoes->capacidade) {
+    if (estacoes->quantidade == estacoes->capacidade)
+    {
         estacoes->capacidade = estacoes->capacidade == 0 ? 16 : estacoes->capacidade * 2;
         estacoes->nomes = (char **)realloc(estacoes->nomes, (size_t)estacoes->capacidade * sizeof(char *));
     }
@@ -248,10 +311,13 @@ bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes) {
     return true;
 }
 
-int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho) {
-    if (arquivo == NULL || cabecalho == NULL) return 0;
+int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
+{
+    if (arquivo == NULL || cabecalho == NULL)
+        return 0;
 
-    typedef struct {
+    typedef struct
+    {
         int codEstacao;
         int codProxEstacao;
     } ParEstacao;
@@ -261,28 +327,34 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho) {
 
     int capacidade_pares = cabecalho->proxRRN > 0 ? cabecalho->proxRRN : 1;
     ParEstacao *pares = (ParEstacao *)malloc((size_t)capacidade_pares * sizeof(ParEstacao));
-    if (pares == NULL) {
+    if (pares == NULL)
+    {
         return 0;
     }
 
     int qtd_pares = 0;
-    if (fseek(arquivo, rrn_para_offset(0), SEEK_SET) != 0) {
+    if (fseek(arquivo, rrn_para_offset(0), SEEK_SET) != 0)
+    {
         free(pares);
         liberar_estacoes_vistas(&estacoes);
         return 0;
     }
 
-    for (int rrn = 0; rrn < cabecalho->proxRRN; rrn++) {
+    for (int rrn = 0; rrn < cabecalho->proxRRN; rrn++)
+    {
 
         Registro registro;
         int leitura = ler_registro(arquivo, &registro);
-        if (leitura == 0) {
+        if (leitura == 0)
+        {
             free(pares);
             liberar_estacoes_vistas(&estacoes);
             return 0;
         }
-        if (leitura == -1) {
-            if (fseek(arquivo, TAMANHO_REGISTRO - 1, SEEK_CUR) != 0) {
+        if (leitura == -1)
+        {
+            if (fseek(arquivo, TAMANHO_REGISTRO - 1, SEEK_CUR) != 0)
+            {
                 free(pares);
                 liberar_estacoes_vistas(&estacoes);
                 return 0;
@@ -291,7 +363,8 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho) {
         }
 
         if (registro.tamNomeEstacao < 0 || registro.tamNomeEstacao >= TAMANHO_CAMPO_VARIAVEL ||
-            registro.tamNomeLinha < 0 || registro.tamNomeLinha >= TAMANHO_CAMPO_VARIAVEL) {
+            registro.tamNomeLinha < 0 || registro.tamNomeLinha >= TAMANHO_CAMPO_VARIAVEL)
+        {
             free(pares);
             liberar_estacoes_vistas(&estacoes);
             return 0;
@@ -302,8 +375,10 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho) {
 
         int bytes_usados = 37 + registro.tamNomeEstacao + registro.tamNomeLinha;
         int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
-        if (bytes_restantes > 0) {
-            if (fseek(arquivo, bytes_restantes, SEEK_CUR) != 0) {
+        if (bytes_restantes > 0)
+        {
+            if (fseek(arquivo, bytes_restantes, SEEK_CUR) != 0)
+            {
                 free(pares);
                 liberar_estacoes_vistas(&estacoes);
                 return 0;
@@ -311,14 +386,17 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho) {
         }
 
         int par_existe = 0;
-        for (int i = 0; i < qtd_pares; i++) {
-            if (pares[i].codEstacao == registro.codEstacao && pares[i].codProxEstacao == registro.codProxEstacao) {
+        for (int i = 0; i < qtd_pares; i++)
+        {
+            if (pares[i].codEstacao == registro.codEstacao && pares[i].codProxEstacao == registro.codProxEstacao)
+            {
                 par_existe = 1;
                 break;
             }
         }
 
-        if (!par_existe) {
+        if (!par_existe)
+        {
             pares[qtd_pares].codEstacao = registro.codEstacao;
             pares[qtd_pares].codProxEstacao = registro.codProxEstacao;
             qtd_pares++;

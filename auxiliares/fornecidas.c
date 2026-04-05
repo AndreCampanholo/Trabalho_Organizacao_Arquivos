@@ -13,9 +13,11 @@
  * Ela vai abrir de novo para leitura e depois fechar
  * (você não vai perder pontos por isso se usar ela).
  */
-void BinarioNaTela(char *arquivo) {
+void BinarioNaTela(char *arquivo)
+{
     FILE *fs;
-    if (arquivo == NULL || !(fs = fopen(arquivo, "rb"))) {
+    if (arquivo == NULL || !(fs = fopen(arquivo, "rb")))
+    {
         fprintf(stderr,
                 "ERRO AO ESCREVER O BINARIO NA TELA (função binarioNaTela): "
                 "não foi possível abrir o arquivo que me passou para leitura. "
@@ -32,7 +34,8 @@ void BinarioNaTela(char *arquivo) {
     fread(mb, 1, fl, fs);
 
     unsigned long cs = 0;
-    for (unsigned long i = 0; i < fl; i++) {
+    for (unsigned long i = 0; i < fl; i++)
+    {
         cs += (unsigned long)mb[i];
     }
 
@@ -55,28 +58,37 @@ void BinarioNaTela(char *arquivo) {
  * (sem as aspas)
  *
  */
-void ScanQuoteString(char *str) {
+void ScanQuoteString(char *str)
+{
     char R;
 
     while ((R = getchar()) != EOF && isspace(R))
         ; // ignorar espaços, \r, \n...
 
-    if (R == 'N' || R == 'n') { // campo NULO
+    if (R == 'N' || R == 'n')
+    { // campo NULO
         getchar();
         getchar();
         getchar();       // ignorar o "ULO" de NULO.
         strcpy(str, ""); // copia string vazia
-    } else if (R == '\"') {
-        if (scanf("%[^\"]", str) != 1) { // ler até o fechamento das aspas
+    }
+    else if (R == '\"')
+    {
+        if (scanf("%[^\"]", str) != 1)
+        { // ler até o fechamento das aspas
             strcpy(str, "");
         }
-        getchar();         // ignorar aspas fechando
-    } else if (R != EOF) { // vc tá tentando ler uma string que não tá entre
-                           // aspas! Fazer leitura normal %s então, pois deve
-                           // ser algum inteiro ou algo assim...
+        getchar(); // ignorar aspas fechando
+    }
+    else if (R != EOF)
+    { // vc tá tentando ler uma string que não tá entre
+      // aspas! Fazer leitura normal %s então, pois deve
+      // ser algum inteiro ou algo assim...
         str[0] = R;
         scanf("%s", &str[1]);
-    } else { // EOF
+    }
+    else
+    { // EOF
         strcpy(str, "");
     }
 }

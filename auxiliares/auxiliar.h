@@ -19,11 +19,8 @@
 #define MSG_FALHA "Falha no processamento do arquivo."
 #define MSG_INEXISTENTE "Registro inexistente."
 
-typedef struct cabecalho Cabecalho;
-typedef struct registro Registro;
-typedef struct estacoesVistas EstacoesVistas;
-
-typedef struct {
+typedef struct cabecalho
+{
     char status;
     int topo;
     int proxRRN;
@@ -31,7 +28,8 @@ typedef struct {
     int nroParesEstacoes;
 } Cabecalho;
 
-typedef struct {
+typedef struct registro
+{
     char removido;
     int proximo;
     int codEstacao;
@@ -46,13 +44,15 @@ typedef struct {
     char nomeLinha[44];
 } Registro;
 
-typedef struct {
+typedef struct estacoesVistas
+{
     char **nomes;
     int quantidade;
     int capacidade;
 } EstacoesVistas;
 
-typedef struct {
+typedef struct criterio
+{
     char nome[32];
     int ehNulo;
     int valorInteiro;
@@ -60,22 +60,30 @@ typedef struct {
 } Criterio;
 
 int ler_cabecalho(FILE *arquivo, Cabecalho *cabecalho);
+
 void escrever_cabecalho(FILE *arquivo, Cabecalho *cabecalho);
 
 long rrn_para_offset(int rrn);
 
 int ler_registro(FILE *arquivo, Registro *registro);
+
 int escrever_registro(FILE *arquivo, Registro *registro);
+
 int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho);
+
 void inicializar_estacoes_vistas(EstacoesVistas *estacoes);
+
 void liberar_estacoes_vistas(EstacoesVistas *estacoes);
+
 bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes);
 
 bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes);
 
 void int_ou_nulo(int valor);
 
-bool campo_nulo (char *valor, int tamanho);
+int inteiro_ou_nulo(char *valor);
+
+bool campo_nulo(char *valor, int tamanho);
 
 bool campo_eh_texto(char *nome_campo);
 
@@ -91,13 +99,18 @@ int obter_campos_inteiros(Registro *registro, char *nome_campo, int *eh_valido);
 
 char *obter_campos_textos(Registro *registro, char *nome_campo, int *tamanho, int *eh_valido);
 
-void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio);
-
-void imprimir_registro(Registro *registro);
-
 void BinarioNaTela(char *arquivo);
 
 void ScanQuoteString(char *str);
 
 int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita);
+
+int abrir_binario_escrita(FILE **arquivo, char *nome_arquivo, Cabecalho *cabecalho);
+
+void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho);
+
+int ler_lista_criterios(Criterio *criterios, int *quantidade, int minimo);
+
+void normalizar_campos_texto_registro(Registro *registro);
+
 #endif

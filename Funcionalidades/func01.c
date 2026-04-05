@@ -1,14 +1,18 @@
 #include "../auxiliares/auxiliar.h"
 
-void criar_tabela(char *nome_csv, char *nome_bin){   
+void criar_tabela(char *nome_csv, char *nome_bin)
+{
     // Abertura dos arquivos csv e bin
     FILE *arquivo_csv = fopen(nome_csv, "r");
     FILE *arquivo_bin = fopen(nome_bin, "wb+");
 
     // Verifica se houve falha na abertura dos arquivos, imprimindo mensagem de erro caso necessário
-    if(arquivo_csv == NULL || arquivo_bin == NULL){
-        if(arquivo_csv) fclose(arquivo_csv);
-        if(arquivo_bin) fclose(arquivo_bin);
+    if (arquivo_csv == NULL || arquivo_bin == NULL)
+    {
+        if (arquivo_csv)
+            fclose(arquivo_csv);
+        if (arquivo_bin)
+            fclose(arquivo_bin);
         printf("%s\n", "Falha no processamento do arquivo.");
         return;
     }
@@ -26,7 +30,8 @@ void criar_tabela(char *nome_csv, char *nome_bin){
     inicializar_estacoes_vistas(&estacoes);
 
     // Laço de leitura dos registros do .csv e escrita no .bin, além da atualização do cabeçalho
-    while (ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho, &estacoes));
+    while (ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho, &estacoes))
+        ;
 
     // Seta o status no cabeçalho para consistente
     cabecalho.status = '1';
@@ -35,7 +40,7 @@ void criar_tabela(char *nome_csv, char *nome_bin){
     // Libera o vetor de nomes de estações vistas
     liberar_estacoes_vistas(&estacoes);
 
-    //Fechamento dos arquivos abertos
+    // Fechamento dos arquivos abertos
     fclose(arquivo_csv);
     fclose(arquivo_bin);
 
