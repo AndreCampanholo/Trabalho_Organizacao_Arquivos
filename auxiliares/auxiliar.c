@@ -185,13 +185,8 @@ int escrever_registro(FILE *arquivo, Registro *registro)
             return 0;
     }
 
-    int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
-    char lixo = '$';
-    for (int i = bytes_usados; i < TAMANHO_REGISTRO; i++)
-    {
-        if (fwrite(&lixo, sizeof(char), 1, arquivo) != 1)
-            return 0;
-    }
+    if(!preencher_campos_variaveis_lixo(arquivo, registro))
+        return 0;
 
     return 1;
 }
@@ -302,7 +297,10 @@ bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
     return true;
 }
 
-bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro, int bytes_restantes) {
+bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
+    int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
+    int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
+    
     char lixo = '$';
     for(int i = 0; i < bytes_restantes; i++) {
         if(fwrite(&lixo, sizeof(char), 1, arquivo) != 1) {
@@ -332,7 +330,7 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
     {
         return 0;
     }
-
+ 
     int qtd_pares = 0;
     if (fseek(arquivo, rrn_para_offset(0), SEEK_SET) != 0)
     {

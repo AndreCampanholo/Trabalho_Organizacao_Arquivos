@@ -75,7 +75,7 @@ void inicializar_estacoes_vistas(EstacoesVistas *estacoes);
 
 void liberar_estacoes_vistas(EstacoesVistas *estacoes);
 
-bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro, int bytes_restantes);
+bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro);
 
 bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes);
 
@@ -93,7 +93,7 @@ int ler_criterio(Criterio *criterio);
 
 int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade);
 
-void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio);
+void aplicar_criterio_no_registro(FILE *arquivo, Registro *registro, Criterio *criterio);
 
 void imprimir_registro(Registro *registro);
 

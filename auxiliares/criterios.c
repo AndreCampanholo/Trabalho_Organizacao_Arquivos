@@ -133,7 +133,7 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
 }
 
 // Auxiliar da funcionalidade 6 (atualização de registros) para aplicar os critérios de atualização no registro.
-void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
+void aplicar_criterio_no_registro(FILE *arquivo, Registro *registro, Criterio *criterio)
 {
     if (strcmp(criterio->nome, "codEstacao") == 0)
     {
@@ -187,9 +187,7 @@ void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
         }
     }
 
-    int bytes_usados = 37 + registro.tamNomeEstacao + registro.tamNomeLinha;
-    int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
-    if(!preencher_campos_variaveis_lixo(registro, bytes_restantes)){
+    if(!preencher_campos_variaveis_lixo(arquivo, registro)){
         printf("%s\n", MSG_FALHA);
     }
 }
