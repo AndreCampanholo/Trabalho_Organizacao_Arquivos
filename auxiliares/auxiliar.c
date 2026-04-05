@@ -142,11 +142,11 @@ int ler_registro(FILE *arquivo, Registro *registro)
         return 0;
     if (fread(&registro->tamNomeEstacao, sizeof(int), 1, arquivo) != 1)
         return 0;
-    if (fread(&registro->nomeEstacao, sizeof(char), registro->tamNomeEstacao, arquivo) != registro->tamNomeEstacao)
+    if (fread(&registro->nomeEstacao, sizeof(char), (size_t)registro->tamNomeEstacao, arquivo) != (size_t)registro->tamNomeEstacao)
         return 0;
     if (fread(&registro->tamNomeLinha, sizeof(int), 1, arquivo) != 1)
         return 0;
-    if (fread(&registro->nomeLinha, sizeof(char), registro->tamNomeLinha, arquivo) != registro->tamNomeLinha)
+    if (fread(&registro->nomeLinha, sizeof(char), (size_t)registro->tamNomeLinha, arquivo) != (size_t)registro->tamNomeLinha)
         return 0;
 
     return 1;
@@ -205,7 +205,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 }
 
 // Lê registros do arquivo .csv e escreve-os no .bin
-bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes)
+bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho)
 {
     // Variáveis auxiliares
     char linha[512];

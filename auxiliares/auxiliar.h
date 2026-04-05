@@ -79,7 +79,7 @@ bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro);
 
 bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes);
 
-bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes);
+bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho);
 
 void int_ou_nulo(int valor);
 

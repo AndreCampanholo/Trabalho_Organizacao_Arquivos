@@ -30,7 +30,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
     inicializar_estacoes_vistas(&estacoes);
 
     // Laço de leitura dos registros do .csv e escrita no .bin, além da atualização do cabeçalho
-    while (ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho, &estacoes))
+    while (ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho))
         ;
 
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))

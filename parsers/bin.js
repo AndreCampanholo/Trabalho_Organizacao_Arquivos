@@ -24,7 +24,6 @@ registerParser(() => {
 	//Dados
 	let tamNomeEstacao, tamNomeLinha;
 	for (let i = 0; i < proxRRN; i++) {
-		read(80);
 		addRow(`RRN ${i}`, '');
 		addDetails(() => {
 			read(1);

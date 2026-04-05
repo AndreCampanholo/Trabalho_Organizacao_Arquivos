@@ -69,7 +69,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 
 			for (int i = 0; i < qtd_campos_atualizar; i++)
 			{
-				aplicar_criterio_no_registro(&arquivo_bin, &registro, &campos_atualizacao[i]);
+				aplicar_criterio_no_registro(arquivo_bin, &registro, &campos_atualizacao[i]);
 			}
 
 			if (registro.tamNomeEstacao < 0 || registro.tamNomeLinha < 0 ||
