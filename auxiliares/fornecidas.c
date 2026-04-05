@@ -3,6 +3,7 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "auxiliar.h"
 /*
  * Você não precisa entender o código dessa função.
  *

@@ -1,6 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include "auxiliar.h"
 
 long rrn_para_offset(int rrn)

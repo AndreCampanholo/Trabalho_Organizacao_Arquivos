@@ -1,8 +1,10 @@
 #ifndef AUXILIAR_H
 #define AUXILIAR_H
 
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #define TAMANHO_CABECALHO 17
 #define TAMANHO_REGISTRO 80
@@ -65,6 +67,9 @@ long rrn_para_offset(int rrn);
 int ler_registro(FILE *arquivo, Registro *registro);
 int escrever_registro(FILE *arquivo, Registro *registro);
 int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho);
+void inicializar_estacoes_vistas(EstacoesVistas *estacoes);
+void liberar_estacoes_vistas(EstacoesVistas *estacoes);
+bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes);
 
 bool campo_nulo (char *valor, int tamanho);
 
@@ -72,9 +77,15 @@ bool campo_eh_texto(char *nome_campo);
 
 int ler_criterio(Criterio *criterio);
 
+int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade);
+
 int obter_campos_inteiros(Registro *registro, char *nome_campo, int *eh_valido);
 
 char *obter_campos_textos(Registro *registro, char *nome_campo, int *tamanho, int *eh_valido);
+
+void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio);
+
+void imprimir_registro(Registro *registro);
 
 void BinarioNaTela(char *arquivo);
 

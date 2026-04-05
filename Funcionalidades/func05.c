@@ -4,75 +4,111 @@
 #include <string.h>
 #include "../auxiliares/auxiliar.h"
 
+static int inteiro_ou_nulo(const char *valor) {
+    if (strcmp(valor, "NULO") == 0) return FLAG_CAMPO_NULO;
+    return atoi(valor);
+}
+
 void inserir_registros(char *nome_arquivo, int qtd_insercoes) {
-    if(nome_arquivo == NULL || qtd_insercoes == 0) {
-        printf("%d\n", MSG_FALHA);
+    if (nome_arquivo == NULL || qtd_insercoes <= 0) {
+        printf("%s\n", MSG_FALHA);
         return;
     }
 
     FILE *arquivo_bin = fopen(nome_arquivo, "r+b");
-    if(arquivo_bin == NULL) {
-        printf("%d\n", MSG_FALHA);
+    if (arquivo_bin == NULL) {
+        printf("%s\n", MSG_FALHA);
         return;
     }
 
     Cabecalho cabecalho;
-    ler_cabecalho(arquivo_bin, &cabecalho);
     if (!ler_cabecalho(arquivo_bin, &cabecalho)) {
         printf("%s\n", MSG_FALHA);
         fclose(arquivo_bin);
         return;
     }
 
-    if(cabecalho.status != '1') {
+    if (cabecalho.status != '1') {
         printf("%s\n", MSG_FALHA);
         fclose(arquivo_bin);
         return;
     }
+
     cabecalho.status = '0';
     escrever_cabecalho(arquivo_bin, &cabecalho);
 
-    Registro novo_registro;
-    char novo_codLinha[5], novo_codProxEstacao[5], novo_distProxEstacao[5], novo_codLinhaIntegra[5], novo_codEstIntegra[5];
-    for(int i = 0; i < qtd_insercoes; i++) {
-        scanf("%d", &novo_registro.codEstacao);
-        ScanQuoteString(&novo_registro.nomeEstacao);
-        scanf("%s", novo_codLinha);
-        ScanQuoteString(&novo_registro.nomeLinha);
-        scanf("%s %s %s %s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra);
+    for (int i = 0; i < qtd_insercoes; i++) {
+        Registro novo_registro;
+        char novo_codLinha[TAMANHO_TEXTO];
+        char novo_codProxEstacao[TAMANHO_TEXTO];
+        char novo_distProxEstacao[TAMANHO_TEXTO];
+        char novo_codLinhaIntegra[TAMANHO_TEXTO];
+        char novo_codEstIntegra[TAMANHO_TEXTO];
 
-        if(strcmp(novo_codLinha, "NULO") == 0) novo_registro.codLinha = -1;
-        else atoi(novo_codLinha);
-        if(strcmp(novo_codProxEstacao, "NULO") == 0) novo_registro.codProxEstacao = -1;
-        else atoi(novo_codProxEstacao);
-        if(strcmp(novo_distProxEstacao, "NULO") == 0) novo_registro.distProxEstacao = -1;
-        else atoi(novo_distProxEstacao);
-        if(strcmp(novo_codLinhaIntegra, "NULO") == 0) novo_registro.codLinhaIntegra = -1;
-        else atoi(novo_codLinhaIntegra);
-        if(strcmp(novo_codEstIntegra, "NULO") == 0) novo_registro.codEstIntegra = -1;
-        else atoi(novo_codEstIntegra);
-
-        if(cabecalho.topo != -1) {
-            if (fseek(arquivo_bin, cabecalho.topo, SEEK_SET) != 0) {
-                printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
-                return;
-            }
-        } else {
-            if (fseek(arquivo_bin, cabecalho.proxRRN, SEEK_SET) != 0) {
-                printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
-                return;
-            }
+        if (scanf("%d", &novo_registro.codEstacao) != 1) {
+            printf("%s\n", MSG_FALHA);
+            fclose(arquivo_bin);
+            return;
         }
 
-        novo_registro.removido = '0';
-        novo_registro.proximo = 
+        ScanQuoteString(novo_registro.nomeEstacao);
+        if (scanf("%127s", novo_codLinha) != 1) {
+            printf("%s\n", MSG_FALHA);
+            fclose(arquivo_bin);
+            return;
+        }
 
-        if(!escrever_registro(arquivo_bin, &novo_registro)) {
+        ScanQuoteString(novo_registro.nomeLinha);
+
+        if (scanf("%127s %127s %127s %127s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra) != 4) {
+            printf("%s\n", MSG_FALHA);
+            fclose(arquivo_bin);
+            return;
+        }
+
+        novo_registro.codLinha = inteiro_ou_nulo(novo_codLinha);
+        novo_registro.codProxEstacao = inteiro_ou_nulo(novo_codProxEstacao);
+        novo_registro.distProxEstacao = inteiro_ou_nulo(novo_distProxEstacao);
+        novo_registro.codLinhaIntegra = inteiro_ou_nulo(novo_codLinhaIntegra);
+        novo_registro.codEstIntegra = inteiro_ou_nulo(novo_codEstIntegra);
+
+        novo_registro.tamNomeEstacao = (int)strlen(novo_registro.nomeEstacao);
+        novo_registro.tamNomeLinha = (int)strlen(novo_registro.nomeLinha);
+        novo_registro.removido = '0';
+        novo_registro.proximo = -1;
+
+        long offset_destino;
+        if (cabecalho.topo != -1) {
+            int proximo_topo = -1;
+            if (fseek(arquivo_bin, cabecalho.topo + sizeof(char), SEEK_SET) != 0 ||
+                fread(&proximo_topo, sizeof(int), 1, arquivo_bin) != 1) {
+                printf("%s\n", MSG_FALHA);
+                fclose(arquivo_bin);
+                return;
+            }
+            offset_destino = cabecalho.topo;
+            cabecalho.topo = proximo_topo;
+        } else {
+            offset_destino = rrn_para_offset(cabecalho.proxRRN);
+            cabecalho.proxRRN++;
+        }
+
+        if (fseek(arquivo_bin, offset_destino, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &novo_registro)) {
             printf("%s\n", MSG_FALHA);
             fclose(arquivo_bin);
             return;
         }
     }
+
+    if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho)) {
+        printf("%s\n", MSG_FALHA);
+        fclose(arquivo_bin);
+        return;
+    }
+
+    cabecalho.status = '1';
+    escrever_cabecalho(arquivo_bin, &cabecalho);
+    fclose(arquivo_bin);
+
+    BinarioNaTela(nome_arquivo);
 }
