@@ -1,8 +1,10 @@
 #ifndef AUXILIAR_H
 #define AUXILIAR_H
 
-#include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 #define TAMANHO_CABECALHO 17
 #define TAMANHO_REGISTRO 80
@@ -12,7 +14,7 @@
 // Limite máximo de pares (nomeCampo, valorCampo) que podem ser informados como critérios por vez
 #define MAX_CRITERIOS 8
 
-#define VALOR_NULO_INTEIRO -1
+#define FLAG_CAMPO_NULO -1
 
 #define MSG_FALHA "Falha no processamento do arquivo."
 #define MSG_INEXISTENTE "Registro inexistente."
@@ -72,6 +74,12 @@ bool campo_eh_texto(char *nome_campo);
 
 int ler_criterio(Criterio *criterio);
 
+int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade);
+
+void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio);
+
+void imprimir_registro(Registro *registro);
+
 int obter_campos_inteiros(Registro *registro, char *nome_campo, int *eh_valido);
 
 char *obter_campos_textos(Registro *registro, char *nome_campo, int *tamanho, int *eh_valido);
@@ -80,4 +88,5 @@ void BinarioNaTela(char *arquivo);
 
 void ScanQuoteString(char *str);
 
+int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita);
 #endif

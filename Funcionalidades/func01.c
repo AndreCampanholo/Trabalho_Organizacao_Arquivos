@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
 #include "../auxiliares/auxiliar.h"
 
 // Lê registros do arquivo .csv e escreve-os no .bin

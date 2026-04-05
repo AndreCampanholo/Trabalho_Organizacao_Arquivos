@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include "criterios.h"
 #include "auxiliar.h"
 
 /* Campo de texto é considerado nulo quando o tamanho == 0 (ou string vazia). */
@@ -53,7 +48,7 @@ int ler_criterio(Criterio *criterio) {
 
     if (str_campo_texto[0] == '\0') {
         criterio->ehNulo = 1;
-        criterio->valorInteiro = VALOR_NULO_INTEIRO; // Valor para indicar nulo em campos inteiros;
+        criterio->valorInteiro = FLAG_CAMPO_NULO; // Valor para indicar nulo em campos inteiros;
         criterio->valorTexto[0] = '\0';
     } else {
         criterio->ehNulo = 0;
@@ -72,7 +67,7 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
         if (campo_eh_texto(criterios[i].nome)) {
             int tamanho = 0;
             int eh_valido = 0;
-            const char *texto = obter_campos_textos(registro, criterios[i].nome, &tamanho, &ok);
+            char *texto = obter_campos_textos(registro, criterios[i].nome, &tamanho, &eh_valido);
             if (!eh_valido) return 0;
 
             if (criterios[i].ehNulo) {
@@ -87,7 +82,7 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
             if (!eh_valido) return 0;
 
             if (criterios[i].ehNulo) {
-                if (valor != VALOR_NULO_INTEIRO) return 0;
+                if (valor != FLAG_CAMPO_NULO) return 0;
             } else {
                 if (valor != criterios[i].valorInteiro) return 0;
             }
@@ -97,19 +92,20 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
     return 1;
 }
 
+// Auxiliar da funcionalidade 6 (atualização de registros) para aplicar os critérios de atualização no registro.
 void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio) {
     if (strcmp(criterio->nome, "codEstacao") == 0) {
-        registro->codEstacao = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+        registro->codEstacao = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;
     } else if (strcmp(criterio->nome, "codLinha") == 0) {
-        registro->codLinha = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+        registro->codLinha = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;
     } else if (strcmp(criterio->nome, "codProxEstacao") == 0) {
-        registro->codProxEstacao = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+        registro->codProxEstacao = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;
     } else if (strcmp(criterio->nome, "distProxEstacao") == 0) {
-        registro->distProxEstacao = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+        registro->distProxEstacao = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;
     } else if (strcmp(criterio->nome, "codLinhaIntegra") == 0) {
-        registro->codLinhaIntegra = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+        registro->codLinhaIntegra = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;
     } else if (strcmp(criterio->nome, "codEstIntegra") == 0) {
-        registro->codEstIntegra = criterio->ehNulo ? VALOR_NULO_INTEIRO : criterio->valorInteiro;
+        registro->codEstIntegra = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;
     } else if (strcmp(criterio->nome, "nomeEstacao") == 0) {
         if (criterio->ehNulo) {
             registro->tamNomeEstacao = 0;
@@ -134,37 +130,37 @@ void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio) {
 void imprimir_registro(Registro *registro) {
     printf("%d ", registro->codEstacao);
 
-    if (texto_nulo(registro->nomeEstacao, registro->tamNomeEstacao))
+    if (campo_nulo(registro->nomeEstacao, registro->tamNomeEstacao))
         printf("NULO ");
     else
         printf("%s ", registro->nomeEstacao);
 
-    if (registro->codLinha == VALOR_NULO_INTEIRO)
+    if (registro->codLinha == FLAG_CAMPO_NULO)
         printf("NULO ");
     else
         printf("%d ", registro->codLinha);
 
-    if (texto_nulo(registro->nomeLinha, registro->tamNomeLinha))
+    if (campo_nulo(registro->nomeLinha, registro->tamNomeLinha))
         printf("NULO ");
     else
         printf("%s ", registro->nomeLinha);
 
-    if (registro->codProxEstacao == VALOR_NULO_INTEIRO)
+    if (registro->codProxEstacao == FLAG_CAMPO_NULO)
         printf("NULO ");
     else
         printf("%d ", registro->codProxEstacao);
 
-    if (registro->distProxEstacao == VALOR_NULO_INTEIRO)
+    if (registro->distProxEstacao == FLAG_CAMPO_NULO)
         printf("NULO ");
     else
         printf("%d ", registro->distProxEstacao);
 
-    if (registro->codLinhaIntegra == VALOR_NULO_INTEIRO)
+    if (registro->codLinhaIntegra == FLAG_CAMPO_NULO)
         printf("NULO ");
     else
         printf("%d ", registro->codLinhaIntegra);
 
-    if (registro->codEstIntegra == VALOR_NULO_INTEIRO)
+    if (registro->codEstIntegra == FLAG_CAMPO_NULO)
         printf("NULO\n");
     else
         printf("%d\n", registro->codEstIntegra);

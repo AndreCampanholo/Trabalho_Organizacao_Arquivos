@@ -1,39 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
 #include "../auxiliares/auxiliar.h"
-
-// Verifica se um registro deve ser removido ou não
-bool registro_atende_criterios(Registro *registro, int qtd_criterios, char nome_campo[][32], char valor_campo[][45], int valor_campo_int[]) {
-    for (int k = 0; k < qtd_criterios; k++) {
-        // Se 'nome_campo' for de um campo de tamanho variável, entra
-        if (campo_eh_texto(nome_campo[k])) {
-            int tamanho = 0;
-            int eh_valido = 0; 
-            // Retorna o valor textual do registro de tamanho variável
-            char *valor_registro = obter_campos_textos(registro, nome_campo[k], &tamanho, &eh_valido);
-
-            // Se 'nome_campo' é inválido ou o valor do registro é diferente do valor informado, retorna false (não remove)
-            if (!eh_valido || strcmp(valor_registro, valor_campo[k]) != 0) {
-                return false;
-            }
-        //Se 'nome_campo' for de um campo de tamanho fixo, entra
-        } else {
-            int eh_valido = 0;
-            // Retorna valor inteiro do registro de tamanho fixo
-            int inteiro_registro = obter_campos_inteiros(registro, nome_campo[k], &eh_valido);
-
-            // Se 'nome_campo' é inválido ou o valor do registro é diferente do valor informado, retorna false (não remove)
-            if (!eh_valido || inteiro_registro != valor_campo_int[k]) {
-                return false;
-            }
-        }
-    }
-
-    // Caso o registro atenda aos critérios, retorna true (será removido)
-    return true;
-}
 
 void deletar_registros(char *nome_arquivo, int qtd_remocoes) {
     // Verifica se parâmetros são válidos
@@ -78,26 +43,14 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes) {
             return;
         }
 
-        // Variáveis auxiliares
-        char nome_campo[MAX_CRITERIOS][32];
-        char valor_campo[MAX_CRITERIOS][45];
-        int valor_campo_int[MAX_CRITERIOS];
+        Criterio criterios[MAX_CRITERIOS];
 
-        // Lê o os m nomes e valores de campos dos critérios de remoção
+        // Le os m pares (nomeCampo, valorCampo) usando a rotina modularizada.
         for (int j = 0; j < qtd_criterios; j++) {
-            if (scanf("%31s", nome_campo[j]) != 1) {
+            if (!ler_criterio(&criterios[j])) {
                 printf("%s\n", MSG_FALHA);
                 fclose(arquivo_bin);
                 return;
-            }
-            if (campo_eh_texto(nome_campo[j])) {
-                ScanQuoteString(valor_campo[j]); // Caso campo seja textual, lê valor com ""
-            } else {
-                if (scanf("%d", &valor_campo_int[j]) != 1) {
-                    printf("%s\n", MSG_FALHA);
-                    fclose(arquivo_bin);
-                    return;
-                }
             }
         }
 
@@ -134,7 +87,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes) {
             }
 
             // Compara registros com os critérios de deleção
-            if (!registro_atende_criterios(&registro, qtd_criterios, nome_campo, valor_campo, valor_campo_int)) {
+            if (!registro_atende_criterios(&registro, criterios, qtd_criterios)) {
                 continue; // Se o registro não deve ser removido, não executa resto do loop
             }
 

@@ -1,54 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include "../pilha/pilha.h"
 #include "../auxiliares/auxiliar.h"
-
-typedef struct
-{
-    char removido;
-    int proximo;
-    int codEstacao;
-    int codLinha;
-    int codProxEstacao;
-    int distProxEstacao;
-    int codLinhaIntegra;
-    int codEstIntegra;
-    int tamNomeEstacao;
-    char *nomeEstacao;
-    int tamNomeLinha;
-    char *nomeLinha;
-} Registro;
-
-typedef struct{
-    char nome[32];
-    int ehNulo;
-    int valorInteiro;
-    char valorTexto[44];
-} Criterio;
-
-int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita) {
-    *arquivo = fopen(nome_arquivo, modo);
-    if (*arquivo == NULL) return 0;
-
-    if (!ler_cabecalho(*arquivo, cabecalho)) {
-        fclose(*arquivo);
-        return 0;
-    }
-
-    if (cabecalho->status != '1') {
-        fclose(*arquivo);
-        return 0;
-    }
-
-    if (eh_escrita) {
-        cabecalho->status = '0';
-        escrever_cabecalho(*arquivo, cabecalho);
-    }
-
-    return 1;
-}
 
 void recuperar_registros_condicional(char *nome_arquivo_bin)
 {
@@ -73,7 +23,7 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
     for (int b = 0; b < quantidade_buscas; b++)
     {
         int quantidade_criterios;
-        if (scanf("%d", &quantidade_criterios) != 1 || quantidade_criterios < 0 || quantidade_criterios > MAX_CRITERIOS)
+        if (scanf("%d", &quantidade_criterios) != 1 || quantidade_criterios <= 0 || quantidade_criterios > MAX_CRITERIOS)
         {
             fclose(arquivo_bin);
             printf("%s\n", MSG_FALHA);
@@ -99,6 +49,11 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
             }
 
             if (registro.removido == '1') continue;
+            
+            if (registro_atende_criterios(&registro, criterios, quantidade_criterios)) {
+                imprimir_registro(&registro);
+                encontrado = 1;
+            }
 
         }
 

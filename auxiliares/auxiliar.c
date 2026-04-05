@@ -8,6 +8,28 @@ long rrn_para_offset(int rrn)
     return TAMANHO_CABECALHO + (long)rrn * TAMANHO_REGISTRO;
 }
 
+int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita) {
+    *arquivo = fopen(nome_arquivo, modo);
+    if (*arquivo == NULL) return 0;
+
+    if (!ler_cabecalho(*arquivo, cabecalho)) {
+        fclose(*arquivo);
+        return 0;
+    }
+
+    if (cabecalho->status != '1') {
+        fclose(*arquivo);
+        return 0;
+    }
+
+    if (eh_escrita) {
+        cabecalho->status = '0';
+        escrever_cabecalho(*arquivo, cabecalho);
+    }
+
+    return 1;
+}
+
 int ler_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
 {
     fseek(arquivo, 0, SEEK_SET);
