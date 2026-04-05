@@ -1,5 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 
+// Funcionalidade [4]: apaga registros do arquivo binário de acordo com critérios informados pelo usuário
 void deletar_registros(char *nome_arquivo, int qtd_remocoes)
 {
     // Verifica se parâmetros são válidos

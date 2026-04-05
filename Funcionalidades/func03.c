@@ -1,5 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 
+// Funcionalidade [3]: Imprime todos os registros que atendem critérios informados pelo usuário
 void recuperar_registros_condicional(char *nome_arquivo_bin)
 {
     /* Para cada consulta, o programa aplica uma operação AND entre todos os criterios informados. */

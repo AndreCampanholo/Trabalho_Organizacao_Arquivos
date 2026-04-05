@@ -1,5 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 
+// Funcionalidade [5]: Insere registros informados pelo usuário
 void inserir_registros(char *nome_arquivo, int qtd_insercoes)
 {
     if (nome_arquivo == NULL || qtd_insercoes <= 0)

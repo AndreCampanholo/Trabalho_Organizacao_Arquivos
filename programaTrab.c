@@ -2,6 +2,7 @@
 
 int main(void)
 {
+    // Leitura da funcionalidade desejada
     int funcionalidade;
     if (scanf("%d", &funcionalidade) != 1)
     {

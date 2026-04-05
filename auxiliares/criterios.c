@@ -53,14 +53,19 @@ char *obter_campos_textos(Registro *registro, char *nome_campo, int *tamanho, in
     return "";
 }
 
+// Lê pares (nomeCampo valorCampo) de critérios informados pelo usuário
 int ler_criterio(Criterio *criterio)
 {
+    // Leitura do nomeCampo
     if (scanf("%31s", criterio->nome) != 1)
         return 0;
+    getchar();
 
+    // Leitura do valorCampo
     char str_campo_texto[TAMANHO_TEXTO] = {0};
     ScanQuoteString(str_campo_texto);
 
+    // Caso valor do campo seja vazio, trata como nulo
     if (str_campo_texto[0] == '\0')
     {
         criterio->ehNulo = 1;
@@ -68,7 +73,7 @@ int ler_criterio(Criterio *criterio)
         criterio->valorTexto[0] = '\0';
     }
     else
-    {
+    {   // Verifica se o campo informado (nomeCampo) é textual (tamanho variável) ou não
         criterio->ehNulo = 0;
         if (campo_eh_texto(criterio->nome))
         {
@@ -83,6 +88,7 @@ int ler_criterio(Criterio *criterio)
     return 1;
 }
 
+// Verifica se registro atende aos critérios
 int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade)
 {
     for (int i = 0; i < quantidade; i++)

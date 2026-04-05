@@ -1,6 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 
-// Imprime todos os registros do arquivo binário
+// Funcionalidade [2]: Imprime todos os registros do arquivo binário
 void recuperar_registros(char *nome_arquivo_bin)
 {
     // Abertura do arquivo binário no modo de leitura

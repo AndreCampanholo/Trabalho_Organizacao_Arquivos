@@ -1,5 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 
+// Funcionalidade [1]: cria arquivo binário a partir de registro de arquivo csv
 void criar_tabela(char *nome_csv, char *nome_bin)
 {
     // Abertura dos arquivos csv e bin
