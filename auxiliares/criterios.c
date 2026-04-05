@@ -67,7 +67,11 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
         if (campo_eh_texto(criterios[i].nome)) {
             int tamanho = 0;
             int eh_valido = 0;
+<<<<<<< HEAD
             const char *texto = obter_campos_textos(registro, criterios[i].nome, &tamanho, &eh_valido);
+=======
+            char *texto = obter_campos_textos(registro, criterios[i].nome, &tamanho, &eh_valido);
+>>>>>>> 2beda9e7d54c264e0442befbd00a51a6f1e3a960
             if (!eh_valido) return 0;
 
             if (criterios[i].ehNulo) {
@@ -92,6 +96,7 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
     return 1;
 }
 
+// Auxiliar da funcionalidade 6 (atualização de registros) para aplicar os critérios de atualização no registro.
 void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio) {
     if (strcmp(criterio->nome, "codEstacao") == 0) {
         registro->codEstacao = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;

@@ -1,7 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
 #include "../auxiliares/auxiliar.h"
 
 void deletar_registros(char *nome_arquivo, int qtd_remocoes) {
@@ -49,7 +45,11 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes) {
 
         Criterio criterios[MAX_CRITERIOS];
 
+<<<<<<< HEAD
         // Lê os m critérios de remoção com a modularização do criterios.c
+=======
+        // Le os m pares (nomeCampo, valorCampo) usando a rotina modularizada.
+>>>>>>> 2beda9e7d54c264e0442befbd00a51a6f1e3a960
         for (int j = 0; j < qtd_criterios; j++) {
             if (!ler_criterio(&criterios[j])) {
                 printf("%s\n", MSG_FALHA);

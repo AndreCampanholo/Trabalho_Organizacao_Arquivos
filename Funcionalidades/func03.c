@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,6 +28,13 @@ static int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecal
 }
 
 void recuperar_registros_condicional(char *nome_arquivo_bin) {
+=======
+#include "../auxiliares/auxiliar.h"
+
+void recuperar_registros_condicional(char *nome_arquivo_bin)
+{
+    /* Para cada consulta, o programa aplica uma operação AND entre todos os criterios informados. */
+>>>>>>> 2beda9e7d54c264e0442befbd00a51a6f1e3a960
     FILE *arquivo_bin;
     Cabecalho cabecalho;
 
@@ -44,7 +52,12 @@ void recuperar_registros_condicional(char *nome_arquivo_bin) {
 
     for (int b = 0; b < quantidade_buscas; b++) {
         int quantidade_criterios;
+<<<<<<< HEAD
         if (scanf("%d", &quantidade_criterios) != 1 || quantidade_criterios < 0 || quantidade_criterios > MAX_CRITERIOS) {
+=======
+        if (scanf("%d", &quantidade_criterios) != 1 || quantidade_criterios <= 0 || quantidade_criterios > MAX_CRITERIOS)
+        {
+>>>>>>> 2beda9e7d54c264e0442befbd00a51a6f1e3a960
             fclose(arquivo_bin);
             printf("%s\n", MSG_FALHA);
             return;
@@ -70,6 +83,7 @@ void recuperar_registros_condicional(char *nome_arquivo_bin) {
                 return;
             }
 
+<<<<<<< HEAD
             int leitura = ler_registro(arquivo_bin, &registro);
             if (leitura == 0) {
                 fclose(arquivo_bin);
@@ -77,6 +91,14 @@ void recuperar_registros_condicional(char *nome_arquivo_bin) {
                 return;
             }
             if (leitura == -1) continue;
+=======
+            if (registro.removido == '1') continue;
+            
+            if (registro_atende_criterios(&registro, criterios, quantidade_criterios)) {
+                imprimir_registro(&registro);
+                encontrado = 1;
+            }
+>>>>>>> 2beda9e7d54c264e0442befbd00a51a6f1e3a960
 
             if (registro.tamNomeEstacao >= 0 && registro.tamNomeEstacao < TAMANHO_CAMPO_VARIAVEL) {
                 registro.nomeEstacao[registro.tamNomeEstacao] = '\0';

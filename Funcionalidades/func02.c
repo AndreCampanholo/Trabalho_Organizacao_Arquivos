@@ -1,8 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include "../pilha/pilha.h"
 #include "../auxiliares/auxiliar.h"
 
 // Imprime NULO caso o valor do campo seja -1 ou o valor caso contrário
