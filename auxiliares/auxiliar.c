@@ -44,6 +44,19 @@ void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
     fclose(arquivo);
 }
 
+bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
+    int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
+    int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
+    
+    char lixo = '$';
+    for(int i = 0; i < bytes_restantes; i++) {
+        if(fwrite(&lixo, sizeof(char), 1, arquivo) != 1) {
+            return false;
+        }
+    }
+    return true;
+}
+
 int ler_lista_criterios(Criterio *criterios, int *quantidade, int minimo)
 {
     if (scanf("%d", quantidade) != 1 || *quantidade < minimo || *quantidade > MAX_CRITERIOS)
@@ -294,19 +307,6 @@ bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
     estacoes->nomes[estacoes->quantidade] = (char *)malloc(strlen(novo_nome) + 1);
     strcpy(estacoes->nomes[estacoes->quantidade], novo_nome);
     estacoes->quantidade++;
-    return true;
-}
-
-bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
-    int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
-    int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
-    
-    char lixo = '$';
-    for(int i = 0; i < bytes_restantes; i++) {
-        if(fwrite(&lixo, sizeof(char), 1, arquivo) != 1) {
-            return false;
-        }
-    }
     return true;
 }
 
