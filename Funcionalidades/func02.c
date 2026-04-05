@@ -1,13 +1,5 @@
 #include "../auxiliares/auxiliar.h"
 
-// Imprime NULO caso o valor do campo seja -1 ou o valor caso contrário
-void int_ou_nulo(int valor) {
-    if (valor == -1)
-        printf("NULO ");
-    else
-        printf("%d ", valor);
-}
-
 // Imprime todos os registros do arquivo binário
 void recuperar_registros(char *nome_arquivo_bin) {
     // Abertura do arquivo binário no modo de leitura

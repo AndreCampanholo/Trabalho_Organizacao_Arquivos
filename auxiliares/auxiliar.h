@@ -68,6 +68,10 @@ int ler_registro(FILE *arquivo, Registro *registro);
 int escrever_registro(FILE *arquivo, Registro *registro);
 int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho);
 
+bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, EstacoesVistas *estacoes);
+
+void int_ou_nulo(int valor);
+
 bool campo_nulo (char *valor, int tamanho);
 
 bool campo_eh_texto(char *nome_campo);
