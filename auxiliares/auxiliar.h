@@ -83,13 +83,10 @@ int ler_criterio(Criterio *criterio);
 
 int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade);
 
-<<<<<<< HEAD
-=======
 void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio);
 
 void imprimir_registro(Registro *registro);
 
->>>>>>> 2beda9e7d54c264e0442befbd00a51a6f1e3a960
 int obter_campos_inteiros(Registro *registro, char *nome_campo, int *eh_valido);
 
 char *obter_campos_textos(Registro *registro, char *nome_campo, int *tamanho, int *eh_valido);
