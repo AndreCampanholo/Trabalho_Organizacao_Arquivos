@@ -69,6 +69,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
     Cabecalho cabecalho = {'0', -1, 0, 0, 0};
     escrever_cabecalho(arquivo_bin, &cabecalho);
 
+    // Conta a quantidade de registros do csv para alocar memória para vetor de estacoesVistas e ParesEstacao
     int qtd_registros_csv = preparar_csv_e_contar_registros(arquivo_csv);
     if (qtd_registros_csv < 0)
     {
@@ -84,6 +85,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
     estacoes.capacidade = qtd_registros_csv;
     if (estacoes.capacidade > 0)
     {
+        // Aloca memória equivalente à quantidade de registros do arquivo .csv para vetor de estacoes vistas
         estacoes.nomes = (char **)malloc((size_t)estacoes.capacidade * sizeof(char *));
         if (estacoes.nomes == NULL)
         {
@@ -100,6 +102,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
     int capacidade_pares = qtd_registros_csv;
     if (capacidade_pares > 0)
     {
+        // Aloca memória equivalente à quantidade de registros do arquivo .csv para vetor de pares de estacoes
         pares = (ParEstacao *)malloc((size_t)capacidade_pares * sizeof(ParEstacao));
         if (pares == NULL)
         {
@@ -113,13 +116,31 @@ void criar_tabela(char *nome_csv, char *nome_bin)
 
     // Aqui acontece o fluxo principal: le do CSV, escreve no BIN e atualiza as estatisticas do cabecalho.
     Registro registro_lido;
-    while (ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho, &registro_lido))
+    while (1)
     {
         // Sempre que surge uma estacao nova, a contagem de estacoes e incrementada.
         if (nova_estacao(registro_lido.nomeEstacao, &estacoes))
             cabecalho.nroEstacoes++;
 
         // O par e contabilizado apenas na primeira vez em que aparece.
+        int resultado_leitura = ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho, &registro_lido);
+        if (resultado_leitura == 0)
+            break;
+        if (resultado_leitura == -1)
+        {
+            printf("%s\n", MSG_FALHA);
+            free(pares);
+            liberar_estacoes_vistas(&estacoes);
+            fclose(arquivo_csv);
+            fclose(arquivo_bin);
+            return;
+        }
+
+        // Verifica se estação lida do arquivo .csv e escrita no .bin é nova ou não, incrementando contador
+        if (nova_estacao(registro_lido.nomeEstacao, &estacoes))
+            cabecalho.nroEstacoes++;
+
+        // Verifica se encontrou um par de estações unico/novo
         int resultado_par = adicionar_par_unico(registro_lido.codEstacao, registro_lido.codProxEstacao, &pares, &qtd_pares, &capacidade_pares);
         if (resultado_par == -1)
         {
@@ -131,10 +152,12 @@ void criar_tabela(char *nome_csv, char *nome_bin)
             return;
         }
 
+        // Se encontrou um novo par, incrementa contador
         if (resultado_par == 1)
             cabecalho.nroParesEstacoes++;
     }
 
+    // Libera vetor de pares de estações alocado
     free(pares);
 
     // Se chegou ate aqui, o arquivo ficou consistente e o status pode ser marcado como '1'.
