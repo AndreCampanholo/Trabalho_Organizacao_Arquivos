@@ -73,8 +73,8 @@ int ler_criterio(Criterio *criterio)
             return 0;
     }
 
-    // Caso valor do campo seja vazio, trata como nulo
-    if (str_campo_texto[0] == '\0')
+    // Caso valor do campo seja vazio (ou NULO em campos inteiros), trata como nulo.
+    if (str_campo_texto[0] == '\0' || (!campo_eh_texto(criterio->nome) && strcmp(str_campo_texto, "NULO") == 0))
     {
         // Convenção do trabalho: vazio representa NULO.
         criterio->ehNulo = 1;

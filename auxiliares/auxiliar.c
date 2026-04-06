@@ -224,48 +224,112 @@ int escrever_registro(FILE *arquivo, Registro *registro)
     return 1;
 }
 
+int preparar_csv_e_contar_registros(FILE *arquivo_csv)
+{
+    char linha[512];
+    if (fgets(linha, sizeof(linha), arquivo_csv) == NULL)
+        return 0;
+
+    int quantidade = 0;
+    while (fgets(linha, sizeof(linha), arquivo_csv) != NULL)
+        quantidade++;
+
+    if (fseek(arquivo_csv, 0, SEEK_SET) != 0)
+        return -1;
+    if (fgets(linha, sizeof(linha), arquivo_csv) == NULL)
+        return -1;
+
+    return quantidade;
+}
+
+// Retorno: 1 = inseriu par novo, 0 = par ja existia, -1 = erro de alocacao.
+int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, int *quantidade, int *capacidade)
+{
+    if (codProxEstacao == FLAG_CAMPO_NULO)
+        return 0;
+
+    for (int i = 0; i < *quantidade; i++)
+    {
+        if ((*pares)[i].codEstacao == codEstacao && (*pares)[i].codProxEstacao == codProxEstacao)
+            return 0;
+    }
+
+    if (*quantidade >= *capacidade)
+        return -1;
+
+    (*pares)[*quantidade].codEstacao = codEstacao;
+    (*pares)[*quantidade].codProxEstacao = codProxEstacao;
+    (*quantidade)++;
+    return 1;
+}
+
 // Lê registros do arquivo .csv e escreve-os no .bin
-bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido)
+// Retorno: 1 = registro processado, 0 = fim do csv, -1 = erro.
+int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido)
 {
     // Variáveis auxiliares
     char linha[512];
-    char *campo;
+    char *campos[8] = {0};
+    int qtd_campos = 0;
 
     registro_lido->removido = '0';
     registro_lido->proximo = -1;
 
     // Se não houverem mais linhas de registros no csv, retorna false
     if (fgets(linha, sizeof(linha), csv) == NULL)
-        return false;
+        return 0;
 
-    // Atribuição dos valores do csv às variáveis por meio da tokenização de 'linha' nas virgulas (",")
-    campo = strtok(linha, ",");
-    registro_lido->codEstacao = atoi(campo);
-    campo = strtok(NULL, ",");
-    strcpy(registro_lido->nomeEstacao, campo);
-    campo = strtok(NULL, ",");
-    strcpy(registro_lido->nomeLinha, (campo != NULL) ? campo : "");
-    campo = strtok(NULL, ",");
-    registro_lido->codProxEstacao = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
-    campo = strtok(NULL, ",");
-    registro_lido->distProxEstacao = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
-    campo = strtok(NULL, ",");
-    registro_lido->codLinhaIntegra = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
-    campo = strtok(NULL, ",");
-    registro_lido->codEstIntegra = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
+    // Remove quebra de linha do final da linha lida.
+    linha[strcspn(linha, "\r\n")] = '\0';
+
+    // Separa os 8 campos do csv preservando campos vazios entre vírgulas.
+    char *inicio = linha;
+    for (char *p = linha;; p++)
+    {
+        if (*p == ',' || *p == '\0')
+        {
+            if (qtd_campos < 8)
+                campos[qtd_campos++] = inicio;
+
+            if (*p == '\0')
+                break;
+
+            *p = '\0';
+            inicio = p + 1;
+        }
+    }
+
+    if (qtd_campos != 8)
+        return -1;
+
+    // Atribuição dos valores do csv às variáveis.
+    registro_lido->codEstacao = atoi(campos[0]);
+
+    strncpy(registro_lido->nomeEstacao, campos[1], TAMANHO_CAMPO_VARIAVEL - 1);
+    registro_lido->nomeEstacao[TAMANHO_CAMPO_VARIAVEL - 1] = '\0';
+
+    registro_lido->codLinha = (campos[2][0] != '\0') ? atoi(campos[2]) : -1;
+
+    strncpy(registro_lido->nomeLinha, campos[3], TAMANHO_CAMPO_VARIAVEL - 1);
+    registro_lido->nomeLinha[TAMANHO_CAMPO_VARIAVEL - 1] = '\0';
+
+    registro_lido->codProxEstacao = (campos[4][0] != '\0') ? atoi(campos[4]) : -1;
+    registro_lido->distProxEstacao = (campos[5][0] != '\0') ? atoi(campos[5]) : -1;
+    registro_lido->codLinhaIntegra = (campos[6][0] != '\0') ? atoi(campos[6]) : -1;
+    registro_lido->codEstIntegra = (campos[7][0] != '\0') ? atoi(campos[7]) : -1;
 
     // Valores dos indicadores de tamanho dos campos de tamanho variável
-    registro_lido->tamNomeEstacao = strlen(registro_lido->nomeEstacao);
-    registro_lido->tamNomeLinha = strlen(registro_lido->nomeLinha);
+    registro_lido->tamNomeEstacao = (int)strlen(registro_lido->nomeEstacao);
+    registro_lido->tamNomeLinha = (int)strlen(registro_lido->nomeLinha);
 
     // Escreve registro no arquivo binário
     if (!escrever_registro(bin, registro_lido))
-        return false;
+        return -1;
 
     // proxRRN aponta para o primeiro RRN livre no final da área de dados.
     cabecalho->proxRRN++;
 
-    return true;
+    return 1;
 }
 
 // Imprime NULO caso o valor do campo seja -1 ou o valor caso contrário
@@ -340,25 +404,22 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
     {
         int codEstacao;
         int codProxEstacao;
-    } ParEstacao;
+    } ParEstacaoLocal;
 
     EstacoesVistas estacoes;
     inicializar_estacoes_vistas(&estacoes);
     estacoes.capacidade = cabecalho->proxRRN > 0 ? cabecalho->proxRRN : 1;
     estacoes.nomes = (char **)malloc((size_t)estacoes.capacidade * sizeof(char *));
     if (estacoes.nomes == NULL)
-    {
         return 0;
-    }
 
-    
     int capacidade_pares = cabecalho->proxRRN > 0 ? cabecalho->proxRRN : 1;
-    ParEstacao *pares = (ParEstacao *)malloc((size_t)capacidade_pares * sizeof(ParEstacao));
+    ParEstacaoLocal *pares = (ParEstacaoLocal *)malloc((size_t)capacidade_pares * sizeof(ParEstacaoLocal));
     if (pares == NULL)
     {
         return 0;
     }
- 
+
     int qtd_pares = 0;
     if (fseek(arquivo, rrn_para_offset(0), SEEK_SET) != 0)
     {
@@ -369,7 +430,6 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
 
     for (int rrn = 0; rrn < cabecalho->proxRRN; rrn++)
     {
-
         Registro registro;
         int leitura = ler_registro(arquivo, &registro);
         if (leitura == 0)
@@ -414,16 +474,19 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
         }
 
         int par_existe = 0;
-        for (int i = 0; i < qtd_pares; i++)
+        if (registro.codProxEstacao != FLAG_CAMPO_NULO)
         {
-            if (pares[i].codEstacao == registro.codEstacao && pares[i].codProxEstacao == registro.codProxEstacao)
+            for (int i = 0; i < qtd_pares; i++)
             {
-                par_existe = 1;
-                break;
+                if (pares[i].codEstacao == registro.codEstacao && pares[i].codProxEstacao == registro.codProxEstacao)
+                {
+                    par_existe = 1;
+                    break;
+                }
             }
         }
 
-        if (!par_existe)
+        if (registro.codProxEstacao != FLAG_CAMPO_NULO && !par_existe)
         {
             // Conta apenas pares distintos no arquivo inteiro.
             pares[qtd_pares].codEstacao = registro.codEstacao;

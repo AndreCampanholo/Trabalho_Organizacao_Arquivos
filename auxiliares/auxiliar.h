@@ -51,6 +51,12 @@ typedef struct estacoesVistas
     int capacidade;
 } EstacoesVistas;
 
+typedef struct parEstacao
+{
+    int codEstacao;
+    int codProxEstacao;
+} ParEstacao;
+
 typedef struct criterio
 {
     char nome[32];
@@ -69,6 +75,10 @@ int ler_registro(FILE *arquivo, Registro *registro);
 
 int escrever_registro(FILE *arquivo, Registro *registro);
 
+int preparar_csv_e_contar_registros(FILE *arquivo_csv);
+
+int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, int *quantidade, int *capacidade);
+
 int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho);
 
 void inicializar_estacoes_vistas(EstacoesVistas *estacoes);
@@ -79,7 +89,7 @@ bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro);
 
 bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes);
 
-bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido);
+int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido);
 
 void int_ou_nulo(int valor);
 
