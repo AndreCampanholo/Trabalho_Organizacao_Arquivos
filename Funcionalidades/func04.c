@@ -98,7 +98,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             }
 
             // O registro removido agora vira o novo topo da pilha de espacos livres.
-            cabecalho.topo = (int)offset;
+            cabecalho.topo = rrn;
         }
     }
 

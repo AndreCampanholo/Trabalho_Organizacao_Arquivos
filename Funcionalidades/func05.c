@@ -59,29 +59,29 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         novo_registro.removido = '0';
         novo_registro.proximo = -1;
 
-        long offset_destino;
+        long rrn_destino;
         if (cabecalho.topo != -1)
         {
             // Se existe espaco livre na pilha de removidos, a insercao reaproveita esse espaco primeiro.
             int proximo_topo = -1;
-            if (fseek(arquivo_bin, cabecalho.topo + sizeof(char), SEEK_SET) != 0 ||
+            rrn_destino = cabecalho.topo;
+            if (fseek(arquivo_bin, rrn_para_offset(rrn_destino) + sizeof(char), SEEK_SET) != 0 ||
                 fread(&proximo_topo, sizeof(int), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
                 fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
-            offset_destino = cabecalho.topo;
             cabecalho.topo = proximo_topo;
         }
         else
         {
             // Quando nao ha espaco livre, o novo registro vai para o fim da area de dados.
-            offset_destino = rrn_para_offset(cabecalho.proxRRN);
+            rrn_destino = cabecalho.proxRRN;
             cabecalho.proxRRN++;
         }
 
-        if (fseek(arquivo_bin, offset_destino, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &novo_registro))
+        if (fseek(arquivo_bin, rrn_para_offset(rrn_destino), SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &novo_registro))
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
