@@ -15,7 +15,7 @@ int main(void)
     char nome_bin[TAMANHO_TEXTO];
 
     switch (funcionalidade){
-        case 1: // func01: conversão de .csv para .bin
+        case 1: // func01: conversão dos dados de registro do formato .csv para .bin
             if (scanf("%255s %255s", nome_csv, nome_bin) != 2)
             {
                 printf("%s\n", MSG_FALHA);
@@ -31,7 +31,7 @@ int main(void)
             }
             recuperar_registros(nome_bin);
             break;
-        case 3: // func03: busca
+        case 3: // func03: busca condicional
             if (scanf("%255s", nome_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
@@ -75,6 +75,5 @@ int main(void)
         default: // Funcionalidade inválida
             printf("%s\n", MSG_FALHA);
     }
-
     return 0;
 }

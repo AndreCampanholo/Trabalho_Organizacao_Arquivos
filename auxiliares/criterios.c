@@ -1,18 +1,18 @@
 #include "auxiliar.h"
 
-/* Campo de texto é considerado nulo quando o tamanho == 0 (ou string vazia). */
+// O campo de texto é considerado nulo quando o seu tamanho é igual a 0 (ou quando a string for vazia). 
 bool campo_nulo(char *valor, int tamanho)
 {
     return tamanho == 0 || valor[0] == '\0';
 }
 
-/* Identifica se o campo corresponde a uma string do registro. */
+/* Identifica se o campo fornecido corresponde a uma string de texto do registro. */
 bool campo_eh_texto(char *nome_campo)
 {
     return strcmp(nome_campo, "nomeEstacao") == 0 || strcmp(nome_campo, "nomeLinha") == 0;
 }
 
-// Busca o valor de um campo inteiro no registro
+// Busca o valor de um campo inteiro específico dentro do registro.
 int obter_campos_inteiros(Registro *registro, char *nome_campo, int *eh_valido)
 {
     *eh_valido = 1;
@@ -32,8 +32,8 @@ int obter_campos_inteiros(Registro *registro, char *nome_campo, int *eh_valido)
     return 0;
 }
 
-// Busca o valor de um campo de texto no registro
-// Retorna o ponteiro para a string e seu tamanho. Se o campo não for válido, retorna uma string vazia e tamanho 0.
+// Busca o valor de um campo de texto específico dentro do registro.
+// Retorna o ponteiro para a string e o seu devido tamanho. Se o campo não for válido, ele retorna uma string vazia e tamanho 0.
 char *obter_campos_textos(Registro *registro, char *nome_campo, int *tamanho, int *eh_valido)
 {
     *eh_valido = 1;
@@ -53,55 +53,67 @@ char *obter_campos_textos(Registro *registro, char *nome_campo, int *tamanho, in
     return "";
 }
 
-// Lê pares (nomeCampo valorCampo) de critérios informados pelo usuário
+// Lê os pares (nomeCampo e valorCampo) de critérios de busca que foram informados pelo usuário na entrada.
 int ler_criterio(Criterio *criterio)
 {
-    // Leitura do nomeCampo
+    // Leitura do primeiro valor (nomeCampo).
     if (scanf("%31s", criterio->nome) != 1)
         return 0;
 
-    // Leitura do valorCampo
+    // Leitura do respectivo valor acoplado (valorCampo).
     char str_campo_texto[TAMANHO_CAMPO_VARIAVEL] = {0};
     if (campo_eh_texto(criterio->nome))
-    {
-        // Campo textual pode conter espaços e vir entre aspas.
         ScanQuoteString(str_campo_texto);
-    }
     else
     {
         if (scanf(" %43s", str_campo_texto) != 1)
             return 0;
     }
 
-    // Caso valor do campo seja vazio (ou NULO em campos inteiros), trata como nulo.
+    // Caso o valor lido do campo seja vazio (ou escrito explicitamente como "NULO" em campos inteiros), o sistema o trata como um elemento nulo.
     if (str_campo_texto[0] == '\0' || (!campo_eh_texto(criterio->nome) && strcmp(str_campo_texto, "NULO") == 0))
     {
         criterio->ehNulo = 1;
-        criterio->valorInteiro = FLAG_CAMPO_NULO; // Valor para indicar nulo em campos inteiros;
+        criterio->valorInteiro = FLAG_CAMPO_NULO; // O valor predefinido para indicar um registro interno nulo em campos numéricos inteiros.
         criterio->valorTexto[0] = '\0';
     }
     else
-    {   // Verifica se o campo informado (nomeCampo) é textual (tamanho variável) ou não
+    {   // Verifica se o campo previamente informado (nomeCampo) é de fato textual (de tamanho variável) ou não.
         criterio->ehNulo = 0;
         if (campo_eh_texto(criterio->nome))
         {
-            // Se for um campo textual atribui ao valorTexto com strncpy
+            // Se ele for um campo textual autêntico, atribui ao parâmetro valorTexto utilizando a função strncpy segura.
             strncpy(criterio->valorTexto, str_campo_texto, TAMANHO_TEXTO - 1);
             criterio->valorTexto[TAMANHO_TEXTO - 1] = '\0';
         }
         else
         {
-            // Se for um campo inteiro atribui ao valorInteiro com atoi
+            // Se ele for um campo do tipo inteiro, o transcreve para valorInteiro utilizando adequadamente a conversão com a função atoi.
             criterio->valorInteiro = atoi(str_campo_texto);
         }
     }
     return 1;
 }
 
-// Verifica se registro atende aos critérios
+// Lê a lista sequencial de critérios definida para as funcionalidades de 3, 4 e 6.
+int ler_lista_criterios(Criterio *criterios, int *quantidade, int minimo)
+{
+    // Retorna um indicador de erro caso a quantidade absoluta de critérios informados não esteja dentro dos devidos limites estabelecidos previamente.
+    if (scanf("%d", quantidade) != 1 || *quantidade < minimo || *quantidade > MAX_CRITERIOS)
+        return 0;
+
+    for (int i = 0; i < *quantidade; i++)
+    {
+        if (!ler_criterio(&criterios[i]))
+            return 0;
+    }
+    return 1;
+}
+
+// Verifica ativamente se um determinado registro já preenchido atende a todos os critérios listados na busca.
 int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade)
 {
-    // A busca condicional aplica AND entre todos os pares nomeCampo/valorCampo.
+    // A busca condicional aplica uma operação de intersecção lógica AND entre todos os pares nomeCampo e valorCampo informados em sequência.
     for (int i = 0; i < quantidade; i++)
     {
         if (campo_eh_texto(criterios[i].nome))
@@ -149,10 +161,10 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
     return 1;
 }
 
-// Auxiliar da funcionalidade 6 (atualização de registros) para aplicar os critérios de atualização no registro.
+// Uma função auxiliar empregada na funcionalidade 6 (da atualização de registros interativos) para aplicar os recém lidos critérios de atualização em cima do próprio registro já recuperado.
 void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
 {
-    // Atualiza somente os campos listados; os demais permanecem inalterados.
+    // Atualiza especificamente e somente os campos da estrutura listados pelo usuário na entrada. Os demais permanecem inalterados por questão de segurança de registro original.
     if (strcmp(criterio->nome, "codEstacao") == 0)
     {
         registro->codEstacao = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;

@@ -1,13 +1,13 @@
 #include "../auxiliares/auxiliar.h"
 
-// Funcionalidade [1]: cria arquivo binário a partir de registro de arquivo csv
+// Funcionalidade [1]: Cria um arquivo binário a partir dos registros de um arquivo CSV.
 void criar_tabela(char *nome_csv, char *nome_bin)
 {
-    // A funcao abre o CSV de entrada e o BIN de saida que sera preenchido.
+    // Abre o arquivo CSV de entrada e o arquivo binário de saída que será preenchido.
     FILE *arquivo_csv = fopen(nome_csv, "r");
     FILE *arquivo_bin = fopen(nome_bin, "wb+");
 
-    // Verifica se houve falha na abertura dos arquivos, imprimindo mensagem de erro caso necessário
+    // Verifica se houve uma falha na abertura dos arquivos, imprimindo uma mensagem de erro caso necessário.
     if (arquivo_csv == NULL || arquivo_bin == NULL)
     {
         if (arquivo_csv)
@@ -18,11 +18,11 @@ void criar_tabela(char *nome_csv, char *nome_bin)
         return;
     }
 
-    // O cabecalho nasce inconsistente para proteger o arquivo caso ocorra falha no meio do processo.
+    // O cabeçalho é inicializado como inconsistente para proteger o arquivo caso ocorra uma falha no processo.
     Cabecalho cabecalho = {'0', -1, 0, 0, 0};
     escrever_cabecalho(arquivo_bin, &cabecalho);
 
-    // Conta a quantidade de registros do csv para aloca memória para vetor de estacoesVistas e ParesEstacao
+    // Conta a quantidade de registros do CSV para alocar memória para os vetores de estações vistas e pares de estações.
     int qtd_registros_csv = preparar_csv_e_contar_registros(arquivo_csv);
     if (qtd_registros_csv < 0)
     {
@@ -32,13 +32,13 @@ void criar_tabela(char *nome_csv, char *nome_bin)
         return;
     }
 
-    // Esta estrutura guarda os nomes de estacao ja vistos para contar estacoes unicas.
+    // Esta estrutura guarda os nomes das estações já vistas para contar as estações únicas.
     EstacoesVistas estacoes;
     inicializar_estacoes_vistas(&estacoes);
     estacoes.capacidade = qtd_registros_csv;
     if (estacoes.capacidade > 0)
     {
-        // Aloca memória equivalente à quantidade de registros do arquivo .csv para vetor de estacoes vistas
+        // Aloca uma memória equivalente à quantidade de registros do arquivo CSV para o vetor de estações vistas.
         estacoes.nomes = (char **)malloc((size_t)estacoes.capacidade * sizeof(char *));
         if (estacoes.nomes == NULL)
         {
@@ -49,13 +49,13 @@ void criar_tabela(char *nome_csv, char *nome_bin)
         }
     }
 
-    // Este vetor guarda pares (estacao, proxima estacao) sem repeticao para contar os pares unicos.
+    // Este vetor guarda os pares (estação, próxima estação) sem repetição para contar os pares únicos.
     ParEstacao *pares = NULL;
     int qtd_pares = 0;
     int capacidade_pares = qtd_registros_csv;
     if (capacidade_pares > 0)
     {
-        // Aloca memória equivalente à quantidade de registros do arquivo .csv para vetor de pares de estacoes
+        // Aloca uma memória equivalente à quantidade de registros do arquivo CSV para o vetor de pares de estações.
         pares = (ParEstacao *)malloc((size_t)capacidade_pares * sizeof(ParEstacao));
         if (pares == NULL)
         {
@@ -67,7 +67,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
         }
     }
 
-    // Aqui acontece o fluxo principal: le do CSV, escreve no BIN e atualiza as estatisticas do cabecalho.
+    // Aqui acontece o fluxo principal: lê os dados do CSV, escreve no binário e atualiza as estatísticas do cabeçalho.
     Registro registro_lido;
     while (1)
     {
@@ -84,11 +84,11 @@ void criar_tabela(char *nome_csv, char *nome_bin)
             return;
         }
 
-        // Verifica se estação lida do arquivo .csv e escrita no .bin é nova ou não, incrementando contador
+        // Verifica se a estação lida do arquivo CSV e escrita no binário é nova ou não, incrementando o seu contador.
         if (nova_estacao(registro_lido.nomeEstacao, &estacoes))
             cabecalho.nroEstacoes++;
 
-        // Verifica se encontrou um par de estações unico/novo
+        // Verifica se encontrou um par de estações único e novo.
         int resultado_par = adicionar_par_unico(registro_lido.codEstacao, registro_lido.codProxEstacao, &pares, &qtd_pares, &capacidade_pares);
         if (resultado_par == -1)
         {
@@ -100,25 +100,25 @@ void criar_tabela(char *nome_csv, char *nome_bin)
             return;
         }
 
-        // Se encontrou um novo par, incrementa contador
+        // Se encontrou um novo par, incrementa o seu contador.
         if (resultado_par == 1)
             cabecalho.nroParesEstacoes++;
     }
 
-    // Libera vetor de pares de estações alocado
+    // Libera o vetor de pares de estações alocado.
     free(pares);
 
-    // Se chegou ate aqui, o arquivo ficou consistente e o status pode ser marcado como '1'.
+    // Se chegou até aqui, o arquivo ficou consistente e o seu status pode ser marcado como '1'.
     cabecalho.status = '1';
     escrever_cabecalho(arquivo_bin, &cabecalho);
 
-    // Libera o vetor de nomes de estações vistas
+    // Libera o vetor de nomes de estações vistas.
     liberar_estacoes_vistas(&estacoes);
 
-    // Fechamento dos arquivos abertos
+    // Fechamento dos arquivos abertos.
     fclose(arquivo_csv);
     fclose(arquivo_bin);
 
-    // Impressão do .bin na tela
+    // Impressão do arquivo binário na tela.
     BinarioNaTela(nome_bin);
 }

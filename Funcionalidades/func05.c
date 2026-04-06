@@ -1,6 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 
-// Funcionalidade [5]: Insere registros informados pelo usuário
+// Funcionalidade [5]: Insere os registros informados pelo usuário.
 void inserir_registros(char *nome_arquivo, int qtd_insercoes)
 {
     if (nome_arquivo == NULL || qtd_insercoes <= 0)
@@ -47,7 +47,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
             return;
         }
 
-        // Os campos lidos como texto permitem tratar corretamente o caso de valor NULO.
+        // Os campos lidos como texto permitem que o caso de um valor nulo seja tratado corretamente.
         novo_registro.codLinha = inteiro_ou_nulo(novo_codLinha);
         novo_registro.codProxEstacao = inteiro_ou_nulo(novo_codProxEstacao);
         novo_registro.distProxEstacao = inteiro_ou_nulo(novo_distProxEstacao);
@@ -62,7 +62,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         long rrn_destino;
         if (cabecalho.topo != -1)
         {
-            // Se existe espaco livre na pilha de removidos, a insercao reaproveita esse espaco primeiro.
+            // Se houver um espaço livre na pilha de removidos, a inserção reaproveita esse espaço primeiro.
             int proximo_topo = -1;
             rrn_destino = cabecalho.topo;
             if (fseek(arquivo_bin, rrn_para_offset(rrn_destino) + sizeof(char), SEEK_SET) != 0 ||
@@ -76,7 +76,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         }
         else
         {
-            // Quando nao ha espaco livre, o novo registro vai para o fim da area de dados.
+            // Quando não há espaço livre, o novo registro vai para o final da área de dados do arquivo.
             rrn_destino = cabecalho.proxRRN;
             cabecalho.proxRRN++;
         }
@@ -89,7 +89,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         }
     }
 
-    // Depois de todas as insercoes, os totais agregados do cabecalho sao recalculados.
+    // Depois de todas as inserções, os totais agregados do cabeçalho são recalculados para manter a consistência.
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);

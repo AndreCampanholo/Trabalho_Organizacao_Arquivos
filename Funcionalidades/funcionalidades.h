@@ -4,6 +4,7 @@
 #include "../auxiliares/auxiliar.h"
 
 // Protótipos das funções de cada funcionalidade
+
 void criar_tabela(char *nome_csv, char *nome_bin);
 void recuperar_registros(char *nome_arquivo_bin);
 void recuperar_registros_condicional(char *nome_arquivo_bin);

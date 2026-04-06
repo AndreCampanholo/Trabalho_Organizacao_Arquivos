@@ -1,12 +1,12 @@
 #include "auxiliar.h"
 
-// A partir de um RRN, calcula byte offset
+// A partir de um RRN, calcula o byte offset correspondente
 long rrn_para_offset(int rrn)
 {
     return TAMANHO_CABECALHO + (long)rrn * TAMANHO_REGISTRO;
 }
 
-// Abre arquivo binário no modo informado pelo usuário, fechando-o caso esteja inconsistente
+// Abre o arquivo binário no modo informado pelo usuário, fechando-o caso esteja inconsistente
 int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita)
 {
     *arquivo = fopen(nome_arquivo, modo);
@@ -27,24 +27,22 @@ int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cab
         return 0;
     }
 
-    // Caso estivesse consistente e modo de abertura é para escrita, define como inconsistente
+    // Caso estivesse consistente, mas o modo de abertura é para escrita, define como inconsistente
     if (eh_escrita)
     {
-        // O arquivo fica inconsistente durante a operação para evitar leitura concorrente inválida.
         cabecalho->status = '0';
         escrever_cabecalho(*arquivo, cabecalho);
     }
-
     return 1;
 }
 
-// Chama função acima para escrita
+// Chama a função acima para escrita
 int abrir_binario_escrita(FILE **arquivo, char *nome_arquivo, Cabecalho *cabecalho)
 {
     return abrir_binario(arquivo, nome_arquivo, "r+b", cabecalho, 1);
 }
 
-// Fecha arquivo binário aberto para escrita (seta status para '0')
+// Fecha o arquivo binário aberto para escrita (seta status para '0' -> consistente)
 void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
 {
     cabecalho->status = '1';
@@ -52,9 +50,9 @@ void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
     fclose(arquivo);
 }
 
-// Preenche espaço disponível de registro com lixo ('$')
+// Preenche o espaço restante do registro com lixo ('$')
 bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
-    // 37 bytes fixos + tamanhos variáveis; restante do registro deve ser '$'.
+    // 37 bytes fixos + tamanhos variáveis
     int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
     int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
     
@@ -65,25 +63,6 @@ bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
         }
     }
     return true;
-}
-
-// Lê lista de critérios para funcionalidade 3, 4 e 6
-int ler_lista_criterios(Criterio *criterios, int *quantidade, int minimo)
-{
-    if (scanf("%d", quantidade) != 1 || *quantidade < minimo || *quantidade > MAX_CRITERIOS)
-    {
-        return 0;
-    }
-
-    for (int i = 0; i < *quantidade; i++)
-    {
-        if (!ler_criterio(&criterios[i])) // Função no critérios.c
-        {
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 // Adiciona '\0' ao final de campos de tamanho variável para comparação de strings
@@ -178,8 +157,6 @@ int escrever_registro(FILE *arquivo, Registro *registro)
         registro->tamNomeEstacao + registro->tamNomeLinha > 43)
         return 0;
 
-    // Os 43 bytes variáveis são divididos entre nomeEstacao e nomeLinha.
-
     if (fwrite(&registro->removido, sizeof(char), 1, arquivo) != 1)
         return 0;
     if (fwrite(&registro->proximo, sizeof(int), 1, arquivo) != 1)
@@ -197,6 +174,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
     if (fwrite(&registro->codEstIntegra, sizeof(int), 1, arquivo) != 1)
         return 0;
 
+    // Os 43 bytes variáveis são divididos entre nomeEstacao e nomeLinha.
     if (fwrite(&registro->tamNomeEstacao, sizeof(int), 1, arquivo) != 1)
         return 0;
         
@@ -244,29 +222,7 @@ int preparar_csv_e_contar_registros(FILE *arquivo_csv)
     return quantidade;
 }
 
-// Retorno: 1 = inseriu par novo, 0 = par ja existia, -1 = erro de alocacao
-int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, int *quantidade, int *capacidade)
-{
-    if (codProxEstacao == FLAG_CAMPO_NULO)
-        return 0;
-
-    // Verifica se o par atual já existia no vetor de pares de estações vistas
-    for (int i = 0; i < *quantidade; i++)
-    {
-        if ((*pares)[i].codEstacao == codEstacao && (*pares)[i].codProxEstacao == codProxEstacao)
-            return 0;
-    }
-
-    if (*quantidade >= *capacidade)
-        return -1;
-
-    (*pares)[*quantidade].codEstacao = codEstacao;
-    (*pares)[*quantidade].codProxEstacao = codProxEstacao;
-    (*quantidade)++;
-    return 1;
-}
-
-// Lê registros do arquivo .csv e escreve-os no .bin
+// Lê os registros do arquivo .csv e escreve-os no .bin
 // Retorno: 1 = registro processado, 0 = fim do csv, -1 = erro
 int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido)
 {
@@ -344,12 +300,34 @@ void int_ou_nulo(int valor)
         printf("%d ", valor);
 }
 
-// Verifica se string 'valor' == "NULO" ou não
+// Verifica se uma string 'valor' == "NULO" ou não
 int inteiro_ou_nulo(char *valor)
 {
     if (strcmp(valor, "NULO") == 0)
         return FLAG_CAMPO_NULO;
     return atoi(valor);
+}
+
+// Retorno: 1 = inseriu par novo, 0 = par ja existia, -1 = erro de alocacao
+int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, int *quantidade, int *capacidade)
+{
+    if (codProxEstacao == FLAG_CAMPO_NULO)
+        return 0;
+
+    // Verifica se o par atual já existia no vetor de pares de estações vistas
+    for (int i = 0; i < *quantidade; i++)
+    {
+        if ((*pares)[i].codEstacao == codEstacao && (*pares)[i].codProxEstacao == codProxEstacao)
+            return 0;
+    }
+
+    if (*quantidade >= *capacidade)
+        return -1;
+
+    (*pares)[*quantidade].codEstacao = codEstacao;
+    (*pares)[*quantidade].codProxEstacao = codProxEstacao;
+    (*quantidade)++;
+    return 1;
 }
 
 // Inicialização dos campos das struct 'estacoes'
@@ -360,13 +338,11 @@ void inicializar_estacoes_vistas(EstacoesVistas *estacoes)
     estacoes->capacidade = 0;
 }
 
-// Liberação de memória do vetor de nomes de estações
+// Liberação da memória do vetor de nomes de estações
 void liberar_estacoes_vistas(EstacoesVistas *estacoes)
 {
     for (int i = 0; i < estacoes->quantidade; i++)
-    {
         free(estacoes->nomes[i]);
-    }
     free(estacoes->nomes);
 }
 
@@ -396,7 +372,7 @@ bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
     return true;
 }
 
-// Calcula 'nroEstacoes' and 'nroParesEstacoes'
+// Calcula 'nroEstacoes' e 'nroParesEstacoes'
 int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
 {
     if (arquivo == NULL || cabecalho == NULL)

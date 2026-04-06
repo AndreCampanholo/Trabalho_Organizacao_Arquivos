@@ -1,16 +1,16 @@
 #include "../auxiliares/auxiliar.h"
 
-// Funcionalidade [4]: apaga registros do arquivo binário de acordo com critérios informados pelo usuário
+// Funcionalidade [4]: Apaga os registros do arquivo binário de acordo com os critérios informados pelo usuário.
 void deletar_registros(char *nome_arquivo, int qtd_remocoes)
 {
-    // Verifica se parâmetros são válidos
+    // Verifica se os parâmetros informados são válidos.
     if (nome_arquivo == NULL || qtd_remocoes <= 0)
     {
         printf("%s\n", MSG_FALHA);
         return;
     }
 
-    // Abre o arquivo para leitura e escrita binária
+    // Abre o arquivo para leitura e escrita binária.
     FILE *arquivo_bin;
     Cabecalho cabecalho;
     if (!abrir_binario_escrita(&arquivo_bin, nome_arquivo, &cabecalho))
@@ -19,13 +19,13 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
         return;
     }
 
-    // Este laco processa cada comando de remocao informado na entrada.
+    // Este laço processa cada um dos comandos de remoção que foram informados na entrada.
     int qtd_criterios;
     for (int i = 0; i < qtd_remocoes; i++)
     {
         Criterio criterios[MAX_CRITERIOS];
 
-        // Le os m pares (nomeCampo, valorCampo) usando a rotina modularizada.
+        // Lê os 'm' pares (nomeCampo, valorCampo) utilizando a rotina modularizada.
         if (!ler_lista_criterios(criterios, &qtd_criterios, 1))
         {
             printf("%s\n", MSG_FALHA);
@@ -33,13 +33,13 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             return;
         }
 
-        // Para cada comando, o arquivo inteiro e percorrido para encontrar os registros que batem com os criterios.
+        // Para cada comando, o arquivo inteiro é percorrido para encontrar os registros que batem com os critérios.
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
-            // Cálculo do offset do registro atual
+            // Cálculo do deslocamento (offset) do registro atual.
             long offset = rrn_para_offset(rrn);
 
-            // Posiciona ponteiro no byte offset do registro atualmente sendo avaliado
+            // Posiciona o ponteiro no byte de deslocamento do registro que está sendo avaliado atualmente.
             if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
             {
                 printf("%s\n", MSG_FALHA);
@@ -47,33 +47,33 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
                 return;
             }
 
-            // Leitura do registro
+            // Leitura do registro.
             Registro registro;
             int leitura = ler_registro(arquivo_bin, &registro);
             if (leitura == 0)
-            { // leitura == 0 indica falha de leitura
+            { // leitura == 0 indica uma falha de leitura
                 printf("%s\n", MSG_FALHA);
                 fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
             if (leitura == -1)
-            { // leitura == -1 indica que o registro já está removido
+            { // leitura == -1 indica que o registro já foi removido logicamente
                 continue;
             }
 
-            // Adiciona '\0' ao final de campos de tam. variável para comparações
+            // Adiciona o caractere nulo '\0' ao final dos campos de tamanho variável para realizar as comparações.
             normalizar_campos_texto_registro(&registro);
 
-            // Se o registro nao atende aos criterios, ele permanece como esta.
+            // Se o registro não atende aos critérios, ele permanece da mesma forma que está.
             if (!registro_atende_criterios(&registro, criterios, qtd_criterios))
             {
-                continue; // Se o registro não deve ser removido, não executa resto do loop
+                continue; // Se o registro não deve ser removido, o resto do laço não é executado.
             }
 
             char removido = '1';
             int antigo_topo = cabecalho.topo;
 
-            // Posiciona o ponteiro de volta no início do registro (foi para o final devido ao 'ler_registro()')
+            // Posiciona o ponteiro de volta no início do registro (o ponteiro foi para o final devido ao 'ler_registro()').
             if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
             {
                 printf("%s\n", MSG_FALHA);
@@ -81,7 +81,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
                 return;
             }
 
-            // Remoção lógica do registro
+            // Realiza a remoção lógica do registro.
             if (fwrite(&removido, sizeof(char), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
@@ -89,7 +89,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
                 return;
             }
 
-            // O campo 'proximo' recebe o antigo topo, mantendo a lista de removidos no formato de pilha.
+            // O campo 'próximo' recebe o antigo topo, mantendo a lista de removidos em um formato de pilha.
             if (fwrite(&antigo_topo, sizeof(int), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
@@ -97,12 +97,12 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
                 return;
             }
 
-            // O registro removido agora vira o novo topo da pilha de espacos livres.
+            // O registro removido agora se torna o novo topo da pilha de espaços livres.
             cabecalho.topo = rrn;
         }
     }
 
-    // No fim, as estatisticas do cabecalho sao recalculadas para refletir o estado atual do arquivo.
+    // No fim, as estatísticas do cabeçalho são recalculadas para refletir o estado atualizado do arquivo.
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);
@@ -110,9 +110,9 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
         return;
     }
 
-    // Define status como consistente e fecha arquivo
+    // Define o status do arquivo como consistente novamente e o fecha.
     fechar_binario_escrita(arquivo_bin, &cabecalho);
 
-    // Imprime
+    // Imprime o arquivo binário na tela.
     BinarioNaTela(nome_arquivo);
 }
