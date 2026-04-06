@@ -19,7 +19,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 		return;
 	}
 
-	// Laço de leitura dos critérios e execução das atualizações
+	// Cada iteracao trata uma operacao completa de atualizacao: filtro de busca + campos para alterar.
 	for (int a = 0; a < qtd_atualizacoes; a++)
 	{
 		// Leitura de critérios de busca dos campos que devem ser alterados
@@ -42,11 +42,11 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 			return;
 		}
 
-		// Laço que verifica se registro do RRN atual atenda a critérios
+		// O arquivo e percorrido por completo para localizar os registros que atendem aos criterios.
 		for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
 		{
 			Registro registro;
-			// Atualização é in-place: lê, modifica em memória e regrava no mesmo offset.
+			// A atualizacao e in-place: o registro e lido, alterado em memoria e gravado no mesmo offset.
 			long offset = rrn_para_offset(rrn);
 
 			// Posiciona ponteiro no byte offset do registro do RRN atual
@@ -73,14 +73,13 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 			// Adiciona '\0' ao final de campos de tamanho variável para comparar strings
 			normalizar_campos_texto_registro(&registro);
 
-			// Verifica se o registro atende aos critérios, pulando o laço de atualização caso negativo
+			// O registro so entra na etapa de alteracao se ele passar em todos os criterios de busca.
 			if (!registro_atende_criterios(&registro, criterios_busca, qtd_criterios_busca))
 			{
-				// printf("%s\n", MSG_FALHA);
 				continue;
 			}
 
-			// Laço de atualização dos campos com seus novos valores (apenas muda os campos da struct 'registro')
+			// Aqui a funcao aplica apenas os campos pedidos pelo usuario, sem mexer no restante do registro.
 			for (int i = 0; i < qtd_campos_atualizar; i++)
 			{
 				aplicar_criterio_no_registro(&registro, &campos_atualizacao[i]);
@@ -105,7 +104,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 		}
 	}
 
-	// Atualiza 'nroEstacoes' e 'nroParesEstacoes'
+	// Ao final, as contagens agregadas do cabecalho sao recalculadas para manter a consistencia.
 	if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
 	{
 		printf("%s\n", MSG_FALHA);

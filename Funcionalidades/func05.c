@@ -47,6 +47,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
             return;
         }
 
+        // Os campos lidos como texto permitem tratar corretamente o caso de valor NULO.
         novo_registro.codLinha = inteiro_ou_nulo(novo_codLinha);
         novo_registro.codProxEstacao = inteiro_ou_nulo(novo_codProxEstacao);
         novo_registro.distProxEstacao = inteiro_ou_nulo(novo_distProxEstacao);
@@ -61,7 +62,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         long offset_destino;
         if (cabecalho.topo != -1)
         {
-            // Reaproveita espaço de registro removido (pilha de removidos).
+            // Se existe espaco livre na pilha de removidos, a insercao reaproveita esse espaco primeiro.
             int proximo_topo = -1;
             if (fseek(arquivo_bin, cabecalho.topo + sizeof(char), SEEK_SET) != 0 ||
                 fread(&proximo_topo, sizeof(int), 1, arquivo_bin) != 1)
@@ -75,7 +76,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         }
         else
         {
-            // Sem removidos disponíveis: escreve no final da área de dados.
+            // Quando nao ha espaco livre, o novo registro vai para o fim da area de dados.
             offset_destino = rrn_para_offset(cabecalho.proxRRN);
             cabecalho.proxRRN++;
         }
@@ -88,6 +89,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         }
     }
 
+    // Depois de todas as insercoes, os totais agregados do cabecalho sao recalculados.
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);

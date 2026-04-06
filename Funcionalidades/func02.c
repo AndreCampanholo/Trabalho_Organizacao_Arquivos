@@ -13,7 +13,7 @@ void recuperar_registros(char *nome_arquivo_bin)
         return;
     }
 
-    // Leitura campo a campo do cabeçalho 
+    // O cabecalho e lido logo no inicio para validar o arquivo e descobrir ate qual RRN deve ser percorrido.
     Cabecalho curr_cabecalho;
     if (!ler_cabecalho(arquivo_bin, &curr_cabecalho))
     {
@@ -30,12 +30,12 @@ void recuperar_registros(char *nome_arquivo_bin)
         return;
     }
 
-    // Loop de leitura de cada registro campo a campo até proxRRN - 1 (último RRN ocupado)
+    // O laco percorre todos os RRNs ja ocupados e tenta reconstruir cada registro na memoria.
     bool existe_registro = false;
     Registro curr_registro;
     for (int i = 0; i < curr_cabecalho.proxRRN; i++)
     {
-        // Cada RRN é mapeado para byte offset fixo de 80 bytes por registro.
+        // Cada RRN aponta para uma posicao fixa no arquivo, entao o calculo do offset e direto.
         long offset = rrn_para_offset(i);
         if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
         {
@@ -53,13 +53,13 @@ void recuperar_registros(char *nome_arquivo_bin)
         }
         else if (ler_registros == -1)
         {
-            // Registro removido logicamente não deve ser exibido.
+            // O registro removido logicamente e ignorado para nao aparecer na saida.
             continue;
         }
 
         normalizar_campos_texto_registro(&curr_registro);
 
-        // Impressão do registro no formato exigido
+        // A impressao segue exatamente o formato especificado no enunciado.
         printf("%d %s ", curr_registro.codEstacao, curr_registro.nomeEstacao);
         int_ou_nulo(curr_registro.codLinha);
         if (curr_registro.tamNomeLinha == 0)
