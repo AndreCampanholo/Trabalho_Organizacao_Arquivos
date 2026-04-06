@@ -1,52 +1,5 @@
 #include "../auxiliares/auxiliar.h"
 
-typedef struct
-{
-    int codEstacao;
-    int codProxEstacao;
-} ParEstacao;
-
-int preparar_csv_e_contar_registros(FILE *arquivo_csv)
-{
-    char linha[512];
-    // A primeira linha e o cabecalho do CSV, entao ela e consumida e ignorada.
-    if (fgets(linha, sizeof(linha), arquivo_csv) == NULL)
-        return 0;
-
-    int quantidade = 0;
-    // Aqui a gente percorre o restante do arquivo so para descobrir quantos registros existem.
-    while (fgets(linha, sizeof(linha), arquivo_csv) != NULL)
-        quantidade++;
-
-    // Depois da contagem, o ponteiro volta para o inicio para permitir a leitura real dos dados.
-    if (fseek(arquivo_csv, 0, SEEK_SET) != 0)
-        return -1;
-    if (fgets(linha, sizeof(linha), arquivo_csv) == NULL)
-        return -1;
-
-    return quantidade;
-}
-
-// Retorno: 1 = inseriu par novo, 0 = par ja existia, -1 = erro de alocacao.
-int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, int *quantidade, int *capacidade)
-{
-    // Primeiro a funcao verifica se esse par ja apareceu para evitar contagem duplicada.
-    for (int i = 0; i < *quantidade; i++)
-    {
-        if ((*pares)[i].codEstacao == codEstacao && (*pares)[i].codProxEstacao == codProxEstacao)
-            return 0;
-    }
-
-    // Como o vetor foi alocado com a capacidade final esperada, nao ha realocacao aqui.
-    if (*quantidade >= *capacidade)
-        return -1;
-
-    (*pares)[*quantidade].codEstacao = codEstacao;
-    (*pares)[*quantidade].codProxEstacao = codProxEstacao;
-    (*quantidade)++;
-    return 1;
-}
-
 // Funcionalidade [1]: cria arquivo binário a partir de registro de arquivo csv
 void criar_tabela(char *nome_csv, char *nome_bin)
 {
@@ -118,11 +71,6 @@ void criar_tabela(char *nome_csv, char *nome_bin)
     Registro registro_lido;
     while (1)
     {
-        // Sempre que surge uma estacao nova, a contagem de estacoes e incrementada.
-        if (nova_estacao(registro_lido.nomeEstacao, &estacoes))
-            cabecalho.nroEstacoes++;
-
-        // O par e contabilizado apenas na primeira vez em que aparece.
         int resultado_leitura = ler_escrever_registros(arquivo_csv, arquivo_bin, &cabecalho, &registro_lido);
         if (resultado_leitura == 0)
             break;

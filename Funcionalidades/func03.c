@@ -70,10 +70,11 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
                 encontrado = 1;
             }
         }
-        // A linha em branco separa visualmente o resultado de cada consulta.
-        printf("\n");
+        
         if (!encontrado)
             printf("%s\n", MSG_INEXISTENTE);
+        // A linha em branco separa visualmente o resultado de cada consulta.
+        printf("\n");
     }
 
     fclose(arquivo_bin);
