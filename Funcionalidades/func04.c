@@ -19,7 +19,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
         return;
     }
 
-    // Laço que realiza as deleções para as n remoções (qtd_remoções)
+    // Este laco processa cada comando de remocao informado na entrada.
     int qtd_criterios;
     for (int i = 0; i < qtd_remocoes; i++)
     {
@@ -33,7 +33,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             return;
         }
 
-        // Laço de verificação dos critérios para cada registro e remoção lógica a partir do rrn = 0
+        // Para cada comando, o arquivo inteiro e percorrido para encontrar os registros que batem com os criterios.
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
             // Cálculo do offset do registro atual
@@ -64,7 +64,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             // Adiciona '\0' ao final de campos de tam. variável para comparações
             normalizar_campos_texto_registro(&registro);
 
-            // Compara registros com os critérios de deleção
+            // Se o registro nao atende aos criterios, ele permanece como esta.
             if (!registro_atende_criterios(&registro, criterios, qtd_criterios))
             {
                 continue; // Se o registro não deve ser removido, não executa resto do loop
@@ -89,7 +89,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
                 return;
             }
 
-            // Escreve byte offset do próximo registro removido em 'proximo' (garante funcionamento de pilha)
+            // O campo 'proximo' recebe o antigo topo, mantendo a lista de removidos no formato de pilha.
             if (fwrite(&antigo_topo, sizeof(int), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
@@ -97,12 +97,12 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
                 return;
             }
 
-            // O registro recém-removido vira o novo topo da pilha de removidos.
+            // O registro removido agora vira o novo topo da pilha de espacos livres.
             cabecalho.topo = (int)offset;
         }
     }
 
-    // Calcula novo 'nroEstacoes' e 'nroParesEstacoes' atualizando seus valores na struct cabeçalho
+    // No fim, as estatisticas do cabecalho sao recalculadas para refletir o estado atual do arquivo.
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);
