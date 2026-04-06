@@ -29,7 +29,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
         if (!ler_lista_criterios(criterios, &qtd_criterios, 1))
         {
             printf("%s\n", MSG_FALHA);
-            fclose(arquivo_bin);
+            fechar_binario_escrita(arquivo_bin, &cabecalho);
             return;
         }
 
@@ -43,7 +43,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
             {
                 printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
+                fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
 
@@ -53,7 +53,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             if (leitura == 0)
             { // leitura == 0 indica falha de leitura
                 printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
+                fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
             if (leitura == -1)
@@ -77,7 +77,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
             {
                 printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
+                fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
 
@@ -85,7 +85,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             if (fwrite(&removido, sizeof(char), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
+                fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
 
@@ -93,7 +93,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             if (fwrite(&antigo_topo, sizeof(int), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
+                fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
 
@@ -106,7 +106,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);
-        fclose(arquivo_bin);
+        fechar_binario_escrita(arquivo_bin, &cabecalho);
         return;
     }
 

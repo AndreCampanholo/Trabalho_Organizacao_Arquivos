@@ -22,7 +22,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
     Cabecalho cabecalho = {'0', -1, 0, 0, 0};
     escrever_cabecalho(arquivo_bin, &cabecalho);
 
-    // Conta a quantidade de registros do csv para alocar memória para vetor de estacoesVistas e ParesEstacao
+    // Conta a quantidade de registros do csv para aloca memória para vetor de estacoesVistas e ParesEstacao
     int qtd_registros_csv = preparar_csv_e_contar_registros(arquivo_csv);
     if (qtd_registros_csv < 0)
     {

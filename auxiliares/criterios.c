@@ -61,7 +61,7 @@ int ler_criterio(Criterio *criterio)
         return 0;
 
     // Leitura do valorCampo
-    char str_campo_texto[TAMANHO_TEXTO] = {0};
+    char str_campo_texto[TAMANHO_CAMPO_VARIAVEL] = {0};
     if (campo_eh_texto(criterio->nome))
     {
         // Campo textual pode conter espaços e vir entre aspas.
@@ -69,14 +69,13 @@ int ler_criterio(Criterio *criterio)
     }
     else
     {
-        if (scanf(" %127s", str_campo_texto) != 1)
+        if (scanf(" %43s", str_campo_texto) != 1)
             return 0;
     }
 
     // Caso valor do campo seja vazio (ou NULO em campos inteiros), trata como nulo.
     if (str_campo_texto[0] == '\0' || (!campo_eh_texto(criterio->nome) && strcmp(str_campo_texto, "NULO") == 0))
     {
-        // Convenção do trabalho: vazio representa NULO.
         criterio->ehNulo = 1;
         criterio->valorInteiro = FLAG_CAMPO_NULO; // Valor para indicar nulo em campos inteiros;
         criterio->valorTexto[0] = '\0';
@@ -86,11 +85,13 @@ int ler_criterio(Criterio *criterio)
         criterio->ehNulo = 0;
         if (campo_eh_texto(criterio->nome))
         {
+            // Se for um campo textual atribui ao valorTexto com strncpy
             strncpy(criterio->valorTexto, str_campo_texto, TAMANHO_TEXTO - 1);
             criterio->valorTexto[TAMANHO_TEXTO - 1] = '\0';
         }
         else
         {
+            // Se for um campo inteiro atribui ao valorInteiro com atoi
             criterio->valorInteiro = atoi(str_campo_texto);
         }
     }

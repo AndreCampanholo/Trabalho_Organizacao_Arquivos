@@ -234,20 +234,23 @@ int preparar_csv_e_contar_registros(FILE *arquivo_csv)
     while (fgets(linha, sizeof(linha), arquivo_csv) != NULL)
         quantidade++;
 
+    // Volta o ponteiro para começo do csv
     if (fseek(arquivo_csv, 0, SEEK_SET) != 0)
         return -1;
+    // Consome a primeira linha do csv (não é um registro) e posiciona ponteiro no primeiro byte de registro válido
     if (fgets(linha, sizeof(linha), arquivo_csv) == NULL)
         return -1;
 
     return quantidade;
 }
 
-// Retorno: 1 = inseriu par novo, 0 = par ja existia, -1 = erro de alocacao.
+// Retorno: 1 = inseriu par novo, 0 = par ja existia, -1 = erro de alocacao
 int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, int *quantidade, int *capacidade)
 {
     if (codProxEstacao == FLAG_CAMPO_NULO)
         return 0;
 
+    // Verifica se o par atual já existia no vetor de pares de estações vistas
     for (int i = 0; i < *quantidade; i++)
     {
         if ((*pares)[i].codEstacao == codEstacao && (*pares)[i].codProxEstacao == codProxEstacao)
@@ -264,7 +267,7 @@ int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, 
 }
 
 // Lê registros do arquivo .csv e escreve-os no .bin
-// Retorno: 1 = registro processado, 0 = fim do csv, -1 = erro.
+// Retorno: 1 = registro processado, 0 = fim do csv, -1 = erro
 int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido)
 {
     // Variáveis auxiliares
@@ -279,10 +282,10 @@ int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro 
     if (fgets(linha, sizeof(linha), csv) == NULL)
         return 0;
 
-    // Remove quebra de linha do final da linha lida.
+    // Remove quebra de linha do final da linha lida e substitui por '\0'
     linha[strcspn(linha, "\r\n")] = '\0';
 
-    // Separa os 8 campos do csv preservando campos vazios entre vírgulas.
+    // Separa os 8 campos do csv preservando campos vazios entre vírgulas
     char *inicio = linha;
     for (char *p = linha;; p++)
     {
@@ -294,7 +297,7 @@ int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro 
             if (*p == '\0')
                 break;
 
-            *p = '\0';
+            *p = '\0'; // Troca ',' por '\0'
             inicio = p + 1;
         }
     }
@@ -302,7 +305,7 @@ int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro 
     if (qtd_campos != 8)
         return -1;
 
-    // Atribuição dos valores do csv às variáveis.
+    // Atribuição dos valores do csv às variáveis
     registro_lido->codEstacao = atoi(campos[0]);
 
     strncpy(registro_lido->nomeEstacao, campos[1], TAMANHO_CAMPO_VARIAVEL - 1);
