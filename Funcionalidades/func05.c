@@ -26,7 +26,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         if (scanf("%d", &novo_registro.codEstacao) != 1)
         {
             printf("%s\n", MSG_FALHA);
-            fclose(arquivo_bin);
+            fechar_binario_escrita(arquivo_bin, &cabecalho);
             return;
         }
 
@@ -34,7 +34,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         if (scanf("%4s", novo_codLinha) != 1)
         {
             printf("%s\n", MSG_FALHA);
-            fclose(arquivo_bin);
+            fechar_binario_escrita(arquivo_bin, &cabecalho);
             return;
         }
 
@@ -43,7 +43,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         if (scanf("%4s %4s %4s %4s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra) != 4)
         {
             printf("%s\n", MSG_FALHA);
-            fclose(arquivo_bin);
+            fechar_binario_escrita(arquivo_bin, &cabecalho);
             return;
         }
 
@@ -68,7 +68,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
                 fread(&proximo_topo, sizeof(int), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
-                fclose(arquivo_bin);
+                fechar_binario_escrita(arquivo_bin, &cabecalho);
                 return;
             }
             offset_destino = cabecalho.topo;
@@ -84,7 +84,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         if (fseek(arquivo_bin, offset_destino, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &novo_registro))
         {
             printf("%s\n", MSG_FALHA);
-            fclose(arquivo_bin);
+            fechar_binario_escrita(arquivo_bin, &cabecalho);
             return;
         }
     }
@@ -93,7 +93,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);
-        fclose(arquivo_bin);
+        fechar_binario_escrita(arquivo_bin, &cabecalho);
         return;
     }
 
