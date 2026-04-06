@@ -61,6 +61,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         long offset_destino;
         if (cabecalho.topo != -1)
         {
+            // Reaproveita espaço de registro removido (pilha de removidos).
             int proximo_topo = -1;
             if (fseek(arquivo_bin, cabecalho.topo + sizeof(char), SEEK_SET) != 0 ||
                 fread(&proximo_topo, sizeof(int), 1, arquivo_bin) != 1)
@@ -74,6 +75,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
         }
         else
         {
+            // Sem removidos disponíveis: escreve no final da área de dados.
             offset_destino = rrn_para_offset(cabecalho.proxRRN);
             cabecalho.proxRRN++;
         }

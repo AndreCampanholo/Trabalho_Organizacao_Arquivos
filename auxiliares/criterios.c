@@ -64,6 +64,7 @@ int ler_criterio(Criterio *criterio)
     char str_campo_texto[TAMANHO_TEXTO] = {0};
     if (campo_eh_texto(criterio->nome))
     {
+        // Campo textual pode conter espaços e vir entre aspas.
         ScanQuoteString(str_campo_texto);
     }
     else
@@ -75,6 +76,7 @@ int ler_criterio(Criterio *criterio)
     // Caso valor do campo seja vazio, trata como nulo
     if (str_campo_texto[0] == '\0')
     {
+        // Convenção do trabalho: vazio representa NULO.
         criterio->ehNulo = 1;
         criterio->valorInteiro = FLAG_CAMPO_NULO; // Valor para indicar nulo em campos inteiros;
         criterio->valorTexto[0] = '\0';
@@ -98,6 +100,7 @@ int ler_criterio(Criterio *criterio)
 // Verifica se registro atende aos critérios
 int registro_atende_criterios(Registro *registro, Criterio *criterios, int quantidade)
 {
+    // A busca condicional aplica AND entre todos os pares nomeCampo/valorCampo.
     for (int i = 0; i < quantidade; i++)
     {
         if (campo_eh_texto(criterios[i].nome))
@@ -148,6 +151,7 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
 // Auxiliar da funcionalidade 6 (atualização de registros) para aplicar os critérios de atualização no registro.
 void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
 {
+    // Atualiza somente os campos listados; os demais permanecem inalterados.
     if (strcmp(criterio->nome, "codEstacao") == 0)
     {
         registro->codEstacao = criterio->ehNulo ? FLAG_CAMPO_NULO : criterio->valorInteiro;
@@ -202,6 +206,7 @@ void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
 
 void imprimir_registro(Registro *registro)
 {
+    // Impressão no layout exigido: inteiros com NULO para -1 e textos vazios como NULO.
     printf("%d ", registro->codEstacao);
 
     if (campo_nulo(registro->nomeEstacao, registro->tamNomeEstacao))

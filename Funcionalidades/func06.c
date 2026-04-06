@@ -46,6 +46,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 		for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
 		{
 			Registro registro;
+			// Atualização é in-place: lê, modifica em memória e regrava no mesmo offset.
 			long offset = rrn_para_offset(rrn);
 
 			// Posiciona ponteiro no byte offset do registro do RRN atual
@@ -69,17 +70,17 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				continue;
 			}
 
-			// Adiciona '\0' ao final de campos de tamanho variável para realização de comparações de string
+			// Adiciona '\0' ao final de campos de tamanho variável para comparar strings
 			normalizar_campos_texto_registro(&registro);
 
-			// Verifica se registro atende aos critérios, pulando laço de atualização caso não
+			// Verifica se o registro atende aos critérios, pulando o laço de atualização caso negativo
 			if (!registro_atende_criterios(&registro, criterios_busca, qtd_criterios_busca))
 			{
 				// printf("%s\n", MSG_FALHA);
 				continue;
 			}
 
-			// Laço de atualização dos campos com seus novos valores (apenas muda campos da struct 'registro')
+			// Laço de atualização dos campos com seus novos valores (apenas muda os campos da struct 'registro')
 			for (int i = 0; i < qtd_campos_atualizar; i++)
 			{
 				aplicar_criterio_no_registro(&registro, &campos_atualizacao[i]);
@@ -94,7 +95,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				return;
 			}
 
-			// Retorna ponteiro ao início do registro e escreve atualizações no arquivo binário
+			// Retorna o ponteiro ao início do registro e escreve as atualizações no arquivo binário
 			if (fseek(arquivo_bin, offset, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &registro))
 			{
 				printf("%s\n", MSG_FALHA);

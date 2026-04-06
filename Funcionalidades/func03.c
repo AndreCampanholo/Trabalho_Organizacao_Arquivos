@@ -1,6 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 
-// Funcionalidade [3]: Imprime todos os registros que atendem critérios informados pelo usuário
+// Funcionalidade [3]: Imprime todos os registros que atendem os critérios informados pelo usuário
 void recuperar_registros_condicional(char *nome_arquivo_bin)
 {
     /* Para cada consulta, o programa aplica uma operação AND entre todos os criterios informados. */
@@ -23,6 +23,7 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
 
     for (int b = 0; b < quantidade_buscas; b++)
     {
+        // Cada busca possui sua própria lista de critérios.
         int quantidade_criterios = 0;
         Criterio criterios[MAX_CRITERIOS];
 
@@ -37,6 +38,7 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
             Registro registro;
+            // Busca linear: avalia todos os registros ativos do arquivo.
             long offset = rrn_para_offset(rrn);
 
             if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
@@ -61,6 +63,7 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
 
             normalizar_campos_texto_registro(&registro);
 
+            // Verifica se registro atende aos critérios de busca e caso positivo, imprime-o.
             if (registro_atende_criterios(&registro, criterios, quantidade_criterios))
             {
                 imprimir_registro(&registro);

@@ -30,6 +30,7 @@ int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cab
     // Caso estivesse consistente e modo de abertura é para escrita, define como inconsistente
     if (eh_escrita)
     {
+        // O arquivo fica inconsistente durante a operação para evitar leitura concorrente inválida.
         cabecalho->status = '0';
         escrever_cabecalho(*arquivo, cabecalho);
     }
@@ -53,6 +54,7 @@ void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
 
 // Preenche espaço disponível de registro com lixo ('$')
 bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
+    // 37 bytes fixos + tamanhos variáveis; restante do registro deve ser '$'.
     int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
     int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
     
@@ -101,6 +103,7 @@ void normalizar_campos_texto_registro(Registro *registro)
 // Leitura do registro de cabeçalho do arquivo
 int ler_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
 {
+    // O cabeçalho sempre começa no byte 0 do arquivo.
     fseek(arquivo, 0, SEEK_SET); // Posiciona ponteiro no byte offset zero
     if (fread(&cabecalho->status, sizeof(char), 1, arquivo) != 1)
         return 0;
@@ -135,6 +138,7 @@ int ler_registro(FILE *arquivo, Registro *registro)
     // Caso este registro esteja marcado como removido, retorna -1 (pula para próximo RRN)
     if (registro->removido == '1')
     {
+        // O chamador deve reposicionar para o próximo RRN.
         return -1;
     }
 
@@ -173,6 +177,8 @@ int escrever_registro(FILE *arquivo, Registro *registro)
     if (registro->tamNomeEstacao < 0 || registro->tamNomeLinha < 0 ||
         registro->tamNomeEstacao + registro->tamNomeLinha > 43)
         return 0;
+
+    // Os 43 bytes variáveis são divididos entre nomeEstacao e nomeLinha.
 
     if (fwrite(&registro->removido, sizeof(char), 1, arquivo) != 1)
         return 0;
@@ -225,9 +231,8 @@ bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro
     char linha[512];
     char *campo;
 
-    Registro registro;
-    registro.removido = '0';
-    registro.proximo = -1;
+    registro_lido->removido = '0';
+    registro_lido->proximo = -1;
 
     // Se não houverem mais linhas de registros no csv, retorna false
     if (fgets(linha, sizeof(linha), csv) == NULL)
@@ -235,36 +240,30 @@ bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro
 
     // Atribuição dos valores do csv às variáveis por meio da tokenização de 'linha' nas virgulas (",")
     campo = strtok(linha, ",");
-    registro.codEstacao = atoi(campo);
+    registro_lido->codEstacao = atoi(campo);
     campo = strtok(NULL, ",");
-    strcpy(registro.nomeEstacao, campo);
+    strcpy(registro_lido->nomeEstacao, campo);
     campo = strtok(NULL, ",");
-    registro.codLinha = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
+    strcpy(registro_lido->nomeLinha, (campo != NULL) ? campo : "");
     campo = strtok(NULL, ",");
-    strcpy(registro.nomeLinha, (campo != NULL) ? campo : "");
+    registro_lido->codProxEstacao = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
     campo = strtok(NULL, ",");
-    registro.codProxEstacao = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
+    registro_lido->distProxEstacao = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
     campo = strtok(NULL, ",");
-    registro.distProxEstacao = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
+    registro_lido->codLinhaIntegra = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
     campo = strtok(NULL, ",");
-    registro.codLinhaIntegra = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
-    campo = strtok(NULL, ",");
-    registro.codEstIntegra = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
+    registro_lido->codEstIntegra = (campo != NULL && campo[0] != '\0') ? atoi(campo) : -1;
 
     // Valores dos indicadores de tamanho dos campos de tamanho variável
-    registro.tamNomeEstacao = strlen(registro.nomeEstacao);
-    registro.tamNomeLinha = strlen(registro.nomeLinha);
+    registro_lido->tamNomeEstacao = strlen(registro_lido->nomeEstacao);
+    registro_lido->tamNomeLinha = strlen(registro_lido->nomeLinha);
 
     // Escreve registro no arquivo binário
-    if (!escrever_registro(bin, &registro))
+    if (!escrever_registro(bin, registro_lido))
         return false;
 
+    // proxRRN aponta para o primeiro RRN livre no final da área de dados.
     cabecalho->proxRRN++;
-
-    if (registro_lido != NULL)
-    {
-        *registro_lido = registro;
-    }
 
     return true;
 }
@@ -320,12 +319,8 @@ bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
         }
     }
 
-    // Caso quantidade de estações estoure capacidade atual, aloca mas memória
-    if (estacoes->quantidade == estacoes->capacidade)
-    {
-        estacoes->capacidade = estacoes->capacidade == 0 ? 16 : estacoes->capacidade * 2;
-        estacoes->nomes = (char **)realloc(estacoes->nomes, (size_t)estacoes->capacidade * sizeof(char *));
-    }
+    if (estacoes->quantidade >= estacoes->capacidade)
+        return false;
 
     // Adiciona um novo nome ao vetor de nomes de estações vistas, incrementando a quantidade
     estacoes->nomes[estacoes->quantidade] = (char *)malloc(strlen(novo_nome) + 1);
@@ -340,7 +335,7 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
     if (arquivo == NULL || cabecalho == NULL)
         return 0;
 
-    // Struct para verificação de pares de estações
+    // Guarda pares (origem, destino) já contabilizados.
     typedef struct
     {
         int codEstacao;
@@ -349,6 +344,12 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
 
     EstacoesVistas estacoes;
     inicializar_estacoes_vistas(&estacoes);
+    estacoes.capacidade = cabecalho->proxRRN > 0 ? cabecalho->proxRRN : 1;
+    estacoes.nomes = (char **)malloc((size_t)estacoes.capacidade * sizeof(char *));
+    if (estacoes.nomes == NULL)
+    {
+        return 0;
+    }
 
     
     int capacidade_pares = cabecalho->proxRRN > 0 ? cabecalho->proxRRN : 1;
@@ -379,6 +380,7 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
         }
         if (leitura == -1)
         {
+            // Registro removido: consumir o restante do RRN para manter alinhamento.
             if (fseek(arquivo, TAMANHO_REGISTRO - 1, SEEK_CUR) != 0)
             {
                 free(pares);
@@ -423,6 +425,7 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
 
         if (!par_existe)
         {
+            // Conta apenas pares distintos no arquivo inteiro.
             pares[qtd_pares].codEstacao = registro.codEstacao;
             pares[qtd_pares].codProxEstacao = registro.codProxEstacao;
             qtd_pares++;

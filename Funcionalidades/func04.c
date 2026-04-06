@@ -97,7 +97,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
                 return;
             }
 
-            // Atualiza o valor de topo
+            // O registro recém-removido vira o novo topo da pilha de removidos.
             cabecalho.topo = (int)offset;
         }
     }

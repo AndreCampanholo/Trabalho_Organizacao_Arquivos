@@ -13,7 +13,7 @@ void recuperar_registros(char *nome_arquivo_bin)
         return;
     }
 
-    // Leitura campo a campo do cabeçalho (consumo dos 17 bytes do cabeçalho sem fseek)
+    // Leitura campo a campo do cabeçalho 
     Cabecalho curr_cabecalho;
     if (!ler_cabecalho(arquivo_bin, &curr_cabecalho))
     {
@@ -35,6 +35,7 @@ void recuperar_registros(char *nome_arquivo_bin)
     Registro curr_registro;
     for (int i = 0; i < curr_cabecalho.proxRRN; i++)
     {
+        // Cada RRN é mapeado para byte offset fixo de 80 bytes por registro.
         long offset = rrn_para_offset(i);
         if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
         {
@@ -52,6 +53,7 @@ void recuperar_registros(char *nome_arquivo_bin)
         }
         else if (ler_registros == -1)
         {
+            // Registro removido logicamente não deve ser exibido.
             continue;
         }
 
