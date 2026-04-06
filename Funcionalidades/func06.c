@@ -75,13 +75,14 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 			// Verifica se registro atende aos critérios, pulando laço de atualização caso não
 			if (!registro_atende_criterios(&registro, criterios_busca, qtd_criterios_busca))
 			{
+				// printf("%s\n", MSG_FALHA);
 				continue;
 			}
 
 			// Laço de atualização dos campos com seus novos valores (apenas muda campos da struct 'registro')
 			for (int i = 0; i < qtd_campos_atualizar; i++)
 			{
-				aplicar_criterio_no_registro(arquivo_bin, &registro, &campos_atualizacao[i]);
+				aplicar_criterio_no_registro(&registro, &campos_atualizacao[i]);
 			}
 
 			// Validação dos campos de tamanho variável

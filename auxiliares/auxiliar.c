@@ -193,6 +193,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 
     if (fwrite(&registro->tamNomeEstacao, sizeof(int), 1, arquivo) != 1)
         return 0;
+        
     if (registro->tamNomeEstacao > 0)
     {
         if (fwrite(registro->nomeEstacao, sizeof(char), (size_t)registro->tamNomeEstacao, arquivo) !=
@@ -218,7 +219,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 }
 
 // Lê registros do arquivo .csv e escreve-os no .bin
-bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho)
+bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido)
 {
     // Variáveis auxiliares
     char linha[512];
@@ -255,9 +256,15 @@ bool ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho)
     registro.tamNomeLinha = strlen(registro.nomeLinha);
 
     // Escreve registro no arquivo binário
-    escrever_registro(bin, &registro);
+    if (!escrever_registro(bin, &registro))
+        return false;
 
     cabecalho->proxRRN++;
+
+    if (registro_lido != NULL)
+    {
+        *registro_lido = registro;
+    }
 
     return true;
 }

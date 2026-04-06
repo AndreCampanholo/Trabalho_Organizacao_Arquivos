@@ -67,11 +67,9 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
                 encontrado = 1;
             }
         }
-
+        printf("\n");
         if (!encontrado)
-        {
             printf("%s\n", MSG_INEXISTENTE);
-        }
     }
 
     fclose(arquivo_bin);

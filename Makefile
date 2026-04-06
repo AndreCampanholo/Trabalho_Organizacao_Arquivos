@@ -29,7 +29,12 @@ $(TARGET): $(OBJECTS)
 run: $(TARGET)
 	./$(TARGET)
 
+ifeq ($(OS),Windows_NT)
+clean:
+	-del /F /Q $(subst /,\,$(OBJECTS)) $(TARGET) $(TARGET).exe 2>nul
+else
 clean:
 	rm -f $(OBJECTS) $(TARGET)
+endif
 
 .PHONY: all run clean

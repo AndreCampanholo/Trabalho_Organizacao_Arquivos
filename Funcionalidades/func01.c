@@ -14,7 +14,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
             fclose(arquivo_csv);
         if (arquivo_bin)
             fclose(arquivo_bin);
-        printf("%s\n", "Falha no processamento do arquivo.");
+        printf("%s\n", MSG_FALHA);
         return;
     }
 
@@ -36,7 +36,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
 
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
-        printf("%s\n", "Falha no processamento do arquivo.");
+        printf("%s\n", MSG_FALHA);
         liberar_estacoes_vistas(&estacoes);
         fclose(arquivo_csv);
         fclose(arquivo_bin);

@@ -1,4 +1,4 @@
-#include "Funcionalidades/funcionalidades.h"
+#include "funcionalidades/funcionalidades.h"
 
 int main(void)
 {

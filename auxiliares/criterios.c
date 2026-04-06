@@ -59,11 +59,18 @@ int ler_criterio(Criterio *criterio)
     // Leitura do nomeCampo
     if (scanf("%31s", criterio->nome) != 1)
         return 0;
-    getchar();
 
     // Leitura do valorCampo
     char str_campo_texto[TAMANHO_TEXTO] = {0};
-    ScanQuoteString(str_campo_texto);
+    if (campo_eh_texto(criterio->nome))
+    {
+        ScanQuoteString(str_campo_texto);
+    }
+    else
+    {
+        if (scanf(" %127s", str_campo_texto) != 1)
+            return 0;
+    }
 
     // Caso valor do campo seja vazio, trata como nulo
     if (str_campo_texto[0] == '\0')
@@ -139,7 +146,7 @@ int registro_atende_criterios(Registro *registro, Criterio *criterios, int quant
 }
 
 // Auxiliar da funcionalidade 6 (atualização de registros) para aplicar os critérios de atualização no registro.
-void aplicar_criterio_no_registro(FILE *arquivo, Registro *registro, Criterio *criterio)
+void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
 {
     if (strcmp(criterio->nome, "codEstacao") == 0)
     {
@@ -188,13 +195,8 @@ void aplicar_criterio_no_registro(FILE *arquivo, Registro *registro, Criterio *c
         else
         {
             strncpy(registro->nomeLinha, criterio->valorTexto, TAMANHO_CAMPO_VARIAVEL - 1);
-            registro->nomeLinha[TAMANHO_CAMPO_VARIAVEL - 1] = '\0';
             registro->tamNomeLinha = (int)strlen(registro->nomeLinha);
         }
-    }
-
-    if(!preencher_campos_variaveis_lixo(arquivo, registro)){
-        printf("%s\n", MSG_FALHA);
     }
 }
 
