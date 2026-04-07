@@ -66,7 +66,7 @@ typedef struct parEstacao
 typedef struct criterio
 {
     char nome[32];
-    int ehNulo;
+    int ehNulo; // Flag para diferenciar um critério de busca que procura um valor null de um critério comum (válido)
     int valorInteiro;
     char valorTexto[TAMANHO_TEXTO];
 } Criterio;

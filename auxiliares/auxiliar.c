@@ -42,7 +42,7 @@ int abrir_binario_escrita(FILE **arquivo, char *nome_arquivo, Cabecalho *cabecal
     return abrir_binario(arquivo, nome_arquivo, "r+b", cabecalho, 1);
 }
 
-// Fecha o arquivo binário aberto para escrita (seta status para '0' -> consistente)
+// Fecha o arquivo binário aberto para escrita (seta status para '1' -> consistente)
 void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
 {
     cabecalho->status = '1';
