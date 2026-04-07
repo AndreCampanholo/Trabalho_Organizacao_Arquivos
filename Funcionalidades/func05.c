@@ -29,15 +29,14 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes)
             fechar_binario_escrita(arquivo_bin, &cabecalho);
             return;
         }
-
         ScanQuoteString(novo_registro.nomeEstacao);
+
         if (scanf("%4s", novo_codLinha) != 1)
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
             return;
         }
-
         ScanQuoteString(novo_registro.nomeLinha);
 
         if (scanf("%4s %4s %4s %4s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra) != 4)
