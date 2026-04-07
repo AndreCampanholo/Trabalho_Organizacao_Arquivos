@@ -19,7 +19,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
         return;
     }
 
-    // Este laço processa cada um dos comandos de remoção que foram informados na entrada.
+    // Laço que processa cada um dos comandos de remoção que foram informados na entrada.
     int qtd_criterios;
     for (int i = 0; i < qtd_remocoes; i++)
     {

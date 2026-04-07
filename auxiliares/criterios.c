@@ -78,11 +78,11 @@ int ler_criterio(Criterio *criterio)
         criterio->valorTexto[0] = '\0';
     }
     else
-    {   // Verifica se o campo previamente informado (nomeCampo) é de fato textual (de tamanho variável) ou não
+    {   // Verifica se o campo previamente informado (nomeCampo) é textual (de tamanho variável) ou não
         criterio->ehNulo = 0;
         if (campo_eh_texto(criterio->nome))
         {
-            // Se ele for um campo textual autêntico, atribui ao parâmetro valorTexto utilizando a função strncpy segura
+            // Se ele for um campo textual válido, atribui ao parâmetro valorTexto utilizando a função strncpy 
             strncpy(criterio->valorTexto, str_campo_texto, TAMANHO_TEXTO - 1);
             criterio->valorTexto[TAMANHO_TEXTO - 1] = '\0';
         }

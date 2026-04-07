@@ -13,7 +13,7 @@ void recuperar_registros(char *nome_arquivo_bin)
         return;
     }
 
-    // O cabeçalho é lido logo no início para validar o arquivo e descobrir até qual RRN ele deve ser percorrido.
+    // O cabeçalho é lido no início para validar o arquivo e descobrir até qual RRN ele deve ser percorrido.
     Cabecalho curr_cabecalho;
     if (!ler_cabecalho(arquivo_bin, &curr_cabecalho))
     {
@@ -22,7 +22,7 @@ void recuperar_registros(char *nome_arquivo_bin)
         return;
     }
 
-    // Caso o status do arquivo seja diferente de '1', fecha-o e imprime uma mensagem de erro.
+    // Caso o status do arquivo esteja inconsistente (0), fecha-o e imprime uma mensagem de erro.
     if (curr_cabecalho.status != '1')
     {
         fclose(arquivo_bin);
@@ -59,7 +59,7 @@ void recuperar_registros(char *nome_arquivo_bin)
 
         normalizar_campos_texto_registro(&curr_registro);
 
-        // A impressão segue exatamente o formato que foi especificado no enunciado.
+        // Impressão de todos os campos do registro
         printf("%d %s ", curr_registro.codEstacao, curr_registro.nomeEstacao);
         int_ou_nulo(curr_registro.codLinha);
         if (curr_registro.tamNomeLinha == 0)
