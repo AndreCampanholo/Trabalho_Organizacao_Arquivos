@@ -33,21 +33,19 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             return;
         }
 
-        // Para cada comando, o arquivo inteiro é percorrido para encontrar os registros que batem com os critérios.
+        // Para cada comando, posiciona o ponteiro no início dos registros apenas uma vez
+        if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
+        {
+            printf("%s\n", MSG_FALHA);
+            fechar_binario_escrita(arquivo_bin, &cabecalho);
+            return;
+        }
+
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
-            // Cálculo do deslocamento (offset) do registro atual.
-            long offset = rrn_para_offset(rrn);
+            long offset = rrn_para_offset(rrn); // Guardar o offset caso precisemos gravar a remoção
 
-            // Posiciona o ponteiro no byte de deslocamento do registro que está sendo avaliado atualmente.
-            if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
-            {
-                printf("%s\n", MSG_FALHA);
-                fechar_binario_escrita(arquivo_bin, &cabecalho);
-                return;
-            }
-
-            // Leitura do registro.
+            // Leitura sequencial do registro.
             Registro registro;
             int leitura = ler_registro(arquivo_bin, &registro);
             if (leitura == 0)
@@ -99,6 +97,14 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
 
             // O registro removido agora se torna o novo topo da pilha de espaços livres.
             cabecalho.topo = rrn;
+
+            // Retorna o ponteiro para o início do próximo registro a ser lido na sequência (offset + 80 bytes).
+            if (fseek(arquivo_bin, offset + TAMANHO_REGISTRO, SEEK_SET) != 0)
+            {
+                printf("%s\n", MSG_FALHA);
+                fechar_binario_escrita(arquivo_bin, &cabecalho);
+                return;
+            }
         }
     }
 

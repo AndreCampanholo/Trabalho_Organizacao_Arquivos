@@ -33,17 +33,17 @@ void recuperar_registros(char *nome_arquivo_bin)
     // O laço percorre todos os RRNs já ocupados e tenta reconstruir cada um dos registros na memória.
     bool existe_registro = false;
     Registro curr_registro;
+
+    // Posiciona o ponteiro no início do primeiro registro (pulando o cabeçalho)
+    if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
+    {
+        printf("%s\n", MSG_FALHA);
+        fclose(arquivo_bin);
+        return;
+    }
+
     for (int i = 0; i < curr_cabecalho.proxRRN; i++)
     {
-        // Cada RRN aponta para uma posição fixa no arquivo, então o cálculo do deslocamento (offset) é direto.
-        long offset = rrn_para_offset(i);
-        if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
-        {
-            printf("%s\n", MSG_FALHA);
-            fclose(arquivo_bin);
-            return;
-        }
-
         int ler_registros = ler_registro(arquivo_bin, &curr_registro);
         if (ler_registros == 0)
         {

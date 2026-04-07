@@ -35,19 +35,19 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
         }
 
         int encontrado = 0;
+        
+        // Pula o cabeçalho apenas uma vez a cada busca
+        if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
+        {
+            fclose(arquivo_bin);
+            printf("%s\n", MSG_FALHA);
+            return;
+        }
+
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
             Registro registro;
-            // A estratégia aqui é realizar uma busca linear, verificando registro por registro.
-            long offset = rrn_para_offset(rrn);
-
-            if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
-            {
-                fclose(arquivo_bin);
-                printf("%s\n", MSG_FALHA);
-                return;
-            }
-
+            // A estratégia aqui é realizar uma busca linear sequencial, deixando o fread avançar de forma nativa.
             int leitura = ler_registro(arquivo_bin, &registro);
             if (leitura == 0)
             {

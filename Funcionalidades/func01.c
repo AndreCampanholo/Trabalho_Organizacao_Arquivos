@@ -32,7 +32,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
         return;
     }
 
-    // Esta estrutura guarda os nomes das estações já vistas para contar as estações únicas.
+    // Guarda os nomes das estações já vistas para contar as estações únicas.
     EstacoesVistas estacoes;
     inicializar_estacoes_vistas(&estacoes);
     estacoes.capacidade = qtd_registros_csv;
@@ -49,7 +49,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
         }
     }
 
-    // Este vetor guarda os pares (estação, próxima estação) sem repetição para contar os pares únicos.
+    // Guarda os pares (estação, próxima estação) sem repetição para contar os pares únicos.
     ParEstacao *pares = NULL;
     int qtd_pares = 0;
     int capacidade_pares = qtd_registros_csv;
@@ -67,7 +67,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
         }
     }
 
-    // Aqui acontece o fluxo principal: lê os dados do CSV, escreve no binário e atualiza as estatísticas do cabeçalho.
+    // Fluxo principal: lê os dados do CSV, escreve no binário e atualiza as estatísticas do cabeçalho.
     Registro registro_lido;
     while (1)
     {

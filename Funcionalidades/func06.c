@@ -42,22 +42,22 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 			return;
 		}
 
-		// O arquivo é percorrido por completo para localizar os registros que atendem aos critérios especificados.
+		// Garante a leitura sequencial iniciando logo após o cabeçalho
+		if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
+		{
+			printf("%s\n", MSG_FALHA);
+			fclose(arquivo_bin);
+			return;
+		}
+
+		// O arquivo é percorrido por completo para localizar os registros que atendem aos critérios especificados de forma algoritmica fluída e linear.
 		for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
 		{
 			Registro registro;
-			// A atualização é feita no local correto da memória: o registro é lido, alterado em memória e gravado no mesmo deslocamento (offset).
+			// Guarda a localização base para aplicar uma possível substituição interna futuramente (caso modificado).
 			long offset = rrn_para_offset(rrn);
 
-			// Posiciona o ponteiro no byte exato do registro do seu respectivo RRN atual.
-			if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
-			{
-				printf("%s\n", MSG_FALHA);
-				fclose(arquivo_bin);
-				return;
-			}
-
-			// Lê o registro atual do ponteiro de leitura.
+			// Lê o registro atual do ponteiro de leitura mantido de modo sequencialmente nativo pelo rrn.
 			int leitura = ler_registro(arquivo_bin, &registro);
 			if (leitura == 0)
 			{
@@ -70,22 +70,22 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				continue;
 			}
 
-			// Adiciona o caractere nulo '\0' ao final dos campos de tamanho variável para que se possa comparar adequadamente as strings lidas com os critérios informados.
+			// Adiciona o caractere nulo '\0' ao final dos campos de tamanho variável para que se possa comparar adequadamente as strings lidas com os critérios informados
 			normalizar_campos_texto_registro(&registro);
 
-			// O registro só entra na etapa final de alteração de seus dados caso ele passe por todos os critérios de busca.
+			// O registro só entra na etapa final de alteração de seus dados caso ele passe por todos os critérios de busca
 			if (!registro_atende_criterios(&registro, criterios_busca, qtd_criterios_busca))
 			{
 				continue;
 			}
 
-			// Aqui a função aplica as mudanças estritamente sobre os campos que foram solicitados pelo usuário, de modo que não mexe no restante do registro preservado na memória ram auxiliar temporal que fará logo então a posterior transação segura para o disco..
+			// Aqui a função aplica as mudanças estritamente sobre os campos que foram solicitados pelo usuário, de modo que não mexe no restante do registro preservado na memória ram auxiliar temporal que fará logo então a posterior transação segura para o disco
 			for (int i = 0; i < qtd_campos_atualizar; i++)
 			{
 				aplicar_criterio_no_registro(&registro, &campos_atualizacao[i]);
 			}
 
-			// Procede então a uma validação de precaução com os escopos variáveis das strings.
+			// Procede então a uma validação de precaução com os escopos variáveis das strings
 			if (registro.tamNomeEstacao < 0 || registro.tamNomeLinha < 0 ||
 				registro.tamNomeEstacao + registro.tamNomeLinha > 43)
 			{
@@ -94,7 +94,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				return;
 			}
 
-			// Retorna o ponteiro ao início efetivo do bloco do registro contido internamente logo em seguida reescrevendo por completo a série com as devidas atualizações embutidas.
+			// Retorna o ponteiro ao início do bloco do registro contido internamente logo em seguida reescrevendo por completo a série com as devidas atualizações embutidas
 			if (fseek(arquivo_bin, offset, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &registro))
 			{
 				printf("%s\n", MSG_FALHA);

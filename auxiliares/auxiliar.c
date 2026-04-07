@@ -114,10 +114,11 @@ int ler_registro(FILE *arquivo, Registro *registro)
     if (fread(&registro->removido, sizeof(char), 1, arquivo) != 1)
         return 0;
 
-    // Caso este registro esteja marcado como removido, retorna -1 (pula para próximo RRN)
-    if (registro->removido == '1')
+    // Caso este registro esteja marcado como removido, retorna -1 logo após consumir os 79 bytes restantes
+    if (registro->removido == '1' || registro->removido == '*')
     {
-        // O chamador deve reposicionar para o próximo RRN.
+        char lixo[80];
+        fread(lixo, sizeof(char), TAMANHO_REGISTRO - 1, arquivo);
         return -1;
     }
 
@@ -143,6 +144,12 @@ int ler_registro(FILE *arquivo, Registro *registro)
         return 0;
     if (fread(&registro->nomeLinha, sizeof(char), (size_t)registro->tamNomeLinha, arquivo) != (size_t)registro->tamNomeLinha)
         return 0;
+
+    int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
+    if (bytes_usados < TAMANHO_REGISTRO) {
+        char lixo[80];
+        fread(lixo, sizeof(char), TAMANHO_REGISTRO - bytes_usados, arquivo);
+    }
 
     return 1;
 }
@@ -419,13 +426,7 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
         }
         if (leitura == -1)
         {
-            // Registro removido: consumir o restante do RRN para manter alinhamento.
-            if (fseek(arquivo, TAMANHO_REGISTRO - 1, SEEK_CUR) != 0)
-            {
-                free(pares);
-                liberar_estacoes_vistas(&estacoes);
-                return 0;
-            }
+            // Registro removido: O ler_registro já avançou 80 bytes.
             continue;
         }
 
@@ -439,18 +440,6 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
 
         registro.nomeEstacao[registro.tamNomeEstacao] = '\0';
         nova_estacao(registro.nomeEstacao, &estacoes);
-
-        int bytes_usados = 37 + registro.tamNomeEstacao + registro.tamNomeLinha;
-        int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
-        if (bytes_restantes > 0)
-        {
-            if (fseek(arquivo, bytes_restantes, SEEK_CUR) != 0)
-            {
-                free(pares);
-                liberar_estacoes_vistas(&estacoes);
-                return 0;
-            }
-        }
 
         int par_existe = 0;
         if (registro.codProxEstacao != FLAG_CAMPO_NULO)
