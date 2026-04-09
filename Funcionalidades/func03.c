@@ -3,7 +3,7 @@
 // Funcionalidade [3]: Imprime todos os registros que atendem aos critérios informados pelo usuário.
 void recuperar_registros_condicional(char *nome_arquivo_bin)
 {
-    /* Em cada consulta, o registro só é aceito quando ele atende a todos os critérios ao mesmo tempo (AND). */
+    // Em cada consulta, o registro só é aceito quando ele atende a todos os critérios ao mesmo tempo
     FILE *arquivo_bin;
     Cabecalho cabecalho;
 
@@ -47,7 +47,7 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
             Registro registro;
-            // A estratégia aqui é realizar uma busca linear sequencial, deixando o fread avançar de forma nativa.
+            // Realiza uma busca linear sequencial, deixando o fread avançar de forma natural (sem fseek)
             int leitura = ler_registro(arquivo_bin, &registro);
             if (leitura == 0)
             {

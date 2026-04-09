@@ -79,13 +79,13 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				continue;
 			}
 
-			// Aqui a função aplica as mudanças estritamente sobre os campos que foram solicitados pelo usuário, de modo que não mexe no restante do registro preservado na memória ram auxiliar temporal que fará logo então a posterior transação segura para o disco
+			// Aqui a função aplica as mudanças estritamente sobre os campos que foram solicitados pelo usuário, de modo que não mexe no restante do registro preservado na memória ram
 			for (int i = 0; i < qtd_campos_atualizar; i++)
 			{
 				aplicar_criterio_no_registro(&registro, &campos_atualizacao[i]);
 			}
 
-			// Procede então a uma validação de precaução com os escopos variáveis das strings
+			// Validação da alteração com as variáveis das strings
 			if (registro.tamNomeEstacao < 0 || registro.tamNomeLinha < 0 ||
 				registro.tamNomeEstacao + registro.tamNomeLinha > 43)
 			{
@@ -94,7 +94,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				return;
 			}
 
-			// Retorna o ponteiro ao início do bloco do registro contido internamente logo em seguida reescrevendo por completo a série com as devidas atualizações embutidas
+			// Retorna o ponteiro ao início do bloco do registro contido internamente logo em seguida reescrevendo por completo a série com as devidas atualizações
 			if (fseek(arquivo_bin, offset, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &registro))
 			{
 				printf("%s\n", MSG_FALHA);
