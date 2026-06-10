@@ -6,6 +6,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+typedef struct cabecalho_bt CabecalhoBT;
+
 // Constantes auxiliares 
 
 #define TAMANHO_CABECALHO 17
@@ -82,6 +84,9 @@ int escrever_registro(FILE *arquivo, Registro *registro);
 int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita);
 int abrir_binario_escrita(FILE **arquivo, char *nome_arquivo, Cabecalho *cabecalho);
 void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho);
+
+void escrever_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt);
+bool escrever_registro_bt(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no_arquivo_dados, int chave);
 
 // Protótipos de funções de leitura do .csv e processamento de cabeçalhos / variáveis
 

@@ -1,4 +1,5 @@
 #include "auxiliar.h"
+#include "bt.h"
 
 // A partir de um RRN, calcula o byte offset correspondente
 long rrn_para_offset(int rrn)
@@ -108,6 +109,15 @@ void escrever_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
     fwrite(&cabecalho->nroParesEstacoes, sizeof(int), 1, arquivo);
 }
 
+void escrever_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt) {
+    fseek(arquivo, 0, SEEK_SET);
+    fwrite(&cabecalho_bt->status, sizeof(char), 1, arquivo);
+    fwrite(&cabecalho_bt->noRaiz, sizeof(int), 1, arquivo);
+    fwrite(&cabecalho_bt->topo, sizeof(int), 1, arquivo);
+    fwrite(&cabecalho_bt->proxRRN, sizeof(int), 1, arquivo);
+    fwrite(&cabecalho_bt->nroNos, sizeof(int), 1, arquivo);
+}
+
 // Lê um registro inteiro campo a campo
 int ler_registro(FILE *arquivo, Registro *registro)
 {
@@ -207,6 +217,10 @@ int escrever_registro(FILE *arquivo, Registro *registro)
         return 0;
 
     return 1;
+}
+
+bool escrever_registro_bt(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no_arquivo_dados, int chave) {
+    return bt_inserir_registro_indice(arquivo_indice, cabecalho_bt, chave, rrn_no_arquivo_dados);
 }
 
 int preparar_csv_e_contar_registros(FILE *arquivo_csv)
