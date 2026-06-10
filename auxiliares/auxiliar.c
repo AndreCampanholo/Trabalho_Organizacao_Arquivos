@@ -1,13 +1,11 @@
 #include "auxiliar.h"
 #include "bt.h"
 
-// A partir de um RRN, calcula o byte offset correspondente
 long rrn_para_offset(int rrn)
 {
     return TAMANHO_CABECALHO + (long)rrn * TAMANHO_REGISTRO;
 }
 
-// Abre o arquivo binário no modo informado pelo usuário, fechando-o caso esteja inconsistente
 int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cabecalho, int eh_escrita)
 {
     *arquivo = fopen(nome_arquivo, modo);
@@ -37,13 +35,11 @@ int abrir_binario(FILE **arquivo, char *nome_arquivo, char *modo, Cabecalho *cab
     return 1;
 }
 
-// Chama a função acima para escrita
 int abrir_binario_escrita(FILE **arquivo, char *nome_arquivo, Cabecalho *cabecalho)
 {
     return abrir_binario(arquivo, nome_arquivo, "r+b", cabecalho, 1);
 }
 
-// Fecha o arquivo binário aberto para escrita (seta status para '1' -> consistente)
 void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
 {
     cabecalho->status = '1';
@@ -51,7 +47,6 @@ void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
     fclose(arquivo);
 }
 
-// Preenche o espaço restante do registro com lixo ('$')
 bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
     // 37 bytes fixos + tamanhos variáveis
     int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
@@ -66,7 +61,6 @@ bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
     return true;
 }
 
-// Adiciona '\0' ao final de campos de tamanho variável para comparação de strings
 void normalizar_campos_texto_registro(Registro *registro)
 {
     if (registro->tamNomeEstacao >= 0 && registro->tamNomeEstacao < TAMANHO_CAMPO_VARIAVEL)
@@ -80,7 +74,6 @@ void normalizar_campos_texto_registro(Registro *registro)
     }
 }
 
-// Leitura do registro de cabeçalho do arquivo
 int ler_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
 {
     // O cabeçalho sempre começa no byte 0 do arquivo.
@@ -98,7 +91,6 @@ int ler_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
     return 1;
 }
 
-// Escrita do cabeçalho campo a campo (não escreve cabeçalho inteiro de uma vez devido ao padding interno)
 void escrever_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
 {
     fseek(arquivo, 0, SEEK_SET);
@@ -109,7 +101,8 @@ void escrever_cabecalho(FILE *arquivo, Cabecalho *cabecalho)
     fwrite(&cabecalho->nroParesEstacoes, sizeof(int), 1, arquivo);
 }
 
-void escrever_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt) {
+void escrever_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt)
+{
     fseek(arquivo, 0, SEEK_SET);
     fwrite(&cabecalho_bt->status, sizeof(char), 1, arquivo);
     fwrite(&cabecalho_bt->noRaiz, sizeof(int), 1, arquivo);
@@ -118,7 +111,6 @@ void escrever_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt) {
     fwrite(&cabecalho_bt->nroNos, sizeof(int), 1, arquivo);
 }
 
-// Lê um registro inteiro campo a campo
 int ler_registro(FILE *arquivo, Registro *registro)
 {
     if (fread(&registro->removido, sizeof(char), 1, arquivo) != 1)
@@ -127,8 +119,8 @@ int ler_registro(FILE *arquivo, Registro *registro)
     // Caso este registro esteja marcado como removido, retorna -1 logo após consumir os 79 bytes restantes
     if (registro->removido == '1' || registro->removido == '*')
     {
-        char lixo[80];
-        fread(lixo, sizeof(char), TAMANHO_REGISTRO - 1, arquivo);
+        if (fseek(arquivo, TAMANHO_REGISTRO - 1, SEEK_CUR) != 0)
+            return 0;
         return -1;
     }
 
@@ -156,15 +148,15 @@ int ler_registro(FILE *arquivo, Registro *registro)
         return 0;
 
     int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
-    if (bytes_usados < TAMANHO_REGISTRO) {
-        char lixo[80];
-        fread(lixo, sizeof(char), TAMANHO_REGISTRO - bytes_usados, arquivo);
+    if (bytes_usados < TAMANHO_REGISTRO)
+    {
+        if (fseek(arquivo, TAMANHO_REGISTRO - bytes_usados, SEEK_CUR) != 0)
+            return 0;
     }
 
     return 1;
 }
 
-// Escreve um registro campo a campo
 int escrever_registro(FILE *arquivo, Registro *registro)
 {
     if (arquivo == NULL || registro == NULL)
@@ -219,7 +211,8 @@ int escrever_registro(FILE *arquivo, Registro *registro)
     return 1;
 }
 
-bool escrever_registro_bt(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no_arquivo_dados, int chave) {
+bool escrever_registro_bt(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no_arquivo_dados, int chave)
+{
     return bt_inserir_registro_indice(arquivo_indice, cabecalho_bt, chave, rrn_no_arquivo_dados);
 }
 
@@ -243,8 +236,6 @@ int preparar_csv_e_contar_registros(FILE *arquivo_csv)
     return quantidade;
 }
 
-// Lê os registros do arquivo .csv e escreve-os no .bin
-// Retorno: 1 = registro processado, 0 = fim do csv, -1 = erro
 int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro *registro_lido)
 {
     // Variáveis auxiliares
@@ -312,7 +303,6 @@ int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro 
     return 1;
 }
 
-// Imprime NULO caso o valor do campo seja -1 ou o valor caso contrário
 void int_ou_nulo(int valor)
 {
     if (valor == -1)
@@ -321,7 +311,6 @@ void int_ou_nulo(int valor)
         printf("%d ", valor);
 }
 
-// Verifica se uma string 'valor' == "NULO" ou não
 int inteiro_ou_nulo(char *valor)
 {
     if (strcmp(valor, "NULO") == 0)
@@ -329,7 +318,6 @@ int inteiro_ou_nulo(char *valor)
     return atoi(valor);
 }
 
-// Retorno: 1 = inseriu par novo, 0 = par ja existia, -1 = erro de alocacao
 int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, int *quantidade, int *capacidade)
 {
     if (codProxEstacao == FLAG_CAMPO_NULO)
@@ -351,7 +339,6 @@ int adicionar_par_unico(int codEstacao, int codProxEstacao, ParEstacao **pares, 
     return 1;
 }
 
-// Inicialização dos campos das struct 'estacoes'
 void inicializar_estacoes_vistas(EstacoesVistas *estacoes)
 {
     estacoes->nomes = NULL;
@@ -359,7 +346,6 @@ void inicializar_estacoes_vistas(EstacoesVistas *estacoes)
     estacoes->capacidade = 0;
 }
 
-// Liberação da memória do vetor de nomes de estações
 void liberar_estacoes_vistas(EstacoesVistas *estacoes)
 {
     for (int i = 0; i < estacoes->quantidade; i++)
@@ -367,9 +353,6 @@ void liberar_estacoes_vistas(EstacoesVistas *estacoes)
     free(estacoes->nomes);
 }
 
-// Verifica se uma estação já foi vista (mesmo nome)
-// Entrada: nome da estação a ser verificada e struct de estações vistas
-// Saída: true se a estação for nova (não repetida), false caso contrário
 bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
 {
     if (novo_nome == NULL)
@@ -393,7 +376,6 @@ bool nova_estacao(char *novo_nome, EstacoesVistas *estacoes)
     return true;
 }
 
-// Calcula 'nroEstacoes' e 'nroParesEstacoes'
 int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
 {
     if (arquivo == NULL || cabecalho == NULL)

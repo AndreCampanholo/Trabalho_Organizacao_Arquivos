@@ -47,17 +47,21 @@ bool bt_ler_no(FILE *arquivo_indice, int rrn, NO *no)
         return false;
 
     int j = 0;
-    for (int i = 0; i < 6; i++) {
-        if(i % 2 == 0) {
+    for (int i = 0; i < 6; i++)
+    {
+        if (i % 2 == 0)
+        {
             if (fread(&no->chaves[i - j], sizeof(int), 1, arquivo_indice) != 1)
                 return false;
             j++;
-        } else {
+        }
+        else
+        {
             if (fread(&no->rrns[i - j], sizeof(int), 1, arquivo_indice) != 1)
-            return false;
+                return false;
         }
     }
-        
+
     for (int i = 0; i < ORDEM; i++)
         if (fread(&no->filhos[i], sizeof(int), 1, arquivo_indice) != 1)
             return false;
@@ -84,12 +88,16 @@ bool bt_escrever_no(FILE *arquivo_indice, int rrn, NO *no)
         return false;
 
     int j = 0;
-    for (int i = 0; i < 6; i++) {
-        if(i % 2 == 0) {
+    for (int i = 0; i < 6; i++)
+    {
+        if (i % 2 == 0)
+        {
             if (fwrite(&no->chaves[i - j], sizeof(int), 1, arquivo_indice) != 1)
                 return false;
             j++;
-        } else {
+        }
+        else
+        {
             if (fwrite(&no->rrns[i - j], sizeof(int), 1, arquivo_indice) != 1)
                 return false;
         }
@@ -102,7 +110,7 @@ bool bt_escrever_no(FILE *arquivo_indice, int rrn, NO *no)
     return true;
 }
 
-// Reserva/escolhe o próximo RRN disponível para uma inserção 
+// Reserva/escolhe o próximo RRN disponível para uma inserção
 int bt_reservar_rrn(CabecalhoBT *cabecalho_bt)
 {
     int rrn = cabecalho_bt->proxRRN;

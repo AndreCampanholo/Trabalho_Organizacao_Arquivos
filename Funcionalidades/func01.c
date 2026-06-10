@@ -5,7 +5,7 @@ void criar_tabela(char *nome_csv, char *nome_bin)
 {
     // Abre o arquivo CSV de entrada e o arquivo binário de saída que será preenchido.
     FILE *arquivo_csv = fopen(nome_csv, "r");
-    FILE *arquivo_bin = fopen(nome_bin, "wb+");
+    FILE *arquivo_bin = fopen(nome_bin, "wb");
 
     // Verifica se houve uma falha na abertura dos arquivos, imprimindo uma mensagem de erro caso necessário.
     if (arquivo_csv == NULL || arquivo_bin == NULL)

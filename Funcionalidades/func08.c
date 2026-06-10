@@ -37,7 +37,7 @@ void recuperar_registros_BT(char *nome_arquivo_bin)
         }
 
         int encontrado = 0;
-        
+
         // Pula o cabeçalho apenas uma vez a cada busca
         if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
         {
@@ -72,7 +72,7 @@ void recuperar_registros_BT(char *nome_arquivo_bin)
                 encontrado = 1;
             }
         }
-        
+
         if (!encontrado)
             printf("%s\n", MSG_INEXISTENTE);
         // Uma linha em branco é inserida para separar visualmente o resultado de cada consulta.

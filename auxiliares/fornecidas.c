@@ -4,6 +4,7 @@
 #include <ctype.h>
 
 #include "auxiliar.h"
+
 /*
  * Você não precisa entender o código dessa função.
  *
@@ -12,7 +13,8 @@
  *
  * Ela vai abrir de novo para leitura e depois fechar
  * (você não vai perder pontos por isso se usar ela).
- */
+*/
+
 void BinarioNaTela(char *arquivo)
 {
     FILE *fs;
@@ -58,6 +60,7 @@ void BinarioNaTela(char *arquivo)
  * (sem as aspas)
  *
  */
+
 void ScanQuoteString(char *str)
 {
     char R;

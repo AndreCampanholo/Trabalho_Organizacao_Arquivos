@@ -35,7 +35,17 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
         }
 
         int encontrado = 0;
-        
+
+        int busca_por_cod_estacao = 0;
+        for (int i = 0; i < quantidade_criterios; i++)
+        {
+            if (strcmp(criterios[i].nome, "codEstacao") == 0 && !criterios[i].ehNulo)
+            {
+                busca_por_cod_estacao = 1;
+                break;
+            }
+        }
+
         // Pula o cabeçalho apenas uma vez a cada busca
         if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
         {
@@ -68,9 +78,12 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
             {
                 imprimir_registro(&registro);
                 encontrado = 1;
+
+                if (busca_por_cod_estacao)
+                    break;
             }
         }
-        
+
         if (!encontrado)
             printf("%s\n", MSG_INEXISTENTE);
         // Uma linha em branco é inserida para separar visualmente o resultado de cada consulta.
