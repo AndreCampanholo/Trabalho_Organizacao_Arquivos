@@ -1,9 +1,14 @@
 #ifndef BT_H
     #define BT_H
 
-    #include "auxiliar.h"
+    #include <stdio.h>
+    #include <stdbool.h>
 
     #define ORDEM 4
+    #define CHAVES_MAX (ORDEM - 1)
+    #define CHAVES_MIN (CHAVES_MAX / 2)
+    #define TAM_NO 53
+    #define NULO -1
 
     typedef struct cabecalho_bt {
         char status;
@@ -18,18 +23,11 @@
         int proximo;
         int tipoNo;
         int nroChaves;
-        int C[ORDEM - 1];
-        int PR[ORDEM - 1];
-        int P[ORDEM];    
+        int chaves[CHAVES_MAX];
+        int rrns[CHAVES_MAX];
+        int filhos[ORDEM];    
     } NO;
 
-    typedef struct bt {
-
-    } BT;
-
-    void BT_criar();
-    void BT_inserir();
-    void BT_remover();
-    void BT_buscar();
+    bool bt_inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro);
 
 #endif
