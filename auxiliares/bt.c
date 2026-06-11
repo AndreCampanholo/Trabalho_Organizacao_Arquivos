@@ -253,17 +253,13 @@ int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rr
             return bt_escrever_no(arquivo_indice, rrn_no, &no) ? 0 : -1;
         }
 
-        return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no,
-                             chave, rrn_registro, NULO,
-                             promo_chave, promo_rrn, promo_filho_dir);
+        return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no, chave, rrn_registro, NULO, promo_chave, promo_rrn, promo_filho_dir);
     }
 
     int promo_chave_filho;
     int promo_rrn_filho;
     int promo_filho_dir_filho;
-    int retorno = bt_inserir_recursivo(arquivo_indice, cabecalho_bt, no.filhos[pos],
-                                       chave, rrn_registro,
-                                       &promo_chave_filho, &promo_rrn_filho, &promo_filho_dir_filho);
+    int retorno = bt_inserir_recursivo(arquivo_indice, cabecalho_bt, no.filhos[pos], chave, rrn_registro, &promo_chave_filho, &promo_rrn_filho, &promo_filho_dir_filho);
     if (retorno != 1)
         return retorno;
 
@@ -273,15 +269,13 @@ int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rr
         return bt_escrever_no(arquivo_indice, rrn_no, &no) ? 0 : -1;
     }
 
-    return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no,
-                         promo_chave_filho, promo_rrn_filho, promo_filho_dir_filho,
-                         promo_chave, promo_rrn, promo_filho_dir);
+    return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no, promo_chave_filho, promo_rrn_filho, promo_filho_dir_filho, promo_chave, promo_rrn, promo_filho_dir);
 }
 
 // Funções Principais da Árvore B
 
 // Realiza a inserção de nós/registros no arquivo de índice
-bool bt_inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro)
+bool inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro)
 {
     if (arquivo_indice == NULL || cabecalho_bt == NULL)
         return false;
@@ -327,3 +321,5 @@ bool bt_inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt,
 
     return true;
 }
+
+int recuperar_registro_indice(FILE *arquivo_indice, CabecalhoBT *bt_cabecalho, int chave_busca);

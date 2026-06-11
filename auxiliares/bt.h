@@ -32,6 +32,8 @@ typedef struct no
     int filhos[ORDEM];      // 4 bytes cada — RRNs dos filhos no arquivo de ÍNDICE, -1 se nulo
 } NO;
 
-bool bt_inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro);
+bool inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *bt_cabecalho, int chave, int rrn_registro);
+// Usa o arquivo de índice para recuperar o rrn de um registro no arquivo de dados
+int recuperar_registro_indice(FILE *arquivo_indice, CabecalhoBT *bt_cabecalho, int chave_busca);
 
 #endif

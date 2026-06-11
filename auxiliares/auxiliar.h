@@ -90,6 +90,9 @@ int ler_registro(FILE *arquivo, Registro *registro);
 // Escreve um registro no arquivo na posição atual do ponteiro. Retorna 1 em sucesso, 0 em falha.
 int escrever_registro(FILE *arquivo, Registro *registro);
 
+// Escreve um registro no arquivo de índice. Retorna 1 em sucesso, 0 em falha.
+bool escrever_registro_bt(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no_arquivo_dados, int chave);
+
 // Abre o arquivo binário no modo indicado, lê o cabeçalho e verifica a consistência.
 // Se eh_escrita != 0, marca o arquivo como inconsistente (status '0') antes de retornar.
 // Retorna 1 em sucesso, 0 em falha.

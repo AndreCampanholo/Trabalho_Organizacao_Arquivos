@@ -1,13 +1,15 @@
 #include "../auxiliares/auxiliar.h"
+#include "../auxiliares/bt.h"
 
-// Funcionalidade [3]: Imprime todos os registros que atendem aos critérios informados pelo usuário.
-void recuperar_registros_BT(char *nome_arquivo_bin)
+// Funcionalidade [8]: Imprime todos os registros que atendem aos critérios informados pelo usuário. Caso o critério de busca seja codEstacao utiliza o arquivo de índice.
+void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indice)
 {
-    // Caso a busca seja por codEstacao, buscar via BT
-
     // Em cada consulta, o registro só é aceito quando ele atende a todos os critérios ao mesmo tempo
     FILE *arquivo_bin;
     Cabecalho cabecalho;
+
+    FILE *arquivo_indice;
+    CabecalhoBT bt_cabecalho;
 
     if (!abrir_binario(&arquivo_bin, nome_arquivo_bin, "rb", &cabecalho, 0))
     {
@@ -37,6 +39,25 @@ void recuperar_registros_BT(char *nome_arquivo_bin)
         }
 
         int encontrado = 0;
+
+        int busca_por_cod_estacao = 0;
+        for (int i = 0; i < quantidade_criterios; i++)
+        {
+            if (strcmp(criterios[i].nome, "codEstacao") == 0 && !criterios[i].ehNulo)
+            {
+                busca_por_cod_estacao = 1;
+                break;
+            }
+        }
+
+        if(busca_por_cod_estacao) {
+            if (!abrir_binario(&arquivo_indice, nome_arquivo_indice, "rb", &bt_cabecalho, 0))
+            {
+                printf("%s\n", MSG_FALHA);
+                return;
+            }
+            buscar_registro_arquivo_indice();
+        }
 
         // Pula o cabeçalho apenas uma vez a cada busca
         if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
@@ -80,4 +101,5 @@ void recuperar_registros_BT(char *nome_arquivo_bin)
     }
 
     fclose(arquivo_bin);
+    fclose(arquivo_indice);
 }

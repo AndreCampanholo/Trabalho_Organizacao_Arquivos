@@ -213,7 +213,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
 
 bool escrever_registro_bt(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no_arquivo_dados, int chave)
 {
-    return bt_inserir_registro_indice(arquivo_indice, cabecalho_bt, chave, rrn_no_arquivo_dados);
+    return inserir_registro_indice(arquivo_indice, cabecalho_bt, chave, rrn_no_arquivo_dados);
 }
 
 int preparar_csv_e_contar_registros(FILE *arquivo_csv)

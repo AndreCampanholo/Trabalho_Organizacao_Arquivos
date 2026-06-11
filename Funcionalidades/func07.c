@@ -26,14 +26,6 @@ void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
     bt_cabecalho.nroNos = 0;
     escrever_cabecalho_bt(arquivo_indice, &bt_cabecalho);
 
-    if (fseek(arquivo_dados, TAMANHO_CABECALHO, SEEK_SET) != 0)
-    {
-        fclose(arquivo_dados);
-        fclose(arquivo_indice);
-        printf("%s\n", MSG_FALHA);
-        return;
-    }
-
     Registro registro_lido;
     int rrn_no_arquivo_dados = 0;
     while (1)

@@ -30,10 +30,10 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes);
 void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice);
 
 // Funcionalidade [8]: Realiza a busca condicional utilizando o índice Árvore-B quando o critério envolve a chave primária.
-void recuperar_registros_BT(char *nome_arquivo, char *arquivo_indice);
+void recuperar_registros_indice(char *nome_arquivo, char *arquivo_indice);
 
 // Funcionalidade [9]: Insere registros no arquivo de dados (com reuso de espaço) e adiciona a nova chave na Árvore-B.
-void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_insercoes);
+void inserir_registros_indice(char *nome_arquivo, char *arquivo_indice, int qtd_insercoes);
 
 // Funcionalidade [10]: Remove registros logicamente no arquivo de dados e remove a chave correspondente do índice Árvore-B.
 void deletar_registros_BT(char *nome_bin, char *indice_bin, int qtd_remocoes);

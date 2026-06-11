@@ -2,10 +2,8 @@
 #include "../auxiliares/bt.h"
 
 // Funcionalidade [5]: Insere os registros informados pelo usuário.
-void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_insercoes)
+void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int qtd_insercoes)
 {
-    // Adicionar lógica de inserção na BT (BT_inserir(arquivo_indice, &novo_registro))
-
     if (nome_arquivo == NULL || qtd_insercoes <= 0)
     {
         printf("%s\n", MSG_FALHA);
@@ -20,6 +18,15 @@ void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_inse
         return;
     }
 
+    FILE *arquivo_indice;
+    CabecalhoBT bt_cabecalho;
+    if (!abrir_binario_escrita(&arquivo_indice, nome_arquivo_indice, &bt_cabecalho))
+    {
+        printf("%s\n", MSG_FALHA);
+        fechar_binario_escrita(arquivo_bin, &cabecalho);
+        return;
+    }
+
     for (int i = 0; i < qtd_insercoes; i++)
     {
         Registro novo_registro;
@@ -30,6 +37,7 @@ void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_inse
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
+            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
             return;
         }
         ScanQuoteString(novo_registro.nomeEstacao);
@@ -38,6 +46,7 @@ void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_inse
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
+            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
             return;
         }
         ScanQuoteString(novo_registro.nomeLinha);
@@ -46,6 +55,7 @@ void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_inse
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
+            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
             return;
         }
 
@@ -72,6 +82,7 @@ void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_inse
             {
                 printf("%s\n", MSG_FALHA);
                 fechar_binario_escrita(arquivo_bin, &cabecalho);
+                fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
                 return;
             }
             cabecalho.topo = proximo_topo;
@@ -83,10 +94,11 @@ void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_inse
             cabecalho.proxRRN++;
         }
 
-        if (fseek(arquivo_bin, rrn_para_offset(rrn_destino), SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &novo_registro))
+        if (fseek(arquivo_bin, rrn_para_offset(rrn_destino), SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &novo_registro) || !escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_destino, novo_registro.codEstacao))
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
+            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
             return;
         }
     }
@@ -96,10 +108,12 @@ void inserir_registros_BT(char *nome_arquivo, char *arquivo_indice, int qtd_inse
     {
         printf("%s\n", MSG_FALHA);
         fechar_binario_escrita(arquivo_bin, &cabecalho);
+        fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
         return;
     }
 
     fechar_binario_escrita(arquivo_bin, &cabecalho);
+    fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
 
     BinarioNaTela(nome_arquivo);
 }
