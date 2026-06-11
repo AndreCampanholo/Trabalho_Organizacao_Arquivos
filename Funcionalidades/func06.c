@@ -28,7 +28,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 		if (!ler_lista_criterios(criterios_busca, &qtd_criterios_busca, 1))
 		{
 			printf("%s\n", MSG_FALHA);
-			fclose(arquivo_bin);
+			fechar_binario_escrita(arquivo_bin, &cabecalho);
 			return;
 		}
 
@@ -38,7 +38,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 		if (!ler_lista_criterios(campos_atualizacao, &qtd_campos_atualizar, 1))
 		{
 			printf("%s\n", MSG_FALHA);
-			fclose(arquivo_bin);
+			fechar_binario_escrita(arquivo_bin, &cabecalho);
 			return;
 		}
 
@@ -46,11 +46,11 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 		if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
 		{
 			printf("%s\n", MSG_FALHA);
-			fclose(arquivo_bin);
+			fechar_binario_escrita(arquivo_bin, &cabecalho);
 			return;
 		}
 
-		// O arquivo é percorrido por completo para localizar os registros que atendem aos critérios especificados de forma algoritmica fluída e linear.
+		// Varredura linear do arquivo para localizar os registros que atendem aos critérios de busca.
 		for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
 		{
 			Registro registro;
@@ -62,7 +62,7 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 			if (leitura == 0)
 			{
 				printf("%s\n", MSG_FALHA);
-				fclose(arquivo_bin);
+				fechar_binario_escrita(arquivo_bin, &cabecalho);
 				return;
 			}
 			if (leitura == -1) // Entra aqui caso o registro analisado já esteja marcado como removido.
@@ -85,20 +85,11 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				aplicar_criterio_no_registro(&registro, &campos_atualizacao[i]);
 			}
 
-			// Validação da alteração com as variáveis das strings
-			if (registro.tamNomeEstacao < 0 || registro.tamNomeLinha < 0 ||
-				registro.tamNomeEstacao + registro.tamNomeLinha > 43)
-			{
-				printf("%s\n", MSG_FALHA);
-				fclose(arquivo_bin);
-				return;
-			}
-
 			// Retorna o ponteiro ao início do bloco do registro contido internamente logo em seguida reescrevendo por completo a série com as devidas atualizações
 			if (fseek(arquivo_bin, offset, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &registro))
 			{
 				printf("%s\n", MSG_FALHA);
-				fclose(arquivo_bin);
+				fechar_binario_escrita(arquivo_bin, &cabecalho);
 				return;
 			}
 		}

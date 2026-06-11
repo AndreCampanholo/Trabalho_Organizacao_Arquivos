@@ -68,9 +68,6 @@ void recuperar_registros_condicional(char *nome_arquivo_bin)
             if (leitura == -1)
                 continue;
 
-            if (registro.removido == '1')
-                continue;
-
             normalizar_campos_texto_registro(&registro);
 
             // Quando um registro passa pelo filtro, ele é impresso imediatamente na tela.

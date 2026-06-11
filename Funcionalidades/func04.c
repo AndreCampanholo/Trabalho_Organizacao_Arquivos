@@ -98,7 +98,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
             // O registro removido agora se torna o novo topo da pilha de espaços livres.
             cabecalho.topo = rrn;
 
-            // Retorna o ponteiro para o início do próximo registro a ser lido na sequência (offset + 80 bytes).
+            // Retorna o ponteiro para o início do próximo registro a ser lido na sequência (offset + TAMANHO_REGISTRO).
             if (fseek(arquivo_bin, offset + TAMANHO_REGISTRO, SEEK_SET) != 0)
             {
                 printf("%s\n", MSG_FALHA);
@@ -108,7 +108,7 @@ void deletar_registros(char *nome_arquivo, int qtd_remocoes)
         }
     }
 
-    // No fim, as estatísticas do cabeçalho são recalculadas para refletir o estado atualizado do arquivo.
+    // No fim, as estatísticas do cabeçalho são recalculadas para mostrar o estado atualizado do arquivo.
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);

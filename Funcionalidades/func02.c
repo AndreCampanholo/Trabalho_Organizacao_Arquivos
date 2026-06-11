@@ -30,7 +30,6 @@ void recuperar_registros(char *nome_arquivo_bin)
         return;
     }
 
-    // O laço percorre todos os RRNs já ocupados e tenta reconstruir cada um dos registros na memória.
     bool existe_registro = false;
     Registro curr_registro;
 
@@ -42,6 +41,7 @@ void recuperar_registros(char *nome_arquivo_bin)
         return;
     }
 
+    // O laço percorre todos os RRNs já ocupados e tenta reconstruir cada um dos registros na memória.
     for (int i = 0; i < curr_cabecalho.proxRRN; i++)
     {
         int ler_registros = ler_registro(arquivo_bin, &curr_registro);

@@ -10,24 +10,26 @@
 #define TAM_NO 53
 #define NULO -1
 
+// Cabeçalho do arquivo de índice
 typedef struct cabecalho_bt
 {
-    char status;
-    int noRaiz;
-    int topo;
-    int proxRRN;
-    int nroNos;
+    char status; // 1 byte  — '0' inconsistente, '1' consistente
+    int noRaiz;  // 4 bytes — RRN da raiz, -1 se vazio
+    int topo;    // 4 bytes — RRN do topo da pilha de removidos, -1 se vazia
+    int proxRRN; // 4 bytes — próximo RRN livre
+    int nroNos;  // 4 bytes — quantidade de nós ativos
 } CabecalhoBT;
 
+// Nó (página) do índice (53 bytes)
 typedef struct no
 {
-    char removido;
-    int proximo;
-    int tipoNo;
-    int nroChaves;
-    int chaves[CHAVES_MAX];
-    int rrns[CHAVES_MAX];
-    int filhos[ORDEM];
+    char removido;          // 1 byte  — '0' ativo, '1' removido
+    int proximo;            // 4 bytes — próximo da pilha de removidos (-1 se não removido)
+    int tipoNo;             // 4 bytes — (-1) folha, (0) raiz, (1) intermediário
+    int nroChaves;          // 4 bytes — quantas chaves estão ocupadas no momento
+    int chaves[CHAVES_MAX]; // 4 bytes cada — chaves de busca (codEstacao), -1 se vazio
+    int rrns[CHAVES_MAX];   // 4 bytes cada — offset do registro correspondente no arquivo de DADOS
+    int filhos[ORDEM];      // 4 bytes cada — RRNs dos filhos no arquivo de ÍNDICE, -1 se nulo
 } NO;
 
 bool bt_inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro);

@@ -128,7 +128,7 @@ int bt_obter_posicao(NO *no, int chave)
     return pos;
 }
 
-// Insere uma chave, seu RRN no arquiv de dados e seu filho direito em um nó
+// Insere uma chave, seu RRN no arquivo de dados e seu filho direito em um nó
 void bt_inserir_em_no(NO *no, int pos, int chave, int rrn_registro, int filho_dir)
 {
     for (int i = no->nroChaves; i > pos; i--)
