@@ -46,20 +46,12 @@ bool bt_ler_no(FILE *arquivo_indice, int rrn, NO *no)
     if (fread(&no->nroChaves, sizeof(int), 1, arquivo_indice) != 1)
         return false;
 
-    int j = 0;
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < CHAVES_MAX; i++)
     {
-        if (i % 2 == 0)
-        {
-            if (fread(&no->chaves[i - j], sizeof(int), 1, arquivo_indice) != 1)
-                return false;
-            j++;
-        }
-        else
-        {
-            if (fread(&no->rrns[i - j], sizeof(int), 1, arquivo_indice) != 1)
-                return false;
-        }
+        if (fread(&no->chaves[i], sizeof(int), 1, arquivo_indice) != 1)
+            return false;
+        if (fread(&no->rrns[i], sizeof(int), 1, arquivo_indice) != 1)
+            return false;
     }
 
     for (int i = 0; i < ORDEM; i++)
@@ -87,20 +79,12 @@ bool bt_escrever_no(FILE *arquivo_indice, int rrn, NO *no)
     if (fwrite(&no->nroChaves, sizeof(int), 1, arquivo_indice) != 1)
         return false;
 
-    int j = 0;
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < CHAVES_MAX; i++)
     {
-        if (i % 2 == 0)
-        {
-            if (fwrite(&no->chaves[i - j], sizeof(int), 1, arquivo_indice) != 1)
-                return false;
-            j++;
-        }
-        else
-        {
-            if (fwrite(&no->rrns[i - j], sizeof(int), 1, arquivo_indice) != 1)
-                return false;
-        }
+        if (fwrite(&no->chaves[i], sizeof(int), 1, arquivo_indice) != 1)
+            return false;
+        if (fwrite(&no->rrns[i], sizeof(int), 1, arquivo_indice) != 1)
+            return false;
     }
 
     for (int i = 0; i < ORDEM; i++)
@@ -192,13 +176,14 @@ int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, N
     }
 
     int total_chaves = no->nroChaves + 1;
-    int meio = total_chaves / 2;
+    int meio = (total_chaves + 1) / 2; 
 
     NO no_esquerdo;
     NO no_direito;
     bt_no_inicializar(&no_esquerdo);
     bt_no_inicializar(&no_direito);
 
+    // Nó esquerdo (original modificado) fica com as primeiras chaves
     no_esquerdo.nroChaves = meio;
     for (int i = 0; i < meio; i++)
     {
@@ -209,6 +194,11 @@ int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, N
         no_esquerdo.filhos[i] = filhos_temp[i];
     no_esquerdo.tipoNo = (no_esquerdo.filhos[0] == NULO) ? 1 : 0;
 
+    *promo_chave = chaves_temp[meio];
+    *promo_rrn = rrns_temp[meio];
+    *promo_filho_dir = bt_reservar_rrn(cabecalho_bt);
+
+    // Nó direito (Nova página criada SEMPRE à direita)
     no_direito.nroChaves = total_chaves - meio - 1;
     for (int i = 0; i < no_direito.nroChaves; i++)
     {
@@ -218,10 +208,6 @@ int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, N
     for (int i = 0; i <= no_direito.nroChaves; i++)
         no_direito.filhos[i] = filhos_temp[meio + 1 + i];
     no_direito.tipoNo = (no_direito.filhos[0] == NULO) ? 1 : 0;
-
-    *promo_chave = chaves_temp[meio];
-    *promo_rrn = rrns_temp[meio];
-    *promo_filho_dir = bt_reservar_rrn(cabecalho_bt);
 
     if (!bt_escrever_no(arquivo_indice, rrn_no, &no_esquerdo))
         return -1;
@@ -245,7 +231,7 @@ int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rr
         return bt_escrever_no(arquivo_indice, rrn_no, &no) ? 0 : -1;
     }
 
-    if (no.filhos[0] == NULO)
+    if (no.filhos[0] == NULO) // Nó Folha
     {
         if (no.nroChaves < CHAVES_MAX)
         {
@@ -259,6 +245,7 @@ int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rr
     int promo_chave_filho;
     int promo_rrn_filho;
     int promo_filho_dir_filho;
+    
     int retorno = bt_inserir_recursivo(arquivo_indice, cabecalho_bt, no.filhos[pos], chave, rrn_registro, &promo_chave_filho, &promo_rrn_filho, &promo_filho_dir_filho);
     if (retorno != 1)
         return retorno;
@@ -270,6 +257,20 @@ int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rr
     }
 
     return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no, promo_chave_filho, promo_rrn_filho, promo_filho_dir_filho, promo_chave, promo_rrn, promo_filho_dir);
+}
+
+int bt_recuperar_registro(FILE *arquivo_indice, int rrn_raiz, int chave_busca) {
+    if(rrn_raiz == -1) return -1;
+
+    NO no_raiz;
+    bt_ler_no(arquivo_indice, rrn_raiz, &no_raiz);
+    for(int i = 0; i < no_raiz.nroChaves; i++) {
+        if(no_raiz.chaves[i] == chave_busca)
+            return no_raiz.rrns[i];
+        else if(no_raiz.chaves[i] > chave_busca)
+            return bt_recuperar_registro(arquivo_indice, no_raiz.filhos[i], chave_busca);
+    }
+    return bt_recuperar_registro(arquivo_indice, no_raiz.filhos[no_raiz.nroChaves], chave_busca);
 }
 
 // Funções Principais da Árvore B
@@ -322,4 +323,8 @@ bool inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, in
     return true;
 }
 
-int recuperar_registro_indice(FILE *arquivo_indice, CabecalhoBT *bt_cabecalho, int chave_busca);
+int recuperar_registro_indice(FILE *arquivo_indice, CabecalhoBT *bt_cabecalho, int chave_busca) {
+    if(arquivo_indice == NULL || bt_cabecalho == NULL) return -1;
+
+    bt_recuperar_registro(arquivo_indice, bt_cabecalho->noRaiz, chave_busca);
+}

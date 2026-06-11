@@ -98,7 +98,7 @@ int main(void)
             printf("%s\n", MSG_FALHA);
             return 0;
         }
-        recuperar_registros_BT(nome_bin, indice_bin);
+        recuperar_registros_indice(nome_bin, indice_bin);
         break;
 
     case 9: // func09.c: insere registros no arquivo de dados e no arquivo de índice
@@ -110,7 +110,7 @@ int main(void)
         getchar();
         int qtd_insercoes;
         scanf("%d", &qtd_insercoes);
-        inserir_registros_BT(nome_bin, indice_bin, qtd_insercoes);
+        inserir_registros_indice(nome_bin, indice_bin, qtd_insercoes);
         break;
 
     case 10: // func10.c: deleta logicamente registros do arquivo de dados e do arquivo de índice por meio do critério de busca da func08
@@ -122,7 +122,7 @@ int main(void)
         getchar();
         int qtd_remocoes;
         scanf("%d", &qtd_remocoes);
-        deletar_registros_BT(nome_bin, indice_bin, qtd_remocoes);
+        deletar_registros_indice(nome_bin, indice_bin, qtd_remocoes);
         break;
 
     default: // Funcionalidade inválida

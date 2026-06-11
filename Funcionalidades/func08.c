@@ -17,6 +17,13 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
         return;
     }
 
+    if (!abrir_binario(&arquivo_indice, nome_arquivo_indice, "rb", &bt_cabecalho, 0))
+    {
+        printf("%s\n", MSG_FALHA);
+        fclose(arquivo_bin);
+        return;
+    }
+
     int quantidade_buscas;
     if (scanf("%d", &quantidade_buscas) != 1)
     {
@@ -41,47 +48,84 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
         int encontrado = 0;
 
         int busca_por_cod_estacao = 0;
+        int chave_codEstacao;
         for (int i = 0; i < quantidade_criterios; i++)
         {
             if (strcmp(criterios[i].nome, "codEstacao") == 0 && !criterios[i].ehNulo)
             {
                 busca_por_cod_estacao = 1;
+                chave_codEstacao = criterios[i].valorInteiro;
                 break;
             }
         }
 
         if(busca_por_cod_estacao) {
-            if (!abrir_binario(&arquivo_indice, nome_arquivo_indice, "rb", &bt_cabecalho, 0))
-            {
+            int rrn_arquivo_dados = recuperar_registro_indice(arquivo_indice, &bt_cabecalho, chave_codEstacao);
+            if(rrn_arquivo_dados == -1) {
+                printf("%s\n", MSG_INEXISTENTE);
+                // Uma linha em branco é inserida para separar visualmente o resultado de cada consulta.
+                printf("\n");
+
+                continue;
+            }
+            long offset = rrn_para_offset(rrn_arquivo_dados);
+
+            if(fseek(arquivo_bin, offset, SEEK_SET) != 0) {
+                fclose(arquivo_bin);
+                fclose(arquivo_indice);
                 printf("%s\n", MSG_FALHA);
                 return;
             }
-            buscar_registro_arquivo_indice();
+
+            Registro registro;
+
+            int leitura = ler_registro(arquivo_bin, &registro);
+            if (leitura == 0)
+            {
+                fclose(arquivo_bin);
+                fclose(arquivo_indice);
+                printf("%s\n", MSG_FALHA);
+                return;
+            }
+            if (leitura != -1 && registro.removido != '1') {
+                normalizar_campos_texto_registro(&registro);
+
+                if (registro_atende_criterios(&registro, criterios, quantidade_criterios)) {
+                    imprimir_registro(&registro);
+                    encontrado = 1;
+                }
+            }
+
+            if (!encontrado)
+                printf("%s\n", MSG_INEXISTENTE);
+            
+            printf("\n");
+            continue;
         }
 
         // Pula o cabeçalho apenas uma vez a cada busca
         if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
         {
             fclose(arquivo_bin);
+            fclose(arquivo_indice);
             printf("%s\n", MSG_FALHA);
             return;
         }
 
+        // Realiza uma busca linear sequencial, deixando o fread avançar de forma natural (sem fseek)
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
             Registro registro;
-            // Realiza uma busca linear sequencial, deixando o fread avançar de forma natural (sem fseek)
+    
             int leitura = ler_registro(arquivo_bin, &registro);
             if (leitura == 0)
             {
                 fclose(arquivo_bin);
+                fclose(arquivo_indice);
                 printf("%s\n", MSG_FALHA);
                 return;
             }
-            if (leitura == -1)
-                continue;
-
-            if (registro.removido == '1')
+            if (leitura == -1 || registro.removido == '1')
                 continue;
 
             normalizar_campos_texto_registro(&registro);
