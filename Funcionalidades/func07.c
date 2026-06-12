@@ -35,7 +35,7 @@ void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
             break;
         if (resultado_leitura == 1)
         {
-            if (!escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_no_arquivo_dados, registro_lido.codEstacao))
+            if (!escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_para_offset(rrn_no_arquivo_dados), registro_lido.codEstacao))
             {
                 fclose(arquivo_dados);
                 fclose(arquivo_indice);

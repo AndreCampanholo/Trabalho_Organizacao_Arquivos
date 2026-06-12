@@ -466,3 +466,75 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
     liberar_estacoes_vistas(&estacoes);
     return 1;
 }
+
+int ler_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt)
+{
+    fseek(arquivo, 0, SEEK_SET);
+    if (fread(&cabecalho_bt->status, sizeof(char), 1, arquivo) != 1)
+        return 0;
+    if (fread(&cabecalho_bt->noRaiz, sizeof(int), 1, arquivo) != 1)
+        return 0;
+    if (fread(&cabecalho_bt->topo, sizeof(int), 1, arquivo) != 1)
+        return 0;
+    if (fread(&cabecalho_bt->proxRRN, sizeof(int), 1, arquivo) != 1)
+        return 0;
+    if (fread(&cabecalho_bt->nroNos, sizeof(int), 1, arquivo) != 1)
+        return 0;
+    return 1;
+}
+
+int abrir_binario_bt(FILE **arquivo, char *nome_arquivo, char *modo, CabecalhoBT *cabecalho_bt, int eh_escrita)
+{
+    *arquivo = fopen(nome_arquivo, modo);
+    if (*arquivo == NULL)
+        return 0;
+
+    if (!ler_cabecalho_bt(*arquivo, cabecalho_bt))
+    {
+        fclose(*arquivo);
+        return 0;
+    }
+
+    if (cabecalho_bt->status != '1')
+    {
+        fclose(*arquivo);
+        return 0;
+    }
+
+    if (eh_escrita)
+    {
+        cabecalho_bt->status = '0';
+        escrever_cabecalho_bt(*arquivo, cabecalho_bt);
+    }
+    return 1;
+}
+
+int abrir_binario_escrita_bt(FILE **arquivo, char *nome_arquivo, CabecalhoBT *cabecalho_bt)
+{
+    return abrir_binario_bt(arquivo, nome_arquivo, "r+b", cabecalho_bt, 1);
+}
+
+void fechar_binario_escrita_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt)
+{
+    cabecalho_bt->status = '1';
+    escrever_cabecalho_bt(arquivo, cabecalho_bt);
+    fclose(arquivo);
+}
+
+int remover_registro_logico(FILE *arquivo, Cabecalho *cabecalho, long offset)
+{
+    char removido = '1';
+    int antigo_topo = cabecalho->topo;
+    int rrn = (int)((offset - TAMANHO_CABECALHO) / TAMANHO_REGISTRO);
+
+    if (fseek(arquivo, offset, SEEK_SET) != 0)
+        return 0;
+    if (fwrite(&removido, sizeof(char), 1, arquivo) != 1)
+        return 0;
+    if (fwrite(&antigo_topo, sizeof(int), 1, arquivo) != 1)
+        return 0;
+
+    // O registro removido se torna o novo topo da pilha de espaços livres
+    cabecalho->topo = rrn;
+    return 1;
+}

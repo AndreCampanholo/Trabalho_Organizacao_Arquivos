@@ -1,32 +1,18 @@
-CC = gcc
-CFLAGS = -Wall -Wextra -std=c99
-TARGET = programaTrab
+ifeq ($(OS),Windows_NT)
+	EXEC = programaTrab.exe
+	RM = del /q /f
+	RUN = programaTrab.exe
+else
+	EXEC = programaTrab
+	RM = rm -f
+	RUN = ./programaTrab
+endif
 
-SOURCES = programaTrab.c \
-          auxiliares/auxiliar.c \
-          auxiliares/criterios.c \
-          auxiliares/fornecidas.c \
-          funcionalidades/func01.c \
-          funcionalidades/func02.c \
-          funcionalidades/func03.c \
-          funcionalidades/func04.c \
-          funcionalidades/func05.c \
-          funcionalidades/func06.c
+all:
+	gcc -Wall -std=c99 -o $(EXEC) *.c auxiliares/*.c funcionalidades/*.c -lm
 
-OBJECTS = $(SOURCES:.c=.o)
-
-all: $(TARGET)
-
-$(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJECTS) -lm
-
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-run: $(TARGET)
-	./$(TARGET)
+run:
+	$(RUN)
 
 clean:
-	rm -f $(OBJECTS) $(TARGET) $(TARGET).exe nul
-
-.PHONY: all run clean
+	$(RM) $(EXEC)

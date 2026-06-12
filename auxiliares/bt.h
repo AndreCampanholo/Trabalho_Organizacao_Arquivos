@@ -33,7 +33,17 @@ typedef struct no
 } NO;
 
 bool inserir_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro);
+
 // Usa o arquivo de índice para recuperar o rrn de um registro no arquivo de dados
 int recuperar_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave_busca);
+
+// Aloca um RRN para um novo nó, reaproveitando a pilha de páginas removidas se possível
+int bt_alocar_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt);
+
+// Libera (remove logicamente) um nó, empilhando seu RRN na pilha de páginas removidas
+void bt_liberar_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn);
+
+// Remove a chave do índice árvore-B. Retorna true se a chave existia e foi removida.
+bool remover_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave);
 
 #endif

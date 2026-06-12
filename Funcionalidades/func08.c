@@ -17,7 +17,7 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
         return;
     }
 
-    if (!abrir_binario(&arquivo_indice, nome_arquivo_indice, "rb", &bt_cabecalho, 0))
+    if (!abrir_binario_bt(&arquivo_indice, nome_arquivo_indice, "rb", &bt_cabecalho, 0))
     {
         printf("%s\n", MSG_FALHA);
         fclose(arquivo_bin);

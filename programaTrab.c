@@ -18,6 +18,11 @@ int main(void)
     char nome_bin[TAMANHO_TEXTO];
     char indice_bin[TAMANHO_TEXTO];
 
+    // Variáveis de quantidade declaradas no escopo do switch para evitar redeclaração
+    int qtd_remocoes;
+    int qtd_insercoes;
+    int qtd_atualizacoes;
+
     switch (funcionalidade)
     {
     case 1: // func01: conversão dos dados de registro do formato .csv para .bin
@@ -54,7 +59,6 @@ int main(void)
             return 0;
         }
         getchar();
-        int qtd_remocoes;
         scanf("%d", &qtd_remocoes);
         deletar_registros(nome_bin, qtd_remocoes);
         break;
@@ -66,7 +70,6 @@ int main(void)
             return 0;
         }
         getchar();
-        int qtd_insercoes;
         scanf("%d", &qtd_insercoes);
         inserir_registros(nome_bin, qtd_insercoes);
         break;
@@ -78,7 +81,6 @@ int main(void)
             return 0;
         }
         getchar();
-        int qtd_atualizacoes;
         scanf("%d", &qtd_atualizacoes);
         atualizar_registros(nome_bin, qtd_atualizacoes);
         break;
@@ -108,7 +110,6 @@ int main(void)
             return 0;
         }
         getchar();
-        int qtd_insercoes;
         scanf("%d", &qtd_insercoes);
         inserir_registros_indice(nome_bin, indice_bin, qtd_insercoes);
         break;
@@ -120,7 +121,6 @@ int main(void)
             return 0;
         }
         getchar();
-        int qtd_remocoes;
         scanf("%d", &qtd_remocoes);
         deletar_registros_indice(nome_bin, indice_bin, qtd_remocoes);
         break;

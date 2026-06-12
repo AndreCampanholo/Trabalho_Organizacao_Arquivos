@@ -1,141 +1,188 @@
 #include "../auxiliares/auxiliar.h"
 #include "../auxiliares/bt.h"
 
-void deletar_registros_indice(char *nome_arquivo_dados, char *nome_arquivo_indice, int qtd_remocoes)
+// Funcionalidade [10]: Remove logicamente registros do arquivo de dados de acordo com os critérios de busca informados pelo usuário
+void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int qtd_remocoes)
 {
-    // Verifica se os parâmetros informados são válidos.
-    if (nome_arquivo_dados == NULL || nome_arquivo_indice == NULL || qtd_remocoes <= 0)
+    // Validação dos parâmetros recebidos pela função
+    if (nome_arquivo == NULL || nome_arquivo_indice == NULL || qtd_remocoes <= 0)
     {
         printf("%s\n", MSG_FALHA);
         return;
     }
 
-    // Abre o arquivo para leitura e escrita binária.
+    // Abre o arquivo de dados em modo de escrita (status passa a '0')
     FILE *arquivo_bin;
     Cabecalho cabecalho;
-    if (!abrir_binario_escrita(&arquivo_bin, nome_arquivo_dados, &cabecalho))
+    if (!abrir_binario_escrita(&arquivo_bin, nome_arquivo, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);
         return;
     }
 
+    // Abre o arquivo de índice árvore-B em modo de escrita (status passa a '0')
     FILE *arquivo_indice;
     CabecalhoBT cabecalho_bt;
-    if(!abrir_binario_escrita(&arquivo_indice, nome_arquivo_indice, &cabecalho_bt)) {
+    if (!abrir_binario_escrita_bt(&arquivo_indice, nome_arquivo_indice, &cabecalho_bt))
+    {
         printf("%s\n", MSG_FALHA);
         fechar_binario_escrita(arquivo_bin, &cabecalho);
         return;
     }
 
-    // Laço que processa cada um dos comandos de remoção que foram informados na entrada.
-    int qtd_criterios;
-    for (int i = 0; i < qtd_remocoes; i++)
+    // Cada uma das n remoções possui seu próprio conjunto independente de critérios
+    for (int r = 0; r < qtd_remocoes; r++)
     {
+        int qtd_criterios = 0;
         Criterio criterios[MAX_CRITERIOS];
 
-        // Lê os 'm' pares (nomeCampo, valorCampo) utilizando a rotina modularizada.
         if (!ler_lista_criterios(criterios, &qtd_criterios, 1))
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
-            fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
+            fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
             return;
         }
 
-        // Para cada comando, posiciona o ponteiro no início dos registros apenas uma vez
-        if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
+        // Verifica se a busca utiliza codEstacao (chave indexada pela árvore-B)
+        int idx_codEstacao = -1;
+        for (int i = 0; i < qtd_criterios; i++)
         {
-            printf("%s\n", MSG_FALHA);
-            fechar_binario_escrita(arquivo_bin, &cabecalho);
-            fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
-            return;
+            if (strcmp(criterios[i].nome, "codEstacao") == 0 && !criterios[i].ehNulo)
+            {
+                idx_codEstacao = i;
+                break;
+            }
         }
 
-        for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
+        if (idx_codEstacao != -1)
         {
-            long offset = rrn_para_offset(rrn); // Guardar o offset caso precisemos gravar a remoção
+            // --- Busca direta via índice árvore-B ---
+            // Como codEstacao é a chave de busca/primária, existe no máximo
+            // um registro correspondente a ela.
+            int chave_busca = criterios[idx_codEstacao].valorInteiro;
+            int rrn_dados = recuperar_registro_indice(arquivo_indice, &cabecalho_bt, chave_busca);
 
-            // Leitura sequencial do registro.
-            Registro registro;
-            int leitura = ler_registro(arquivo_bin, &registro);
-            if (leitura == 0)
-            { // leitura == 0 indica uma falha de leitura
-                printf("%s\n", MSG_FALHA);
-                fechar_binario_escrita(arquivo_bin, &cabecalho);
-                fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
-                return;
-            }
-            if (leitura == -1)
-            { // leitura == -1 indica que o registro já foi removido logicamente
-                continue;
-            }
-
-            // Adiciona o caractere nulo '\0' ao final dos campos de tamanho variável para realizar as comparações.
-            normalizar_campos_texto_registro(&registro);
-
-            // Se o registro não atende aos critérios, ele permanece da mesma forma que está.
-            if (!registro_atende_criterios(&registro, criterios, qtd_criterios))
+            if (rrn_dados != NULO)
             {
-                continue; // Se o registro não deve ser removido, o resto do laço não é executado.
+                long offset = rrn_para_offset(rrn_dados);
+
+                if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
+                {
+                    printf("%s\n", MSG_FALHA);
+                    fechar_binario_escrita(arquivo_bin, &cabecalho);
+                    fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
+                    return;
+                }
+
+                Registro registro;
+                int leitura = ler_registro(arquivo_bin, &registro);
+
+                if (leitura == 0)
+                {
+                    printf("%s\n", MSG_FALHA);
+                    fechar_binario_escrita(arquivo_bin, &cabecalho);
+                    fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
+                    return;
+                }
+
+                // leitura == -1: registro já removido (índice desatualizado) — ignora
+                if (leitura == 1)
+                {
+                    normalizar_campos_texto_registro(&registro);
+
+                    // Só remove se TODOS os critérios (incluindo codEstacao)
+                    // forem satisfeitos simultaneamente
+                    if (registro_atende_criterios(&registro, criterios, qtd_criterios))
+                    {
+                        if (!remover_registro_logico(arquivo_bin, &cabecalho, offset))
+                        {
+                            printf("%s\n", MSG_FALHA);
+                            fechar_binario_escrita(arquivo_bin, &cabecalho);
+                            fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
+                            return;
+                        }
+
+                        remover_registro_indice(arquivo_indice, &cabecalho_bt, chave_busca);
+                    }
+                }
             }
-
-            char removido = '1';
-            int antigo_topo = cabecalho.topo;
-
-            // Posiciona o ponteiro de volta no início do registro (o ponteiro foi para o final devido ao 'ler_registro()').
-            if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
-            {
-                printf("%s\n", MSG_FALHA);
-                fechar_binario_escrita(arquivo_bin, &cabecalho);
-                fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
-                return;
-            }
-
-            // Realiza a remoção lógica do registro.
-            if (fwrite(&removido, sizeof(char), 1, arquivo_bin) != 1)
-            {
-                printf("%s\n", MSG_FALHA);
-                fechar_binario_escrita(arquivo_bin, &cabecalho);
-                fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
-                return;
-            }
-
-            // O campo 'próximo' recebe o antigo topo, mantendo a lista de removidos em um formato de pilha.
-            if (fwrite(&antigo_topo, sizeof(int), 1, arquivo_bin) != 1)
-            {
-                printf("%s\n", MSG_FALHA);
-                fechar_binario_escrita(arquivo_bin, &cabecalho);
-                fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
-                return;
-            }
-
-            // O registro removido agora se torna o novo topo da pilha de espaços livres.
-            cabecalho.topo = rrn;
-
-            // Retorna o ponteiro para o início do próximo registro a ser lido na sequência (offset + TAMANHO_REGISTRO).
-            if (fseek(arquivo_bin, offset + TAMANHO_REGISTRO, SEEK_SET) != 0)
+            // rrn_dados == NULO: chave não existe no índice, nada a remover nesta busca
+        }
+        else
+        {
+            // Todos os registros que satisfizerem os critérios são removidos.
+            if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
             {
                 printf("%s\n", MSG_FALHA);
                 fechar_binario_escrita(arquivo_bin, &cabecalho);
-                fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
+                fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
                 return;
+            }
+
+            for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
+            {
+                long offset = rrn_para_offset(rrn);
+
+                Registro registro;
+                int leitura = ler_registro(arquivo_bin, &registro);
+
+                if (leitura == 0)
+                {
+                    printf("%s\n", MSG_FALHA);
+                    fechar_binario_escrita(arquivo_bin, &cabecalho);
+                    fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
+                    return;
+                }
+                if (leitura == -1)
+                    continue; // registro já removido: ignora
+
+                normalizar_campos_texto_registro(&registro);
+
+                if (registro_atende_criterios(&registro, criterios, qtd_criterios))
+                {
+                    int chave = registro.codEstacao;
+
+                    if (!remover_registro_logico(arquivo_bin, &cabecalho, offset))
+                    {
+                        printf("%s\n", MSG_FALHA);
+                        fechar_binario_escrita(arquivo_bin, &cabecalho);
+                        fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
+                        return;
+                    }
+
+                    remover_registro_indice(arquivo_indice, &cabecalho_bt, chave);
+
+                    // remover_registro_logico deixa o ponteiro no meio do registro
+                    // (após escrever 'removido' e 'proximo'); reposiciona para o
+                    // início do próximo registro antes de continuar a leitura sequencial.
+                    if (fseek(arquivo_bin, offset + TAMANHO_REGISTRO, SEEK_SET) != 0)
+                    {
+                        printf("%s\n", MSG_FALHA);
+                        fechar_binario_escrita(arquivo_bin, &cabecalho);
+                        fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
+                        return;
+                    }
+                }
             }
         }
     }
 
-    // No fim, as estatísticas do cabeçalho são recalculadas para mostrar o estado atualizado do arquivo.
+    // Recalcula as estatísticas agregadas do cabeçalho de dados (nroEstacoes,
+    // nroParesEstacoes) após todas as remoções desta execução
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);
         fechar_binario_escrita(arquivo_bin, &cabecalho);
-        fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
+        fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
         return;
     }
 
-    // Define o status do arquivo como consistente novamente e o fecha.
+    // Marca ambos os arquivos como consistentes (status = '1') e os fecha
     fechar_binario_escrita(arquivo_bin, &cabecalho);
-    fechar_binario_escrita(arquivo_indice, &cabecalho_bt);
+    fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
 
-    // Imprime o arquivo binário na tela.
-    BinarioNaTela(nome_arquivo_dados);
+    // Exibe a saída dos arquivos de dados e de índice já atualizados
+    BinarioNaTela(nome_arquivo);
+    BinarioNaTela(nome_arquivo_indice);
 }

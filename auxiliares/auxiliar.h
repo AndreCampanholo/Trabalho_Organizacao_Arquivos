@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "bt.h"
 
 //* Constantes auxiliares
 
@@ -101,6 +102,25 @@ int abrir_binario_escrita(FILE **arquivo, char *nome_arquivo, Cabecalho *cabecal
 
 // Marca o arquivo como consistente (status '1'), reescreve o cabeçalho e fecha o arquivo.
 void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho);
+
+// Escreve o cabeçalho no arquivo de índice árvore-B a partir do byte 0.
+void escrever_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt);
+
+// Lê o cabeçalho do arquivo de índice árvore-B a partir do byte 0.
+int ler_cabecalho_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt);
+
+// Abre o arquivo de índice árvore-B, lê o cabeçalho e verifica a consistência.
+int abrir_binario_bt(FILE **arquivo, char *nome_arquivo, char *modo, CabecalhoBT *cabecalho_bt, int eh_escrita);
+
+// Atalho para abrir_binario_bt no modo "r+b" com eh_escrita = 1.
+int abrir_binario_escrita_bt(FILE **arquivo, char *nome_arquivo, CabecalhoBT *cabecalho_bt);
+
+// Marca o arquivo de índice como consistente, reescreve o cabeçalho e fecha o arquivo.
+void fechar_binario_escrita_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt);
+
+// Remove logicamente o registro de dados em 'offset', empilhando seu RRN
+// na pilha de removidos do cabeçalho (campos topo/proximo).
+int remover_registro_logico(FILE *arquivo, Cabecalho *cabecalho, long offset);
 
 //* Protótipos de funções de leitura do .csv e processamento de cabeçalhos / variáveis
 

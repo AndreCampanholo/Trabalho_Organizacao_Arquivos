@@ -20,7 +20,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
 
     FILE *arquivo_indice;
     CabecalhoBT bt_cabecalho;
-    if (!abrir_binario_escrita(&arquivo_indice, nome_arquivo_indice, &bt_cabecalho))
+    if (!abrir_binario_escrita_bt(&arquivo_indice, nome_arquivo_indice, &bt_cabecalho))
     {
         printf("%s\n", MSG_FALHA);
         fechar_binario_escrita(arquivo_bin, &cabecalho);
@@ -37,7 +37,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
-            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
+            fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
             return;
         }
         ScanQuoteString(novo_registro.nomeEstacao);
@@ -46,7 +46,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
-            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
+            fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
             return;
         }
         ScanQuoteString(novo_registro.nomeLinha);
@@ -55,7 +55,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
-            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
+            fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
             return;
         }
 
@@ -83,7 +83,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
             {
                 printf("%s\n", MSG_FALHA);
                 fechar_binario_escrita(arquivo_bin, &cabecalho);
-                fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
+                fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
                 return;
             }
             cabecalho.topo = proximo_topo;
@@ -101,7 +101,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
-            fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
+            fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
             return;
         }
     }
@@ -111,12 +111,12 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
     {
         printf("%s\n", MSG_FALHA);
         fechar_binario_escrita(arquivo_bin, &cabecalho);
-        fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
+        fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
         return;
     }
 
     fechar_binario_escrita(arquivo_bin, &cabecalho);
-    fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
+    fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
 
     BinarioNaTela(nome_arquivo);
     BinarioNaTela(nome_arquivo_indice);
