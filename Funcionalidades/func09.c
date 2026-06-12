@@ -1,7 +1,7 @@
 #include "../auxiliares/auxiliar.h"
 #include "../auxiliares/bt.h"
 
-// Funcionalidade [5]: Insere os registros informados pelo usuário.
+// Funcionalidade [9]: Insere os registros informados pelo usuário tanto no arquivo de dados quanto no arquivo de índice.
 void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int qtd_insercoes)
 {
     if (nome_arquivo == NULL || qtd_insercoes <= 0)
@@ -71,13 +71,14 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         novo_registro.removido = '0';
         novo_registro.proximo = -1;
 
-        long rrn_destino;
+        // Descobrir onde deve ocorrer a inserção no arquivo de dados
+        long rrn_insercao_arquivo_dados;
         if (cabecalho.topo != -1)
         {
             // Se houver um espaço livre na pilha de removidos, a inserção reaproveita esse espaço primeiro.
             int proximo_topo = -1;
-            rrn_destino = cabecalho.topo;
-            if (fseek(arquivo_bin, rrn_para_offset(rrn_destino) + sizeof(char), SEEK_SET) != 0 ||
+            rrn_insercao_arquivo_dados = cabecalho.topo;
+            if (fseek(arquivo_bin, rrn_para_offset(rrn_insercao_arquivo_dados) + sizeof(char), SEEK_SET) != 0 ||
                 fread(&proximo_topo, sizeof(int), 1, arquivo_bin) != 1)
             {
                 printf("%s\n", MSG_FALHA);
@@ -90,11 +91,13 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         else
         {
             // Quando não há espaço livre, o novo registro vai para o final da área de dados do arquivo.
-            rrn_destino = cabecalho.proxRRN;
+            rrn_insercao_arquivo_dados = cabecalho.proxRRN;
             cabecalho.proxRRN++;
         }
 
-        if (fseek(arquivo_bin, rrn_para_offset(rrn_destino), SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &novo_registro) || !escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_destino, novo_registro.codEstacao))
+        if (fseek(arquivo_bin, rrn_para_offset(rrn_insercao_arquivo_dados), SEEK_SET) != 0 ||
+            !escrever_registro(arquivo_bin, &novo_registro) ||
+            !escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_para_offset(rrn_insercao_arquivo_dados), novo_registro.codEstacao))
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);

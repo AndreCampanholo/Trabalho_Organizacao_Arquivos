@@ -11,7 +11,7 @@
 #define NULO -1
 
 // Cabeçalho do arquivo de índice
-typedef struct cabecalho_bt
+typedef struct btCabecalho
 {
     char status; // 1 byte  — '0' inconsistente, '1' consistente
     int noRaiz;  // 4 bytes — RRN da raiz, -1 se vazio
@@ -28,12 +28,12 @@ typedef struct no
     int tipoNo;             // 4 bytes — (-1) folha, (0) raiz, (1) intermediário
     int nroChaves;          // 4 bytes — quantas chaves estão ocupadas no momento
     int chaves[CHAVES_MAX]; // 4 bytes cada — chaves de busca (codEstacao), -1 se vazio
-    int rrns[CHAVES_MAX];   // 4 bytes cada — offset do registro correspondente no arquivo de DADOS
+    int offsets[CHAVES_MAX];   // 4 bytes cada — offset do registro correspondente no arquivo de DADOS
     int filhos[ORDEM];      // 4 bytes cada — RRNs dos filhos no arquivo de ÍNDICE, -1 se nulo
 } NO;
 
-bool inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *bt_cabecalho, int chave, int rrn_registro);
+bool inserir_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro);
 // Usa o arquivo de índice para recuperar o rrn de um registro no arquivo de dados
-int recuperar_registro_indice(FILE *arquivo_indice, CabecalhoBT *bt_cabecalho, int chave_busca);
+int recuperar_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave_busca);
 
 #endif

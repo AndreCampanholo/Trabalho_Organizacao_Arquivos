@@ -1,5 +1,5 @@
-#include "bt.h"
 #include "auxiliar.h"
+#include "bt.h"
 #include <stdio.h>
 
 // Funções Auxiliares da Árvore B (invisíveis ao usuário)
@@ -15,7 +15,7 @@ void bt_no_inicializar(NO *no)
     for (int i = 0; i < CHAVES_MAX; i++)
     {
         no->chaves[i] = NULO;
-        no->rrns[i] = NULO;
+        no->offsets[i] = NULO;
     }
 
     for (int i = 0; i < ORDEM; i++)
@@ -50,7 +50,7 @@ bool bt_ler_no(FILE *arquivo_indice, int rrn, NO *no)
     {
         if (fread(&no->chaves[i], sizeof(int), 1, arquivo_indice) != 1)
             return false;
-        if (fread(&no->rrns[i], sizeof(int), 1, arquivo_indice) != 1)
+        if (fread(&no->offsets[i], sizeof(int), 1, arquivo_indice) != 1)
             return false;
     }
 
@@ -83,7 +83,7 @@ bool bt_escrever_no(FILE *arquivo_indice, int rrn, NO *no)
     {
         if (fwrite(&no->chaves[i], sizeof(int), 1, arquivo_indice) != 1)
             return false;
-        if (fwrite(&no->rrns[i], sizeof(int), 1, arquivo_indice) != 1)
+        if (fwrite(&no->offsets[i], sizeof(int), 1, arquivo_indice) != 1)
             return false;
     }
 
@@ -95,8 +95,19 @@ bool bt_escrever_no(FILE *arquivo_indice, int rrn, NO *no)
 }
 
 // Reserva/escolhe o próximo RRN disponível para uma inserção
-int bt_reservar_rrn(CabecalhoBT *cabecalho_bt)
+int bt_reservar_rrn(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt)
 {
+    if (cabecalho_bt->topo != -1) {
+        int rrn_reaproveitado = cabecalho_bt->topo;
+        int proximo_topo = -1;
+        fseek(arquivo_indice, bt_offset_no(rrn_reaproveitado) + sizeof(char), SEEK_SET);
+        fread(&proximo_topo, sizeof(int), 1, arquivo_indice);
+        
+        cabecalho_bt->topo = proximo_topo;
+        cabecalho_bt->nroNos++;
+        return rrn_reaproveitado;
+    }
+
     int rrn = cabecalho_bt->proxRRN;
     cabecalho_bt->proxRRN++;
     cabecalho_bt->nroNos++;
@@ -112,37 +123,37 @@ int bt_obter_posicao(NO *no, int chave)
     return pos;
 }
 
-// Insere uma chave, seu RRN no arquivo de dados e seu filho direito em um nó
-void bt_inserir_em_no(NO *no, int pos, int chave, int rrn_registro, int filho_dir)
+// Insere uma chave, seu offset no arquivo de dados e seu filho direito em um nó
+void bt_inserir_em_no(NO *no, int pos, int chave, int offset_registro, int filho_dir)
 {
     for (int i = no->nroChaves; i > pos; i--)
     {
         no->chaves[i] = no->chaves[i - 1];
-        no->rrns[i] = no->rrns[i - 1];
+        no->offsets[i] = no->offsets[i - 1];
     }
 
     for (int i = no->nroChaves + 1; i > pos + 1; i--)
         no->filhos[i] = no->filhos[i - 1];
 
     no->chaves[pos] = chave;
-    no->rrns[pos] = rrn_registro;
+    no->offsets[pos] = offset_registro;
     no->filhos[pos + 1] = filho_dir;
     no->nroChaves++;
     no->tipoNo = (no->filhos[0] == NULO) ? 1 : 0;
 }
 
 // Operação de split de um nó
-int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, NO *no, int chave, int rrn_registro, int filho_dir, int *promo_chave, int *promo_rrn, int *promo_filho_dir)
+int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, NO *no, int chave, int offset_registro, int filho_dir, int *promo_chave, int *promo_offset, int *promo_filho_dir)
 {
     int pos = bt_obter_posicao(no, chave);
     int chaves_temp[CHAVES_MAX + 1];
-    int rrns_temp[CHAVES_MAX + 1];
+    int offsets_temp[CHAVES_MAX + 1];
     int filhos_temp[ORDEM + 1];
 
     for (int i = 0; i < CHAVES_MAX + 1; i++)
     {
         chaves_temp[i] = NULO;
-        rrns_temp[i] = NULO;
+        offsets_temp[i] = NULO;
     }
     for (int i = 0; i < ORDEM + 1; i++)
         filhos_temp[i] = NULO;
@@ -153,12 +164,12 @@ int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, N
         if (i == pos)
         {
             chaves_temp[i] = chave;
-            rrns_temp[i] = rrn_registro;
+            offsets_temp[i] = offset_registro;
         }
         else
         {
             chaves_temp[i] = no->chaves[indice_chave];
-            rrns_temp[i] = no->rrns[indice_chave];
+            offsets_temp[i] = no->offsets[indice_chave];
             indice_chave++;
         }
     }
@@ -188,22 +199,22 @@ int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, N
     for (int i = 0; i < meio; i++)
     {
         no_esquerdo.chaves[i] = chaves_temp[i];
-        no_esquerdo.rrns[i] = rrns_temp[i];
+        no_esquerdo.offsets[i] = offsets_temp[i];
     }
     for (int i = 0; i <= meio; i++)
         no_esquerdo.filhos[i] = filhos_temp[i];
     no_esquerdo.tipoNo = (no_esquerdo.filhos[0] == NULO) ? 1 : 0;
 
     *promo_chave = chaves_temp[meio];
-    *promo_rrn = rrns_temp[meio];
-    *promo_filho_dir = bt_reservar_rrn(cabecalho_bt);
+    *promo_offset = offsets_temp[meio];
+    *promo_filho_dir = bt_reservar_rrn(arquivo_indice, cabecalho_bt);
 
     // Nó direito (Nova página criada SEMPRE à direita)
     no_direito.nroChaves = total_chaves - meio - 1;
     for (int i = 0; i < no_direito.nroChaves; i++)
     {
         no_direito.chaves[i] = chaves_temp[meio + 1 + i];
-        no_direito.rrns[i] = rrns_temp[meio + 1 + i];
+        no_direito.offsets[i] = offsets_temp[meio + 1 + i];
     }
     for (int i = 0; i <= no_direito.nroChaves; i++)
         no_direito.filhos[i] = filhos_temp[meio + 1 + i];
@@ -218,7 +229,7 @@ int bt_dividir_no(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, N
 }
 
 // Desce recursivamente até um nó folha da árvore B para realizar a inserção
-int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, int chave, int rrn_registro, int *promo_chave, int *promo_rrn, int *promo_filho_dir)
+int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rrn_no, int chave, int offset_registro, int *promo_chave, int *promo_offset, int *promo_filho_dir)
 {
     NO no;
     if (!bt_ler_no(arquivo_indice, rrn_no, &no))
@@ -227,7 +238,7 @@ int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rr
     int pos = bt_obter_posicao(&no, chave);
     if (pos < no.nroChaves && no.chaves[pos] == chave)
     {
-        no.rrns[pos] = rrn_registro;
+        no.offsets[pos] = offset_registro;
         return bt_escrever_no(arquivo_indice, rrn_no, &no) ? 0 : -1;
     }
 
@@ -235,28 +246,28 @@ int bt_inserir_recursivo(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int rr
     {
         if (no.nroChaves < CHAVES_MAX)
         {
-            bt_inserir_em_no(&no, pos, chave, rrn_registro, NULO);
+            bt_inserir_em_no(&no, pos, chave, offset_registro, NULO);
             return bt_escrever_no(arquivo_indice, rrn_no, &no) ? 0 : -1;
         }
 
-        return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no, chave, rrn_registro, NULO, promo_chave, promo_rrn, promo_filho_dir);
+        return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no, chave, offset_registro, NULO, promo_chave, promo_offset, promo_filho_dir);
     }
 
     int promo_chave_filho;
-    int promo_rrn_filho;
+    int promo_offset_filho;
     int promo_filho_dir_filho;
     
-    int retorno = bt_inserir_recursivo(arquivo_indice, cabecalho_bt, no.filhos[pos], chave, rrn_registro, &promo_chave_filho, &promo_rrn_filho, &promo_filho_dir_filho);
+    int retorno = bt_inserir_recursivo(arquivo_indice, cabecalho_bt, no.filhos[pos], chave, offset_registro, &promo_chave_filho, &promo_offset_filho, &promo_filho_dir_filho);
     if (retorno != 1)
         return retorno;
 
     if (no.nroChaves < CHAVES_MAX)
     {
-        bt_inserir_em_no(&no, pos, promo_chave_filho, promo_rrn_filho, promo_filho_dir_filho);
+        bt_inserir_em_no(&no, pos, promo_chave_filho, promo_offset_filho, promo_filho_dir_filho);
         return bt_escrever_no(arquivo_indice, rrn_no, &no) ? 0 : -1;
     }
 
-    return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no, promo_chave_filho, promo_rrn_filho, promo_filho_dir_filho, promo_chave, promo_rrn, promo_filho_dir);
+    return bt_dividir_no(arquivo_indice, cabecalho_bt, rrn_no, &no, promo_chave_filho, promo_offset_filho, promo_filho_dir_filho, promo_chave, promo_offset, promo_filho_dir);
 }
 
 int bt_recuperar_registro(FILE *arquivo_indice, int rrn_raiz, int chave_busca) {
@@ -266,7 +277,7 @@ int bt_recuperar_registro(FILE *arquivo_indice, int rrn_raiz, int chave_busca) {
     bt_ler_no(arquivo_indice, rrn_raiz, &no_raiz);
     for(int i = 0; i < no_raiz.nroChaves; i++) {
         if(no_raiz.chaves[i] == chave_busca)
-            return no_raiz.rrns[i];
+            return no_raiz.offsets[i];
         else if(no_raiz.chaves[i] > chave_busca)
             return bt_recuperar_registro(arquivo_indice, no_raiz.filhos[i], chave_busca);
     }
@@ -276,19 +287,19 @@ int bt_recuperar_registro(FILE *arquivo_indice, int rrn_raiz, int chave_busca) {
 // Funções Principais da Árvore B
 
 // Realiza a inserção de nós/registros no arquivo de índice
-bool inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int rrn_registro)
+bool inserir_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, int chave, int offset_registro)
 {
     if (arquivo_indice == NULL || cabecalho_bt == NULL)
         return false;
 
     if (cabecalho_bt->noRaiz == NULO)
     {
-        int rrn_raiz = bt_reservar_rrn(cabecalho_bt);
+        int rrn_raiz = bt_reservar_rrn(arquivo_indice, cabecalho_bt);
         NO raiz;
         bt_no_inicializar(&raiz);
         raiz.nroChaves = 1;
         raiz.chaves[0] = chave;
-        raiz.rrns[0] = rrn_registro;
+        raiz.offsets[0] = offset_registro;
         raiz.filhos[0] = NULO;
         raiz.filhos[1] = NULO;
         raiz.tipoNo = 1;
@@ -297,20 +308,20 @@ bool inserir_registro_indice(FILE *arquivo_indice, CabecalhoBT *cabecalho_bt, in
     }
 
     int promo_chave;
-    int promo_rrn;
+    int promo_offset;
     int promo_filho_dir;
-    int retorno = bt_inserir_recursivo(arquivo_indice, cabecalho_bt, cabecalho_bt->noRaiz, chave, rrn_registro, &promo_chave, &promo_rrn, &promo_filho_dir);
+    int retorno = bt_inserir_recursivo(arquivo_indice, cabecalho_bt, cabecalho_bt->noRaiz, chave, offset_registro, &promo_chave, &promo_offset, &promo_filho_dir);
     if (retorno < 0)
         return false;
 
     if (retorno == 1)
     {
-        int rrn_nova_raiz = bt_reservar_rrn(cabecalho_bt);
+        int rrn_nova_raiz = bt_reservar_rrn(arquivo_indice, cabecalho_bt);
         NO raiz;
         bt_no_inicializar(&raiz);
         raiz.nroChaves = 1;
         raiz.chaves[0] = promo_chave;
-        raiz.rrns[0] = promo_rrn;
+        raiz.offsets[0] = promo_offset;
         raiz.filhos[0] = cabecalho_bt->noRaiz;
         raiz.filhos[1] = promo_filho_dir;
         raiz.tipoNo = 0;
