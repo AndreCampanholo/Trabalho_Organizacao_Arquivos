@@ -36,6 +36,6 @@ void recuperar_registros_indice(char *nome_arquivo, char *arquivo_indice);
 void inserir_registros_indice(char *nome_arquivo, char *arquivo_indice, int qtd_insercoes);
 
 // Funcionalidade [10]: Remove registros logicamente no arquivo de dados e remove a chave correspondente do índice Árvore-B.
-void deletar_registros_BT(char *nome_bin, char *indice_bin, int qtd_remocoes);
+void deletar_registros_indice(char *nome_bin, char *indice_bin, int qtd_remocoes);
 
 #endif

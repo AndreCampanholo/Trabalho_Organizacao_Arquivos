@@ -6,8 +6,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-typedef struct cabecalho_bt CabecalhoBT;
-
 //* Constantes auxiliares
 
 #define TAMANHO_CABECALHO 17

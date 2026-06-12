@@ -119,4 +119,5 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
     fechar_binario_escrita(arquivo_indice, &bt_cabecalho);
 
     BinarioNaTela(nome_arquivo);
+    BinarioNaTela(nome_arquivo_indice);
 }
