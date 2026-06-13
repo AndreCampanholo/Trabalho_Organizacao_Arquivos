@@ -57,15 +57,13 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
 
         if (idx_codEstacao != -1)
         {
-            // --- Busca direta via índice árvore-B ---
-            // Como codEstacao é a chave de busca/primária, existe no máximo
-            // um registro correspondente a ela.
+            // Como codEstacao é a chave de busca/primária, existe no máximo um registro correspondente a ela.
+            // recuperar_registro_indice retorna o byte offset do registro no arquivo de dados (não um RRN)
             int chave_busca = criterios[idx_codEstacao].valorInteiro;
-            int rrn_dados = recuperar_registro_indice(arquivo_indice, &cabecalho_bt, chave_busca);
+            long offset = (long)recuperar_registro_indice(arquivo_indice, &cabecalho_bt, chave_busca);
 
-            if (rrn_dados != NULO)
+            if (offset != (long)NULO)
             {
-                long offset = rrn_para_offset(rrn_dados);
 
                 if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
                 {
@@ -91,8 +89,7 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
                 {
                     normalizar_campos_texto_registro(&registro);
 
-                    // Só remove se TODOS os critérios (incluindo codEstacao)
-                    // forem satisfeitos simultaneamente
+                    // Só remove se todos os critérios (incluindo codEstacao) forem satisfeitos simultaneamente
                     if (registro_atende_criterios(&registro, criterios, qtd_criterios))
                     {
                         if (!remover_registro_logico(arquivo_bin, &cabecalho, offset))
@@ -107,11 +104,10 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
                     }
                 }
             }
-            // rrn_dados == NULO: chave não existe no índice, nada a remover nesta busca
+            // offset == NULO: a chave não existe no índice, então não há remoções nessa busca
         }
         else
         {
-            // Todos os registros que satisfizerem os critérios são removidos.
             if (fseek(arquivo_bin, TAMANHO_CABECALHO, SEEK_SET) != 0)
             {
                 printf("%s\n", MSG_FALHA);
@@ -151,11 +147,10 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
                         return;
                     }
 
+                    // Retorna o ponteiro no meio do registro (após escrever os campos "removido" e "próximo")
                     remover_registro_indice(arquivo_indice, &cabecalho_bt, chave);
 
-                    // remover_registro_logico deixa o ponteiro no meio do registro
-                    // (após escrever 'removido' e 'proximo'); reposiciona para o
-                    // início do próximo registro antes de continuar a leitura sequencial.
+                    // Reposiciona o ponteiro para o início do próximo registro antes de continuar
                     if (fseek(arquivo_bin, offset + TAMANHO_REGISTRO, SEEK_SET) != 0)
                     {
                         printf("%s\n", MSG_FALHA);
@@ -168,8 +163,7 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         }
     }
 
-    // Recalcula as estatísticas agregadas do cabeçalho de dados (nroEstacoes,
-    // nroParesEstacoes) após todas as remoções desta execução
+    // Recalcula "nroEstacoes" e "nroParesEstacoes" do cabeçalho de dados após todas as remoções
     if (!calcular_nroEstacoes_nroParesEstacoes(arquivo_bin, &cabecalho))
     {
         printf("%s\n", MSG_FALHA);
@@ -182,7 +176,7 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
     fechar_binario_escrita(arquivo_bin, &cabecalho);
     fechar_binario_escrita_bt(arquivo_indice, &cabecalho_bt);
 
-    // Exibe a saída dos arquivos de dados e de índice já atualizados
+    // Exibe a saída dos arquivos de dados e de índice atualizados
     BinarioNaTela(nome_arquivo);
     BinarioNaTela(nome_arquivo_indice);
 }

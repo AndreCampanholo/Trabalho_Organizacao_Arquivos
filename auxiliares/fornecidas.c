@@ -13,7 +13,7 @@
  *
  * Ela vai abrir de novo para leitura e depois fechar
  * (você não vai perder pontos por isso se usar ela).
-*/
+ */
 
 void BinarioNaTela(char *arquivo)
 {

@@ -47,14 +47,17 @@ void fechar_binario_escrita(FILE *arquivo, Cabecalho *cabecalho)
     fclose(arquivo);
 }
 
-bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro) {
+bool preencher_campos_variaveis_lixo(FILE *arquivo, Registro *registro)
+{
     // 37 bytes fixos + tamanhos variáveis
     int bytes_usados = 37 + registro->tamNomeEstacao + registro->tamNomeLinha;
     int bytes_restantes = TAMANHO_REGISTRO - bytes_usados;
-    
+
     char lixo = '$';
-    for(int i = 0; i < bytes_restantes; i++) {
-        if(fwrite(&lixo, sizeof(char), 1, arquivo) != 1) {
+    for (int i = 0; i < bytes_restantes; i++)
+    {
+        if (fwrite(&lixo, sizeof(char), 1, arquivo) != 1)
+        {
             return false;
         }
     }
@@ -163,7 +166,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
         return 0;
 
     if (registro->tamNomeEstacao < 0 || registro->tamNomeLinha < 0 ||
-        registro->tamNomeEstacao + registro->tamNomeLinha > 43)
+        registro->tamNomeEstacao + registro->tamNomeLinha >= TAMANHO_CAMPO_VARIAVEL)
         return 0;
 
     if (fwrite(&registro->removido, sizeof(char), 1, arquivo) != 1)
@@ -186,7 +189,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
     // Os 43 bytes variáveis são divididos entre nomeEstacao e nomeLinha.
     if (fwrite(&registro->tamNomeEstacao, sizeof(int), 1, arquivo) != 1)
         return 0;
-        
+
     if (registro->tamNomeEstacao > 0)
     {
         if (fwrite(registro->nomeEstacao, sizeof(char), (size_t)registro->tamNomeEstacao, arquivo) !=
@@ -205,7 +208,7 @@ int escrever_registro(FILE *arquivo, Registro *registro)
             return 0;
     }
 
-    if(!preencher_campos_variaveis_lixo(arquivo, registro))
+    if (!preencher_campos_variaveis_lixo(arquivo, registro))
         return 0;
 
     return 1;

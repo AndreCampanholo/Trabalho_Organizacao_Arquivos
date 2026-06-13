@@ -127,7 +127,6 @@ int main(void)
 
     default: // Funcionalidade inválida
         printf("%s\n", MSG_FALHA);
-
     }
     return 0;
 }

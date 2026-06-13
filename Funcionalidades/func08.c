@@ -59,18 +59,21 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
             }
         }
 
-        if(busca_por_cod_estacao) {
-            int rrn_arquivo_dados = recuperar_registro_indice(arquivo_indice, &bt_cabecalho, chave_codEstacao);
-            if(rrn_arquivo_dados == -1) {
+        if (busca_por_cod_estacao)
+        {
+            // recuperar_registro_indice retorna o byte offset do registro no arquivo de dados (não um RRN)
+            long offset = (long)recuperar_registro_indice(arquivo_indice, &bt_cabecalho, chave_codEstacao);
+            if (offset == (long)NULO)
+            {
                 printf("%s\n", MSG_INEXISTENTE);
                 // Uma linha em branco é inserida para separar visualmente o resultado de cada consulta.
                 printf("\n");
 
                 continue;
             }
-            long offset = rrn_para_offset(rrn_arquivo_dados);
 
-            if(fseek(arquivo_bin, offset, SEEK_SET) != 0) {
+            if (fseek(arquivo_bin, offset, SEEK_SET) != 0)
+            {
                 fclose(arquivo_bin);
                 fclose(arquivo_indice);
                 printf("%s\n", MSG_FALHA);
@@ -87,10 +90,12 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
                 printf("%s\n", MSG_FALHA);
                 return;
             }
-            if (leitura != -1 && registro.removido != '1') {
+            if (leitura != -1 && registro.removido != '1')
+            {
                 normalizar_campos_texto_registro(&registro);
 
-                if (registro_atende_criterios(&registro, criterios, quantidade_criterios)) {
+                if (registro_atende_criterios(&registro, criterios, quantidade_criterios))
+                {
                     imprimir_registro(&registro);
                     encontrado = 1;
                 }
@@ -98,7 +103,7 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
 
             if (!encontrado)
                 printf("%s\n", MSG_INEXISTENTE);
-            
+
             printf("\n");
             continue;
         }
@@ -116,7 +121,7 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
         for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
         {
             Registro registro;
-    
+
             int leitura = ler_registro(arquivo_bin, &registro);
             if (leitura == 0)
             {

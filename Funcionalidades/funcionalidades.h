@@ -24,7 +24,7 @@ void inserir_registros(char *nome_arquivo, int qtd_insercoes);
 // Funcionalidade [6]: Atualiza campos específicos dos registros que correspondam aos critérios informados.
 void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes);
 
-//* Protótipos das funcionalidades com índice Árvore-B 
+//* Protótipos das funcionalidades com índice Árvore-B
 
 // Funcionalidade [7]: Cria um arquivo de índice Árvore-B a partir de um arquivo de dados existente.
 void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice);

@@ -4,8 +4,9 @@
 // Funcionalidade [7]: Cria um arquivo de índice com árvore B a partir de um arquivo de dados binário
 void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
 {
-    FILE *arquivo_dados = fopen(nome_arquivo_dados, "rb");
-    if (arquivo_dados == NULL)
+    FILE *arquivo_dados;
+    Cabecalho cabecalho_dados;
+    if (!abrir_binario(&arquivo_dados, nome_arquivo_dados, "rb", &cabecalho_dados, 0))
     {
         printf("%s\n", MSG_FALHA);
         return;

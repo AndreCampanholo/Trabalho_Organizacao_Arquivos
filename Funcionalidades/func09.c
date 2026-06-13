@@ -96,8 +96,15 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         }
 
         if (fseek(arquivo_bin, rrn_para_offset(rrn_insercao_arquivo_dados), SEEK_SET) != 0 ||
-            !escrever_registro(arquivo_bin, &novo_registro) ||
-            !escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_para_offset(rrn_insercao_arquivo_dados), novo_registro.codEstacao))
+            !escrever_registro(arquivo_bin, &novo_registro))
+        {
+            printf("%s\n", MSG_FALHA);
+            fechar_binario_escrita(arquivo_bin, &cabecalho);
+            fechar_binario_escrita_bt(arquivo_indice, &bt_cabecalho);
+            return;
+        }
+
+        if (!escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_para_offset(rrn_insercao_arquivo_dados), novo_registro.codEstacao))
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
