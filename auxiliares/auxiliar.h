@@ -9,8 +9,8 @@
 
 //* Constantes auxiliares
 
-#define TAMANHO_CABECALHO 17
-#define TAMANHO_REGISTRO 80
+#define TAMANHO_CABECALHO 17   // tamanho em bytes do cabeçalho do arquivo de dados
+#define TAMANHO_REGISTRO  80   // tamanho fixo em bytes de cada registro de dados
 #define TAMANHO_CAMPO_VARIAVEL 44
 #define TAMANHO_TEXTO 128
 
@@ -28,11 +28,11 @@
 
 typedef struct cabecalho
 {
-    char status;
-    int topo;
-    int proxRRN;
-    int nroEstacoes;
-    int nroParesEstacoes;
+    char status;          // '1' = consistente, '0' = inconsistente
+    int topo;             // RRN do topo da pilha de registros removidos; -1 se vazia
+    int proxRRN;          // próximo RRN disponível na área de dados
+    int nroEstacoes;      // quantidade de estações únicas no arquivo
+    int nroParesEstacoes; // quantidade de pares (estação, próxima estação) únicos
 } Cabecalho;
 
 typedef struct registro
@@ -118,8 +118,9 @@ int abrir_binario_escrita_bt(FILE **arquivo, char *nome_arquivo, CabecalhoBT *ca
 // Marca o arquivo de índice como consistente, reescreve o cabeçalho e fecha o arquivo.
 void fechar_binario_escrita_bt(FILE *arquivo, CabecalhoBT *cabecalho_bt);
 
-// Remove logicamente o registro de dados em 'offset', empilhando seu RRN
-// na pilha de removidos do cabeçalho (campos topo/proximo).
+// Remove logicamente o registro em 'offset': escreve removido='1' e proximo=cabecalho->topo no disco, depois atualiza cabecalho->topo = RRN do registro.
+// Obs: o ponteiro do arquivo fica posicionado após os 5 bytes escritos.
+// Retorna 1 em sucesso, 0 se o seek/write falhar.
 int remover_registro_logico(FILE *arquivo, Cabecalho *cabecalho, long offset);
 
 //* Protótipos de funções de leitura do .csv e processamento de cabeçalhos / variáveis
