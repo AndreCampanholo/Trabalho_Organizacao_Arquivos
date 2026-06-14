@@ -11,7 +11,8 @@ void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
         printf("%s\n", MSG_FALHA);
         return;
     }
-    FILE *arquivo_indice = fopen(nome_arquivo_indice, "wb");
+
+    FILE *arquivo_indice = fopen(nome_arquivo_indice, "wb+");
     if (arquivo_indice == NULL)
     {
         fclose(arquivo_dados);
