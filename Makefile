@@ -1,18 +1,20 @@
+EXEC = programaTrab
+
 ifeq ($(OS),Windows_NT)
-	EXEC = programaTrab.exe
-	RM = del /q /f
-	RUN = programaTrab.exe
-else
-	EXEC = programaTrab
-	RM = rm -f
-	RUN = ./programaTrab
+    EXEC := $(EXEC).exe
 endif
 
-all:
-	gcc -Wall -std=c99 -o $(EXEC) *.c auxiliares/*.c funcionalidades/*.c -lm
+CC = gcc
+CFLAGS = -Wall -std=c99
+LIBS = -lm
 
-run:
-	$(RUN)
+all:
+	$(CC) $(CFLAGS) -o $(EXEC) *.c auxiliares/*.c funcionalidades/*.c $(LIBS)
+
+run: all
+	./$(EXEC)
 
 clean:
-	$(RM) $(EXEC)
+	rm -f $(EXEC)
+
+rebuild: clean all
