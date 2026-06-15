@@ -170,8 +170,8 @@ void bt_inserir_em_no(NO *no, int pos, int chave, int offset_registro, int filho
     no->filhos[pos + 1] = filho_dir;
     no->nroChaves++;
 
-    // Atualiza o tipo: folha não tem filhos, nó intermediário tem
-    no->tipoNo = (no->filhos[0] == NULO) ? -1 : 1;
+    if (no->tipoNo != 0)
+        no->tipoNo = (no->filhos[0] == NULO) ? -1 : 1;
 }
 
 // Remove a chave na posição 'pos' do nó deslocando os elementos restantes à esquerda.
@@ -312,9 +312,7 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
 
 // Desce recursivamente até a folha correta para inserir 'chave'/'offset_registro'.
 // Retorna: 0 = inserido sem promoção, 1 = promoção necessária (promo_* preenchidos), -1 = erro.
-int bt_inserir_rec(FILE *arq_indice, CabecalhoBT *cab,
-                   int rrn_no, int chave, int offset_registro,
-                   int *promo_chave, int *promo_offset, int *promo_rrn_dir)
+int bt_inserir_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave, int offset_registro, int *promo_chave, int *promo_offset, int *promo_rrn_dir)
 {
     NO no;
     if (!bt_ler_no(arq_indice, rrn_no, &no))
@@ -322,12 +320,9 @@ int bt_inserir_rec(FILE *arq_indice, CabecalhoBT *cab,
 
     int pos = bt_obter_posicao(&no, chave);
 
-    // Chave duplicada: apenas atualiza o offset sem criar nova entrada
+    // Se a chave for duplicada, retorna 0 imediatamente
     if (pos < no.nroChaves && no.chaves[pos] == chave)
-    {
-        no.offsets[pos] = offset_registro;
-        return bt_escrever_no(arq_indice, rrn_no, &no) ? 0 : -1;
-    }
+        return 0;
 
     if (no.filhos[0] == NULO) // nó folha: inserção ocorre aqui
     {

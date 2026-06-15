@@ -465,8 +465,11 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
         }
 
         // Insere o terminador para usar a string como nome da estação na verificação de duplicatas.
-        registro.nomeEstacao[registro.tamNomeEstacao] = '\0';
-        nova_estacao(registro.nomeEstacao, &estacoes);
+        if (registro.tamNomeEstacao > 0)
+        {
+            registro.nomeEstacao[registro.tamNomeEstacao] = '\0';
+            nova_estacao(registro.nomeEstacao, &estacoes);
+        }
 
         // Verifica se o par (codEstacao, codProxEstacao) deste registro já foi contabilizado.
         int par_existe = 0;

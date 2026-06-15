@@ -29,9 +29,9 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
 
     for (int i = 0; i < qtd_insercoes; i++)
     {
-        Registro novo_registro;
+        Registro novo_registro = {0};
 
-        char novo_codLinha[5], novo_codProxEstacao[5], novo_distProxEstacao[5], novo_codLinhaIntegra[5], novo_codEstIntegra[5];
+        char novo_codLinha[20], novo_codProxEstacao[20], novo_distProxEstacao[20], novo_codLinhaIntegra[20], novo_codEstIntegra[20];
 
         if (scanf("%d", &novo_registro.codEstacao) != 1)
         {
@@ -42,7 +42,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         }
         ScanQuoteString(novo_registro.nomeEstacao);
 
-        if (scanf("%4s", novo_codLinha) != 1)
+        if (scanf("%s", novo_codLinha) != 1)
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
@@ -51,7 +51,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         }
         ScanQuoteString(novo_registro.nomeLinha);
 
-        if (scanf("%4s %4s %4s %4s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra) != 4)
+        if (scanf("%s %s %s %s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra) != 4)
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
@@ -71,7 +71,12 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         novo_registro.removido = '0';
         novo_registro.proximo = -1;
 
-        // Descobrir onde deve ocorrer a inserção no arquivo de dados
+        // Se a chave já existir no índice, a inserção é igonarada em ambos os arquivos.
+        if (recuperar_registro_indice(arquivo_indice, &bt_cabecalho, novo_registro.codEstacao) != NULO)
+        {
+            continue; 
+        }
+
         long rrn_insercao_arquivo_dados;
         if (cabecalho.topo != -1)
         {
