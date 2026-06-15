@@ -170,6 +170,7 @@ void bt_inserir_em_no(NO *no, int pos, int chave, int offset_registro, int filho
     no->filhos[pos + 1] = filho_dir;
     no->nroChaves++;
 
+    // Preserva o tipoNo == 0 se este nó é a raiz, já que essa nunca vira uma folha (-1) ou um nó intermediario (1)
     if (no->tipoNo != 0)
         no->tipoNo = (no->filhos[0] == NULO) ? -1 : 1;
 }
@@ -236,7 +237,7 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
         filhos_tmp[i] = NULO;
 
     // Intercala a nova chave na posição 'pos', copiando as existentes ao redor
-    int ic = 0; // cursor para as chaves originais do nó
+    int i_chave = 0; // índice sobre as chaves originais do nó durante a intercalação
     for (int i = 0; i < no->nroChaves + 1; i++)
     {
         if (i == pos)
@@ -246,22 +247,22 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
         }
         else
         {
-            chaves_tmp[i] = no->chaves[ic];
-            offsets_tmp[i] = no->offsets[ic];
-            ic++;
+            chaves_tmp[i] = no->chaves[i_chave];
+            offsets_tmp[i] = no->offsets[i_chave];
+            i_chave++;
         }
     }
 
     // Intercala o filho direito da nova chave na posição 'pos+1'
-    int if_ = 0; // cursor para os filhos originais do nó
+    int i_filho = 0; // índice sobre os filhos originais do nó durante a intercalação
     for (int i = 0; i < no->nroChaves + 2; i++)
     {
         if (i == pos + 1)
             filhos_tmp[i] = filho_dir;
         else
         {
-            filhos_tmp[i] = no->filhos[if_];
-            if_++;
+            filhos_tmp[i] = no->filhos[i_filho];
+            i_filho++;
         }
     }
 

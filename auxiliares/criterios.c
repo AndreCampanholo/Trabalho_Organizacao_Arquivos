@@ -219,7 +219,7 @@ void aplicar_criterio_no_registro(Registro *registro, Criterio *criterio)
 
 void imprimir_registro(Registro *registro)
 {
-    // Impressão no layout exigido: inteiros com NULO para -1 e textos vazios como NULO.
+    // Inteiros usam int_ou_nulo (imprime NULO se -1)enquanto textos variaveis usam campo_nulo para detectar strings válidas
     printf("%d ", registro->codEstacao);
 
     if (campo_nulo(registro->nomeEstacao, registro->tamNomeEstacao))
@@ -227,33 +227,33 @@ void imprimir_registro(Registro *registro)
     else
         printf("%s ", registro->nomeEstacao);
 
-    if (registro->codLinha == FLAG_CAMPO_NULO)
-        printf("NULO ");
-    else
-        printf("%d ", registro->codLinha);
+    int_ou_nulo(registro->codLinha);
 
     if (campo_nulo(registro->nomeLinha, registro->tamNomeLinha))
         printf("NULO ");
     else
         printf("%s ", registro->nomeLinha);
 
-    if (registro->codProxEstacao == FLAG_CAMPO_NULO)
-        printf("NULO ");
-    else
-        printf("%d ", registro->codProxEstacao);
-
-    if (registro->distProxEstacao == FLAG_CAMPO_NULO)
-        printf("NULO ");
-    else
-        printf("%d ", registro->distProxEstacao);
-
-    if (registro->codLinhaIntegra == FLAG_CAMPO_NULO)
-        printf("NULO ");
-    else
-        printf("%d ", registro->codLinhaIntegra);
+    int_ou_nulo(registro->codProxEstacao);
+    int_ou_nulo(registro->distProxEstacao);
+    int_ou_nulo(registro->codLinhaIntegra);
 
     if (registro->codEstIntegra == FLAG_CAMPO_NULO)
         printf("NULO\n");
     else
         printf("%d\n", registro->codEstIntegra);
+}
+// Percorre o vetor de criterios buscando um criterio não nulo sobre codEstacao. Se for encontrado, armazena o valor inteiro da chave no *chave e retorna 1.
+// Retorna 0 se nenhum critério de codEstacao estiver presente.
+int criterio_obter_codEstacao(Criterio *criterios, int quantidade, int *chave)
+{
+    for (int i = 0; i < quantidade; i++)
+    {
+        if (strcmp(criterios[i].nome, "codEstacao") == 0 && !criterios[i].ehNulo)
+        {
+            *chave = criterios[i].valorInteiro;
+            return 1;
+        }
+    }
+    return 0;
 }

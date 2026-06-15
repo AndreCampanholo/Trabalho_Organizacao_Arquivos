@@ -29,7 +29,7 @@ void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
     escrever_cabecalho_bt(arquivo_indice, &bt_cabecalho);
 
     Registro registro_lido;
-    int rrn_no_arquivo_dados = 0;
+    int rrn_atual = 0;
     while (1)
     {
         int resultado_leitura = ler_registro(arquivo_dados, &registro_lido);
@@ -37,7 +37,7 @@ void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
             break;
         if (resultado_leitura == 1)
         {
-            if (!escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_para_offset(rrn_no_arquivo_dados), registro_lido.codEstacao))
+            if (!escrever_registro_bt(arquivo_indice, &bt_cabecalho, rrn_para_offset(rrn_atual), registro_lido.codEstacao))
             {
                 fclose(arquivo_dados);
                 fclose(arquivo_indice);
@@ -45,7 +45,7 @@ void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
                 return;
             }
         }
-        rrn_no_arquivo_dados++;
+        rrn_atual++;
     }
 
     bt_cabecalho.status = '1';

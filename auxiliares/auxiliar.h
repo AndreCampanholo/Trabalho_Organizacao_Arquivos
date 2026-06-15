@@ -154,7 +154,10 @@ int ler_escrever_registros(FILE *csv, FILE *bin, Cabecalho *cabecalho, Registro 
 
 //* Protótipos de funções de critérios de busca / aplicação (funcionalidades 3, 4, 6)
 
-// Lê um par (nomeCampo, valorCampo) da entrada padrão e preenche a struct Criterio.
+// Percorre o vetor de criterios e, se encontrar um criterio nao-nulo sobre codEstacao, armazena a chave em *chave e retorna 1. Retorna 0 se não houver criterio de codEstacao.
+int criterio_obter_codEstacao(Criterio *criterios, int quantidade, int *chave);
+
+// Le um par (nomeCampo, valorCampo) da entrada padrao e preenche a struct Criterio.
 // Retorna 1 em sucesso, 0 em falha.
 int ler_criterio(Criterio *criterio);
 

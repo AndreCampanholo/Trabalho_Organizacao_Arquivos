@@ -128,8 +128,8 @@ int ler_registro(FILE *arquivo, Registro *registro)
     if (fread(&registro->removido, sizeof(char), 1, arquivo) != 1)
         return 0;
 
-    // Se o registro está marcado como removido, avança os 79 bytes restantes para manter o ponteiro alinhado no início do próximo registro e retorna -1.
-    if (registro->removido == '1' || registro->removido == '*')
+    // Se o registro esta marcado como removido ('1'), avanca os bytes restantes para manter o ponteiro alinhado e retorna -1.
+    if (registro->removido == '1')
     {
         if (fseek(arquivo, TAMANHO_REGISTRO - 1, SEEK_CUR) != 0)
             return 0;
@@ -170,7 +170,9 @@ int ler_registro(FILE *arquivo, Registro *registro)
     return 1;
 }
 
-// Escreve um registro completo na posição atual do ponteiro do arquivo. Valida os ponteiros e os tamanhos dos campos variáveis antes de escrever, retornando 0 em qualquer falha. Os bytes restantes são preenchidos com lixo para manter o tamanho fixo.
+// Escreve um registro completo na posição atual do ponteiro do arquivo. Os campos são escritos individualmente (não com um único fwrite da struct) para evitar o padding interno da struct
+// O espaço restante até TAMANHO_REGISTRO bytes é preenchido com '$', garantindo o tamanho fixo que permite calcular qualquer RRN como offset = TAMANHO_CABECALHO + rrn * TAMANHO_REGISTRO.
+// Retorna 0 em qualquer falha de validação ou escrita.
 int escrever_registro(FILE *arquivo, Registro *registro)
 {
     if (arquivo == NULL || registro == NULL)
@@ -409,13 +411,6 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
     if (arquivo == NULL || cabecalho == NULL)
         return 0;
 
-    // Estrutura local para armazenar os pares (origem, destino) já contabilizados.
-    typedef struct
-    {
-        int codEstacao;
-        int codProxEstacao;
-    } ParEstacaoLocal;
-
     EstacoesVistas estacoes;
     inicializar_estacoes_vistas(&estacoes);
     estacoes.capacidade = cabecalho->proxRRN > 0 ? cabecalho->proxRRN : 1;
@@ -424,7 +419,7 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
         return 0;
 
     int capacidade_pares = cabecalho->proxRRN > 0 ? cabecalho->proxRRN : 1;
-    ParEstacaoLocal *pares = (ParEstacaoLocal *)malloc((size_t)capacidade_pares * sizeof(ParEstacaoLocal));
+    ParEstacao *pares = (ParEstacao *)malloc((size_t)capacidade_pares * sizeof(ParEstacao));
     if (pares == NULL)
     {
         return 0;
@@ -471,26 +466,11 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
             nova_estacao(registro.nomeEstacao, &estacoes);
         }
 
-        // Verifica se o par (codEstacao, codProxEstacao) deste registro já foi contabilizado.
-        int par_existe = 0;
+        // Verifica se o par (codEstacao, codProxEstacao) deste registro ja foi contabilizado.
         if (registro.codProxEstacao != FLAG_CAMPO_NULO)
         {
-            for (int i = 0; i < qtd_pares; i++)
-            {
-                if (pares[i].codEstacao == registro.codEstacao && pares[i].codProxEstacao == registro.codProxEstacao)
-                {
-                    par_existe = 1;
-                    break;
-                }
-            }
-        }
-
-        // Adiciona o par ao vetor somente se ele ainda não tiver sido contabilizado.
-        if (registro.codProxEstacao != FLAG_CAMPO_NULO && !par_existe)
-        {
-            pares[qtd_pares].codEstacao = registro.codEstacao;
-            pares[qtd_pares].codProxEstacao = registro.codProxEstacao;
-            qtd_pares++;
+            adicionar_par_unico(registro.codEstacao, registro.codProxEstacao,
+                                &pares, &qtd_pares, &capacidade_pares);
         }
     }
 

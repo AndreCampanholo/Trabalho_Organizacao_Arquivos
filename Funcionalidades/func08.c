@@ -47,21 +47,13 @@ void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indic
 
         int encontrado = 0;
 
-        int busca_por_cod_estacao = 0;
+        // Verifica se algum critério usa codEstacao como chave de busca (acessa o índice).
         int chave_codEstacao;
-        for (int i = 0; i < quantidade_criterios; i++)
-        {
-            if (strcmp(criterios[i].nome, "codEstacao") == 0 && !criterios[i].ehNulo)
-            {
-                busca_por_cod_estacao = 1;
-                chave_codEstacao = criterios[i].valorInteiro;
-                break;
-            }
-        }
+        int busca_por_cod_estacao = criterio_obter_codEstacao(criterios, quantidade_criterios, &chave_codEstacao);
 
         if (busca_por_cod_estacao)
         {
-            // recuperar_registro_indice retorna o byte offset do registro no arquivo de dados (não um RRN)
+            // recuperar_registro_indice retorna o byte offset do registro no arquivo de dados
             long offset = (long)recuperar_registro_indice(arquivo_indice, &bt_cabecalho, chave_codEstacao);
             if (offset == (long)NULO)
             {

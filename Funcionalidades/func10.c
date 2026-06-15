@@ -44,22 +44,13 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
             return;
         }
 
-        // Verifica se a busca utiliza codEstacao (chave indexada pela árvore-B)
-        int idx_codEstacao = -1;
-        for (int i = 0; i < qtd_criterios; i++)
-        {
-            if (strcmp(criterios[i].nome, "codEstacao") == 0 && !criterios[i].ehNulo)
-            {
-                idx_codEstacao = i;
-                break;
-            }
-        }
+        // Verifica se a busca utiliza codEstacao (chave indexada pela arvore-B).
+        int chave_busca;
+        int busca_por_codEstacao = criterio_obter_codEstacao(criterios, qtd_criterios, &chave_busca);
 
-        if (idx_codEstacao != -1)
+        if (busca_por_codEstacao)
         {
-            // Como codEstacao é a chave de busca/primária, existe no máximo um registro correspondente a ela.
-            // recuperar_registro_indice retorna o byte offset do registro no arquivo de dados (não um RRN)
-            int chave_busca = criterios[idx_codEstacao].valorInteiro;
+            // Como codEstacao é a chave primaria, há, no máximo, um registro correspondente.
             long offset = (long)recuperar_registro_indice(arquivo_indice, &cabecalho_bt, chave_busca);
 
             if (offset != (long)NULO)
