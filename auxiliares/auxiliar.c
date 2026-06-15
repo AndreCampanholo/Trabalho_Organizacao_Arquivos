@@ -422,6 +422,7 @@ int calcular_nroEstacoes_nroParesEstacoes(FILE *arquivo, Cabecalho *cabecalho)
     ParEstacao *pares = (ParEstacao *)malloc((size_t)capacidade_pares * sizeof(ParEstacao));
     if (pares == NULL)
     {
+        free(estacoes.nomes);
         return 0;
     }
 

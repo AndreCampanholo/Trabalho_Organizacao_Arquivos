@@ -713,7 +713,7 @@ bool remover_registro_indice(FILE *arq_indice, CabecalhoBT *cab, int chave)
     if (!bt_remover_rec(arq_indice, cab, cab->noRaiz, chave))
         return false;
 
-    // Verifica se a raiz ficou sem chaves após a remoção (diminuiçã da altura da árvore)
+    // Verifica se a raiz ficou sem chaves após a remoção (diminuição da altura da árvore)
     NO raiz;
     bt_ler_no(arq_indice, cab->noRaiz, &raiz);
 

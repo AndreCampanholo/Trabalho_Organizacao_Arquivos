@@ -54,7 +54,6 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 		for (int rrn = 0; rrn < cabecalho.proxRRN; rrn++)
 		{
 			Registro registro;
-			// Guarda a localização base para aplicar uma possível substituição interna futuramente (caso modificado).
 			long offset = rrn_para_offset(rrn);
 
 			// Lê o registro atual do ponteiro de leitura mantido de modo sequencialmente nativo pelo rrn.
@@ -65,25 +64,19 @@ void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 				fechar_binario_escrita(arquivo_bin, &cabecalho);
 				return;
 			}
-			if (leitura == -1) // Entra aqui caso o registro analisado já esteja marcado como removido.
-			{
+			if (leitura == -1) // Caso o registro analisado já esteja marcado como removido.
 				continue;
-			}
 
 			// Adiciona o caractere nulo '\0' ao final dos campos de tamanho variável para que se possa comparar adequadamente as strings lidas com os critérios informados
 			normalizar_campos_texto_registro(&registro);
 
 			// O registro só entra na etapa final de alteração de seus dados caso ele passe por todos os critérios de busca
 			if (!registro_atende_criterios(&registro, criterios_busca, qtd_criterios_busca))
-			{
 				continue;
-			}
 
 			// Aqui a função aplica as mudanças estritamente sobre os campos que foram solicitados pelo usuário, de modo que não mexe no restante do registro preservado na memória ram
 			for (int i = 0; i < qtd_campos_atualizar; i++)
-			{
 				aplicar_criterio_no_registro(&registro, &campos_atualizacao[i]);
-			}
 
 			// Retorna o ponteiro ao início do bloco do registro contido internamente logo em seguida reescrevendo por completo a série com as devidas atualizações
 			if (fseek(arquivo_bin, offset, SEEK_SET) != 0 || !escrever_registro(arquivo_bin, &registro))

@@ -69,7 +69,12 @@ void recuperar_registros(char *nome_arquivo_bin)
         int_ou_nulo(curr_registro.codProxEstacao);
         int_ou_nulo(curr_registro.distProxEstacao);
         int_ou_nulo(curr_registro.codLinhaIntegra);
-        int_ou_nulo(curr_registro.codEstIntegra);
+
+        if (curr_registro.codEstIntegra == -1)
+            printf("NULO\n");
+        else
+            printf("%d\n", curr_registro.codEstIntegra);
+
         printf("\n");
         existe_registro = true;
     }

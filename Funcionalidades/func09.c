@@ -51,7 +51,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
         }
         ScanQuoteString(novo_registro.nomeLinha);
 
-        if (scanf("%s %s %s %s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra) != 4)
+        if (scanf("%19s %19s %19s %19s", novo_codProxEstacao, novo_distProxEstacao, novo_codLinhaIntegra, novo_codEstIntegra) != 4)
         {
             printf("%s\n", MSG_FALHA);
             fechar_binario_escrita(arquivo_bin, &cabecalho);
@@ -73,9 +73,7 @@ void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
 
         // Se a chave já existir no índice, a inserção é igonarada em ambos os arquivos.
         if (recuperar_registro_indice(arquivo_indice, &bt_cabecalho, novo_registro.codEstacao) != NULO)
-        {
             continue; 
-        }
 
         long rrn_insercao_arquivo_dados;
         if (cabecalho.topo != -1)
