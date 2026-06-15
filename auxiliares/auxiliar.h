@@ -9,15 +9,12 @@
 
 //* Constantes auxiliares
 
-#define TAMANHO_CABECALHO 17   // tamanho em bytes do cabeçalho do arquivo de dados
-#define TAMANHO_REGISTRO  80   // tamanho fixo em bytes de cada registro de dados
-#define TAMANHO_CAMPO_VARIAVEL 44
-#define TAMANHO_TEXTO 128
-
-// Limite máximo de pares (nomeCampo, valorCampo) que podem ser informados como critérios por vez
-#define MAX_CRITERIOS 8
-
-#define FLAG_CAMPO_NULO -1
+#define TAMANHO_CABECALHO 17      // 1 byte (char) + 4 ints = 17 bytes; leitura campo a campo evita padding
+#define TAMANHO_REGISTRO 80       // tamanho fixo de cada registro na área de dados
+#define TAMANHO_CAMPO_VARIAVEL 44 // limite máximo combinado para nomeEstacao e nomeLinha
+#define TAMANHO_TEXTO 128         // Máximo de caracteres que um valorTexto dentro de um Criterio pode ter
+#define MAX_CRITERIOS 8           // limite de pares (nomeCampo, valorCampo) por operação
+#define FLAG_CAMPO_NULO -1        // flag para campos inteiros ausentes no registro
 
 //* Strings de erro
 
@@ -28,27 +25,27 @@
 
 typedef struct cabecalho
 {
-    char status;          // '1' = consistente, '0' = inconsistente
+    char status;          // '1' = consistente, '0' = inconsistente (arquivo aberto para escrita)
     int topo;             // RRN do topo da pilha de registros removidos; -1 se vazia
-    int proxRRN;          // próximo RRN disponível na área de dados
-    int nroEstacoes;      // quantidade de estações únicas no arquivo
-    int nroParesEstacoes; // quantidade de pares (estação, próxima estação) únicos
+    int proxRRN;          // próximo slot disponível na área de dados
+    int nroEstacoes;      // quantidade de estações únicas (nome distinto)
+    int nroParesEstacoes; // quantidade de pares (codEstacao, codProxEstacao) únicos
 } Cabecalho;
 
 typedef struct registro
 {
-    char removido;
-    int proximo;
-    int codEstacao;
+    char removido;  // '0' = ativo, '1' = removido logicamente
+    int proximo;    // Quando removido, aponta para o próximo da pilha; -1 se for o último
+    int codEstacao; // Chave primária usada pelo índice árvore-B
     int codLinha;
     int codProxEstacao;
     int distProxEstacao;
     int codLinhaIntegra;
     int codEstIntegra;
-    int tamNomeEstacao;
-    char nomeEstacao[44];
-    int tamNomeLinha;
-    char nomeLinha[44];
+    int tamNomeEstacao;   // Comprimento do nome da estação em bytes (sem o terminador '\0')
+    char nomeEstacao[44]; // Campo variável em que só os primeiros "tamNomeEstacao" bytes são dados válidos
+    int tamNomeLinha;     // Comprimento do nome da linha em bytes (sem o terminador '\0')
+    char nomeLinha[44];   // Campo variável em que só os primeiros "tamNomeLinha" bytes são dados válidos
 } Registro;
 
 typedef struct estacoesVistas
@@ -66,10 +63,10 @@ typedef struct parEstacao
 
 typedef struct criterio
 {
-    char nome[32];
-    int ehNulo; // Flag para diferenciar um critério de busca que procura um valor null de um critério comum (válido)
-    int valorInteiro;
-    char valorTexto[TAMANHO_TEXTO];
+    char nome[32];        // nome do campo desejado (ex: "codEstacao", "nomeEstacao")
+    int ehNulo;           // 1 quando o critério busca por um valor ausente (NULO)
+    int valorInteiro;     // valor esperado para campos inteiros
+    char valorTexto[128]; // valor esperado para campos de texto
 } Criterio;
 
 //* Protótipos de funções de manipulação geral de arquivos binários e RRN
