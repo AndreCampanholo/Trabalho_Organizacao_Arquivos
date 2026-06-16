@@ -360,10 +360,10 @@ int bt_inserir_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave, in
                          promo_chave, promo_offset, promo_rrn_dir);
 }
 
-// Toma uma chave emprestada do irmão à direita ('dir') para resolver o underflow de 'esq'.
+// Pega uma chave emprestada do irmão à direita ('dir') para resolver o underflow de 'esq'.
 // O separador do pai (posição 'idx_sep') desce para o fim de 'esq';
-// a primeira chave de 'dir' sobe para o pai.
-// Se não for folha, o primeiro filho de 'dir' migra para o último filho de 'esq'.
+// A primeira chave de 'dir' sobe para o pai.
+// Se não for uma folha, o primeiro filho de 'dir' muda para o último filho de 'esq'.
 void bt_redistribuir_da_direita(NO *pai, NO *esq, NO *dir, int idx_sep, bool folha)
 {
     int k = esq->nroChaves;
@@ -398,10 +398,10 @@ void bt_redistribuir_da_direita(NO *pai, NO *esq, NO *dir, int idx_sep, bool fol
     dir->nroChaves--;
 }
 
-// Toma uma chave emprestada do irmão à esquerda ('esq') para resolver o underflow de 'dir'.
+// Pega uma chave emprestada do irmão à esquerda ('esq') para resolver o underflow de 'dir'.
 // O separador do pai (posição 'idx_sep') desce para o início de 'dir';
-// a última chave de 'esq' sobe para o pai.
-// Se não for folha, o último filho de 'esq' migra para o primeiro filho de 'dir'.
+// A última chave de 'esq' sobe para o pai.
+// Se não for uma folha, o último filho de 'esq' muda para o primeiro filho de 'dir'.
 void bt_redistribuir_da_esquerda(NO *pai, NO *esq, NO *dir, int idx_sep, bool folha)
 {
     // Abre espaço no início de 'dir' deslocando seus elementos à direita
@@ -575,12 +575,12 @@ bool bt_remover_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave)
     {
         if (folha)
         {
-            // Caso 1: chave está em folha — remoção direta
+            // Caso 1: chave está em uma folha — remoção direta
             bt_remover_de_no(&no, pos);
             return bt_escrever_no(arq_indice, rrn_no, &no);
         }
 
-        // Caso 2: chave está em nó interno — substitui pela sucessora imediata.
+        // Caso 2: chave está em um nó interno — substitui pela sucessora.
         // A sucessora é a menor chave da subárvore do filho à direita da chave removida.
         int chave_suc, offset_suc;
         bt_obter_sucessor(arq_indice, no.filhos[pos + 1], &chave_suc, &offset_suc);
@@ -594,7 +594,7 @@ bool bt_remover_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave)
         if (!bt_remover_rec(arq_indice, cab, no.filhos[pos + 1], chave_suc))
             return false;
 
-        // Corrige possível underflow no filho de onde a sucessora foi retirada
+        // Corrige o possível underflow no filho de onde a sucessora foi retirada
         bt_corrigir_underflow(arq_indice, cab, rrn_no, pos + 1);
         return true;
     }
@@ -606,7 +606,7 @@ bool bt_remover_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave)
     if (!bt_remover_rec(arq_indice, cab, no.filhos[pos], chave))
         return false;
 
-    // Corrige possível underflow no filho em que ocorreu a remoção
+    // Corrige o possível underflow no filho em que ocorreu a remoção
     bt_corrigir_underflow(arq_indice, cab, rrn_no, pos);
     return true;
 }
@@ -713,10 +713,10 @@ bool remover_registro_indice(FILE *arq_indice, CabecalhoBT *cab, int chave)
     if (!bt_remover_rec(arq_indice, cab, cab->noRaiz, chave))
         return false;
 
-    // Verifica se a raiz ficou sem chaves após a remoção (diminuição da altura da árvore)
     NO raiz;
     bt_ler_no(arq_indice, cab->noRaiz, &raiz);
 
+    // Verifica se a raiz ficou sem chaves após a remoção (diminuição da altura da árvore)
     if (raiz.nroChaves == 0)
     {
         int rrn_raiz_antiga = cab->noRaiz;
@@ -728,7 +728,7 @@ bool remover_registro_indice(FILE *arq_indice, CabecalhoBT *cab, int chave)
         }
         else
         {
-            // Se a raiz interna ficou sem chaves, logo seu único filho restante vira a nova raiz
+            // Se a raiz interna ficou sem chaves, seu único filho restante vira a nova raiz
             cab->noRaiz = raiz.filhos[0];
 
             NO nova_raiz;

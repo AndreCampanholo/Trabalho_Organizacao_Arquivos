@@ -243,6 +243,7 @@ void imprimir_registro(Registro *registro)
     else
         printf("%d\n", registro->codEstIntegra);
 }
+
 // Percorre o vetor de criterios buscando um criterio não nulo sobre codEstacao. Se for encontrado, armazena o valor inteiro da chave no *chave e retorna 1.
 // Retorna 0 se nenhum critério de codEstacao estiver presente.
 int criterio_obter_codEstacao(Criterio *criterios, int quantidade, int *chave)

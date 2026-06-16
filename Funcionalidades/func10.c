@@ -75,7 +75,7 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
                     return;
                 }
 
-                // leitura == -1: registro já removido (índice desatualizado) — ignora
+                // leitura == -1: registro já removido (índice desatualizado), logo deve ser ignorado
                 if (leitura == 1)
                 {
                     normalizar_campos_texto_registro(&registro);
@@ -95,7 +95,6 @@ void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int
                     }
                 }
             }
-            // offset == NULO: a chave não existe no índice, então não há remoções nessa busca
         }
         else
         {
