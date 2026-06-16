@@ -19,16 +19,13 @@ void bt_no_inicializar(NO *no)
         no->filhos[i] = NULO;
 }
 
-// Retorna o byte offset do nó de RRN 'rrn' no arquivo de índice.
-// Esquema: cabeçalho de TAMANHO_CABECALHO bytes seguido de blocos de TAM_NO bytes.
+// Retorna o byte offset do nó de RRN 'rrn' no arquivo de índice. Esquema cabeçalho de TAMANHO_CABECALHO bytes seguido de blocos de TAM_NO bytes.
 long bt_offset_no(int rrn)
 {
     return TAMANHO_CABECALHO + (long)rrn * TAM_NO;
 }
 
-// Lê o nó de RRN 'rrn' do arquivo de índice para a struct apontada por 'no'.
-// Os pares (chave, offset) são lidos intercalados conforme o esquema de disco citado acima.
-// Retorna true em sucesso, false em falha de seek ou read.
+// Lê o nó de RRN 'rrn' do arquivo de índice para a struct apontada por 'no'. Os pares (chave, offset) são lidos intercalados conforme o esquema de disco citado acima. Retorna true em sucesso, false em falha de seek ou read.
 bool bt_ler_no(FILE *arq_indice, int rrn, NO *no)
 {
     if (arq_indice == NULL || no == NULL)
@@ -46,7 +43,7 @@ bool bt_ler_no(FILE *arq_indice, int rrn, NO *no)
     if (fread(&no->nroChaves, sizeof(int), 1, arq_indice) != 1)
         return false;
 
-    // Pares (chave, offset) intercalados: C1 PR1 C2 PR2 C3 PR3
+    // Pares (chave, offset) intercalados C1 PR1 C2 PR2 C3 PR3
     for (int i = 0; i < CHAVES_MAX; i++)
     {
         if (fread(&no->chaves[i], sizeof(int), 1, arq_indice) != 1)
@@ -62,9 +59,7 @@ bool bt_ler_no(FILE *arq_indice, int rrn, NO *no)
     return true;
 }
 
-// Escreve a struct 'no' no arquivo de índice na posição do RRN 'rrn'.
-// Os campos são escritos campo a campo para evitar o padding interno da struct.
-// Retorna true em sucesso, false em falha de seek ou write.
+// Escreve a struct 'no' no arquivo de índice na posição do RRN 'rrn'. Os campos são escritos campo a campo para evitar o padding interno da struct. Retorna true em sucesso, false em falha de seek ou write.
 bool bt_escrever_no(FILE *arq_indice, int rrn, NO *no)
 {
     if (arq_indice == NULL || no == NULL)
@@ -97,15 +92,13 @@ bool bt_escrever_no(FILE *arq_indice, int rrn, NO *no)
     return true;
 }
 
-// Reserva um RRN para um novo nó.
-// Se a pilha de removidos não estiver vazia (topo != NULO), o espaço é reaproveitado
-// o nó do topo e avançamos o ponteiro da pilha. Caso contrário, usamos proxRRN.
+// Reserva um RRN para um novo nó. Se a pilha de removidos não estiver vazia (topo != NULO), o espaço é reaproveitado o nó do topo e avançamos o ponteiro da pilha. Caso contrário, usamos proxRRN.
 int bt_alocar_no(FILE *arq_indice, CabecalhoBT *cab)
 {
     int rrn;
     if (cab->topo != NULO)
     {
-        // Reaproveitamento: lê o campo 'proximo' do nó removido para desempilhar
+        // Reaproveitamento lê o campo 'proximo' do nó removido para desempilhar
         rrn = cab->topo;
         NO no_removido;
         bt_ler_no(arq_indice, rrn, &no_removido);
@@ -113,7 +106,7 @@ int bt_alocar_no(FILE *arq_indice, CabecalhoBT *cab)
     }
     else
     {
-        // Sem espaço reutilizável: expande o arquivo alocando um RRN novo ao final
+        // Sem espaço reutilizável expande o arquivo alocando um RRN novo ao final
         rrn = cab->proxRRN;
         cab->proxRRN++;
     }
@@ -121,9 +114,7 @@ int bt_alocar_no(FILE *arq_indice, CabecalhoBT *cab)
     return rrn;
 }
 
-// Libera o nó de RRN 'rrn' logicamente: marca removido='1', encadeia na pilha
-// atualizando o campo 'proximo' com o antigo topo e promovendo 'rrn' ao novo topo.
-// Os demais campos do nó permanecem intactos no disco, conforme a especificação.
+// Libera o nó de RRN 'rrn' logicamente marca removido='1', encadeia na pilha atualizando o campo 'proximo' com o antigo topo e promovendo 'rrn' ao novo topo. Os demais campos do nó permanecem intactos no disco, conforme a especificação.
 void bt_liberar_no(FILE *arq_indice, CabecalhoBT *cab, int rrn)
 {
     NO no;
@@ -138,9 +129,7 @@ void bt_liberar_no(FILE *arq_indice, CabecalhoBT *cab, int rrn)
     bt_escrever_no(arq_indice, rrn, &no);
 }
 
-// Retorna o índice da primeira posição em que 'chave' pode ser inserida no nó,
-// ou seja, a primeira posição i tal que chave <= no->chaves[i].
-// Se chave for maior que todas as chaves presentes, retorna no->nroChaves.
+// Retorna o índice da primeira posição em que 'chave' pode ser inserida no nó, ou seja, a primeira posição i tal que chave <= no->chaves[i]. Se chave for maior que todas as chaves presentes, retorna no->nroChaves.
 int bt_obter_posicao(NO *no, int chave)
 {
     int pos = 0;
@@ -149,9 +138,7 @@ int bt_obter_posicao(NO *no, int chave)
     return pos;
 }
 
-// Insere 'chave', 'offset_registro' e o filho direito 'filho_dir' na posição 'pos' do nó.
-// Desloca os elementos existentes à direita para abrir espaço.
-// Atualiza tipoNo com base na presença de filhos: (-1) folha, (1) intermediário.
+// Insere 'chave', 'offset_registro' e o filho direito 'filho_dir' na posição 'pos' do nó. Desloca os elementos existentes à direita para abrir espaço. Atualiza tipoNo com base na presença de filhos (-1) folha, (1) intermediário.
 void bt_inserir_em_no(NO *no, int pos, int chave, int offset_registro, int filho_dir)
 {
     // Abre espaço para a nova chave deslocando os elementos à direita
@@ -175,8 +162,7 @@ void bt_inserir_em_no(NO *no, int pos, int chave, int offset_registro, int filho
         no->tipoNo = (no->filhos[0] == NULO) ? -1 : 1;
 }
 
-// Remove a chave na posição 'pos' do nó deslocando os elementos restantes à esquerda.
-// Limpa com NULO as posições que ficam descobertas após o deslocamento.
+// Remove a chave na posição 'pos' do nó deslocando os elementos restantes à esquerda. Limpa com NULO as posições que ficam descobertas após o deslocamento.
 void bt_remover_de_no(NO *no, int pos)
 {
     // Desloca chaves e offsets à esquerda para preencher a lacuna em 'pos'
@@ -192,9 +178,7 @@ void bt_remover_de_no(NO *no, int pos)
     no->nroChaves--;
 }
 
-// Desce sempre pelo filho mais à esquerda a partir do nó de RRN 'rrn_inicio'
-// até atingir uma folha. Preenche '*chave_suc' e '*offset_suc' com os valores
-// da menor chave encontrada (sucessora imediata da chave sendo removida).
+// Desce sempre pelo filho mais à esquerda a partir do nó de RRN 'rrn_inicio' até atingir uma folha. Preenche '*chave_suc' e '*offset_suc' com os valores da menor chave encontrada (sucessora imediata da chave sendo removida).
 void bt_obter_sucessor(FILE *arq_indice, int rrn_inicio, int *chave_suc, int *offset_suc)
 {
     NO no;
@@ -209,12 +193,7 @@ void bt_obter_sucessor(FILE *arq_indice, int rrn_inicio, int *chave_suc, int *of
     *offset_suc = no.offsets[0];
 }
 
-// Divide o nó 'no' (RRN 'rrn_no') que está cheio ao receber 'chave'/'offset_registro'/'filho_dir'.
-// Monta arrays temporários com CHAVES_MAX+1 chaves intercalando a nova, determina a mediana
-// e divide em nó esquerdo (original reaproveitado) e nó direito (nova página alocada).
-// A mediana sobe para o pai via os ponteiros 'promo_*'.
-// A nova página é SEMPRE criada à direita, conforme a especificação.
-// Retorna 1 (promoção necessária) ou -1 (falha de escrita).
+// Divide o nó 'no' (RRN 'rrn_no') que está cheio ao receber 'chave'/'offset_registro'/'filho_dir'. Monta arrays temporários com CHAVES_MAX+1 chaves intercalando a nova, determina a mediana e divide em nó esquerdo (original reaproveitado) e nó direito (nova página alocada). A mediana sobe para o pai via os ponteiros 'promo_*'. A nova página é SEMPRE criada à direita, conforme a especificação. Retorna 1 (promoção necessária) ou -1 (falha de escrita).
 int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
                   int rrn_no, NO *no,
                   int chave, int offset_registro, int filho_dir,
@@ -222,8 +201,7 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
 {
     int pos = bt_obter_posicao(no, chave);
 
-    // Arrays temporários para acomodar as CHAVES_MAX+1 chaves e ORDEM+1 filhos
-    // resultantes da inserção da nova chave num nó que já estava cheio
+    // Arrays temporários para acomodar as CHAVES_MAX+1 chaves e ORDEM+1 filhos resultantes da inserção da nova chave num nó que já estava cheio
     int chaves_tmp[CHAVES_MAX + 1];
     int offsets_tmp[CHAVES_MAX + 1];
     int filhos_tmp[ORDEM + 1];
@@ -266,9 +244,7 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
         }
     }
 
-    // Calcula o índice da mediana.
-    // (total+1)/2 garante que o nó esquerdo receba uma chave a mais quando ímpar,
-    // conforme exigido pela especificação.
+    // Calcula o índice da mediana. (total+1)/2 garante que o nó esquerdo receba uma chave a mais quando ímpar, conforme exigido pela especificação.
     int total = no->nroChaves + 1;
     int meio = (total + 1) / 2; // índice da chave que será promovida ao pai
 
@@ -276,7 +252,7 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
     bt_no_inicializar(&no_esq);
     bt_no_inicializar(&no_dir);
 
-    // Nó esquerdo reaproveitado: recebe as 'meio' primeiras chaves
+    // Nó esquerdo reaproveitado recebe as 'meio' primeiras chaves
     no_esq.nroChaves = meio;
     for (int i = 0; i < meio; i++)
     {
@@ -291,7 +267,7 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
     *promo_chave = chaves_tmp[meio];
     *promo_offset = offsets_tmp[meio];
 
-    // Nova página à direita: recebe as chaves após a mediana
+    // Nova página à direita recebe as chaves após a mediana
     *promo_rrn_dir = bt_alocar_no(arq_indice, cab);
     no_dir.nroChaves = total - meio - 1;
     for (int i = 0; i < no_dir.nroChaves; i++)
@@ -311,8 +287,7 @@ int bt_dividir_no(FILE *arq_indice, CabecalhoBT *cab,
     return 1; // sinaliza ao chamador que há promoção pendente
 }
 
-// Desce recursivamente até a folha correta para inserir 'chave'/'offset_registro'.
-// Retorna: 0 = inserido sem promoção, 1 = promoção necessária (promo_* preenchidos), -1 = erro.
+// Desce recursivamente até a folha correta para inserir 'chave'/'offset_registro'. Retorna 0 = inserido sem promoção, 1 = promoção necessária (promo_* preenchidos), -1 = erro.
 int bt_inserir_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave, int offset_registro, int *promo_chave, int *promo_offset, int *promo_rrn_dir)
 {
     NO no;
@@ -329,41 +304,38 @@ int bt_inserir_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave, in
     {
         if (no.nroChaves < CHAVES_MAX)
         {
-            // Há espaço: insere diretamente sem necessidade de split
+            // Há espaço insere diretamente sem necessidade de split
             bt_inserir_em_no(&no, pos, chave, offset_registro, NULO);
             return bt_escrever_no(arq_indice, rrn_no, &no) ? 0 : -1;
         }
 
-        // Nó cheio: realiza split e sinaliza promoção para o pai
+        // Nó cheio realiza split e sinaliza promoção para o pai
         return bt_dividir_no(arq_indice, cab, rrn_no, &no,
                              chave, offset_registro, NULO,
                              promo_chave, promo_offset, promo_rrn_dir);
     }
 
-    // Nó interno: desce para o filho correspondente à posição da chave
+    // Nó interno desce para o filho correspondente à posição da chave
     int pc, po, pd; // chave, offset e RRN direito promovidos pelo filho
     int ret = bt_inserir_rec(arq_indice, cab, no.filhos[pos],
                              chave, offset_registro, &pc, &po, &pd);
     if (ret != 1)
         return ret; // 0 = sem promoção, -1 = erro
 
-    // Filho promoveu uma chave: tenta incorporá-la neste nó
+    // Filho promoveu uma chave tenta incorporá-la neste nó
     if (no.nroChaves < CHAVES_MAX)
     {
         bt_inserir_em_no(&no, pos, pc, po, pd);
         return bt_escrever_no(arq_indice, rrn_no, &no) ? 0 : -1;
     }
 
-    // Este nó também está cheio: propaga o split para cima
+    // Este nó também está cheio propaga o split para cima
     return bt_dividir_no(arq_indice, cab, rrn_no, &no,
                          pc, po, pd,
                          promo_chave, promo_offset, promo_rrn_dir);
 }
 
-// Pega uma chave emprestada do irmão à direita ('dir') para resolver o underflow de 'esq'.
-// O separador do pai (posição 'idx_sep') desce para o fim de 'esq';
-// A primeira chave de 'dir' sobe para o pai.
-// Se não for uma folha, o primeiro filho de 'dir' muda para o último filho de 'esq'.
+// Pega uma chave emprestada do irmão à direita ('dir') para resolver o underflow de 'esq'. O separador do pai (posição 'idx_sep') desce para o fim de 'esq' A primeira chave de 'dir' sobe para o pai. Se não for uma folha, o primeiro filho de 'dir' muda para o último filho de 'esq'.
 void bt_redistribuir_da_direita(NO *pai, NO *esq, NO *dir, int idx_sep, bool folha)
 {
     int k = esq->nroChaves;
@@ -398,10 +370,7 @@ void bt_redistribuir_da_direita(NO *pai, NO *esq, NO *dir, int idx_sep, bool fol
     dir->nroChaves--;
 }
 
-// Pega uma chave emprestada do irmão à esquerda ('esq') para resolver o underflow de 'dir'.
-// O separador do pai (posição 'idx_sep') desce para o início de 'dir';
-// A última chave de 'esq' sobe para o pai.
-// Se não for uma folha, o último filho de 'esq' muda para o primeiro filho de 'dir'.
+// Pega uma chave emprestada do irmão à esquerda ('esq') para resolver o underflow de 'dir'. O separador do pai (posição 'idx_sep') desce para o início de 'dir' A última chave de 'esq' sobe para o pai. Se não for uma folha, o último filho de 'esq' muda para o primeiro filho de 'dir'.
 void bt_redistribuir_da_esquerda(NO *pai, NO *esq, NO *dir, int idx_sep, bool folha)
 {
     // Abre espaço no início de 'dir' deslocando seus elementos à direita
@@ -434,9 +403,7 @@ void bt_redistribuir_da_esquerda(NO *pai, NO *esq, NO *dir, int idx_sep, bool fo
     esq->nroChaves--;
 }
 
-// Concatena 'dir' no final de 'esq', intercalando o separador do pai (posição 'idx_sep').
-// Remove o separador e o ponteiro para 'dir' do pai após a fusão.
-// 'dir' é sempre a página destruída (liberada pelo chamador após esta função).
+// Concatena 'dir' no final de 'esq', intercalando o separador do pai (posição 'idx_sep'). Remove o separador e o ponteiro para 'dir' do pai após a fusão. 'dir' é sempre a página destruída (liberada pelo chamador após esta função).
 void bt_concatenar(NO *pai, NO *esq, NO *dir, int idx_sep, bool folha)
 {
     int k = esq->nroChaves;
@@ -478,12 +445,7 @@ void bt_concatenar(NO *pai, NO *esq, NO *dir, int idx_sep, bool folha)
     pai->nroChaves--;
 }
 
-// Verifica se o filho na posição 'idx_filho' de 'rrn_pai' está em underflow e o corrige.
-// Ordem de tentativas conforme a especificação:
-//   1. Redistribuição com irmão à direita
-//   2. Redistribuição com irmão à esquerda
-//   3. Concatenação com irmão à esquerda (página direita — 'filho' — é destruída)
-//   4. Concatenação com irmão à direita  (página direita — 'dir'  — é destruída)
+// Verifica se o filho na posição 'idx_filho' de 'rrn_pai' está em underflow e o corrige. Ordem de tentativas conforme a especificação 1. Redistribuição com irmão à direita 2. Redistribuição com irmão à esquerda 3. Concatenação com irmão à esquerda (página direita   'filho'   é destruída) 4. Concatenação com irmão à direita  (página direita   'dir'    é destruída)
 void bt_corrigir_underflow(FILE *arq_indice, CabecalhoBT *cab, int rrn_pai, int idx_filho)
 {
     NO pai, filho;
@@ -529,7 +491,7 @@ void bt_corrigir_underflow(FILE *arq_indice, CabecalhoBT *cab, int rrn_pai, int 
         }
     }
 
-    // 3. Concatenação com o irmão à esquerda: 'filho' (direito) é a página destruída
+    // 3. Concatenação com o irmão à esquerda 'filho' (direito) é a página destruída
     if (idx_filho > 0)
     {
         int rrn_esq = pai.filhos[idx_filho - 1];
@@ -544,7 +506,7 @@ void bt_corrigir_underflow(FILE *arq_indice, CabecalhoBT *cab, int rrn_pai, int 
         return;
     }
 
-    // 4. Concatenação com o irmão à direita: 'dir' (direito) é a página destruída
+    // 4. Concatenação com o irmão à direita 'dir' (direito) é a página destruída
     {
         int rrn_dir = pai.filhos[idx_filho + 1];
         NO dir;
@@ -558,9 +520,7 @@ void bt_corrigir_underflow(FILE *arq_indice, CabecalhoBT *cab, int rrn_pai, int 
     }
 }
 
-// Remove 'chave' recursivamente da subárvore enraizada em 'rrn_no'.
-// Após remover em um filho, verifica e corrige underflow naquele filho.
-// Retorna true se a chave existia e foi removida, false caso contrário.
+// Remove 'chave' recursivamente da subárvore enraizada em 'rrn_no'. Após remover em um filho, verifica e corrige underflow naquele filho. Retorna true se a chave existia e foi removida, false caso contrário.
 bool bt_remover_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave)
 {
     NO no;
@@ -575,13 +535,12 @@ bool bt_remover_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave)
     {
         if (folha)
         {
-            // Caso 1: chave está em uma folha — remoção direta
+            // Caso 1 chave está em uma folha   remoção direta
             bt_remover_de_no(&no, pos);
             return bt_escrever_no(arq_indice, rrn_no, &no);
         }
 
-        // Caso 2: chave está em um nó interno — substitui pela sucessora.
-        // A sucessora é a menor chave da subárvore do filho à direita da chave removida.
+        // Caso 2 chave está em um nó interno   substitui pela sucessora. A sucessora é a menor chave da subárvore do filho à direita da chave removida.
         int chave_suc, offset_suc;
         bt_obter_sucessor(arq_indice, no.filhos[pos + 1], &chave_suc, &offset_suc);
 
@@ -602,7 +561,7 @@ bool bt_remover_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave)
     if (folha)
         return false; // chegou na folha sem encontrar a chave: não existe na árvore
 
-    // Caso 3: chave não está neste nó — desce para o filho correto
+    // Caso 3 chave não está neste nó   desce para o filho correto
     if (!bt_remover_rec(arq_indice, cab, no.filhos[pos], chave))
         return false;
 
@@ -611,9 +570,7 @@ bool bt_remover_rec(FILE *arq_indice, CabecalhoBT *cab, int rrn_no, int chave)
     return true;
 }
 
-// Insere 'chave' e 'offset_registro' no índice árvore-B.
-// Se a árvore estiver vazia, cria o primeiro nó (folha-raiz).
-// Se a inserção recursiva gerar promoção, cria uma nova raiz com a chave promovida.
+// Insere 'chave' e 'offset_registro' no índice árvore-B. Se a árvore estiver vazia, cria o primeiro nó (folha-raiz). Se a inserção recursiva gerar promoção, cria uma nova raiz com a chave promovida.
 bool inserir_indice(FILE *arq_indice, CabecalhoBT *cab, int chave, int offset_registro)
 {
     if (arq_indice == NULL || cab == NULL)
@@ -621,7 +578,7 @@ bool inserir_indice(FILE *arq_indice, CabecalhoBT *cab, int chave, int offset_re
 
     if (cab->noRaiz == NULO)
     {
-        // Árvore vazia: cria o primeiro nó, que é simultaneamente raiz e folha (tipoNo = -1)
+        // Árvore vazia cria o primeiro nó, que é simultaneamente raiz e folha (tipoNo = -1)
         int rrn_raiz = bt_alocar_no(arq_indice, cab);
         NO raiz;
         bt_no_inicializar(&raiz);
@@ -641,7 +598,7 @@ bool inserir_indice(FILE *arq_indice, CabecalhoBT *cab, int chave, int offset_re
 
     if (ret == 1)
     {
-        // A raiz sofreu split: cria nova raiz com a chave promovida e dois filhos
+        // A raiz sofreu split cria nova raiz com a chave promovida e dois filhos
         int rrn_raiz_antiga = cab->noRaiz;
         int rrn_nova_raiz = bt_alocar_no(arq_indice, cab);
 
@@ -669,8 +626,7 @@ bool inserir_indice(FILE *arq_indice, CabecalhoBT *cab, int chave, int offset_re
     return true;
 }
 
-// Busca 'chave_busca' no índice percorrendo iterativamente da raiz até uma folha.
-// Retorna o offset em bytes do registro no arquivo de dados, ou NULO se não encontrado.
+// Busca 'chave_busca' no índice percorrendo iterativamente da raiz até uma folha. Retorna o offset em bytes do registro no arquivo de dados, ou NULO se não encontrado.
 int recuperar_registro_indice(FILE *arq_indice, CabecalhoBT *cab, int chave_busca)
 {
     if (arq_indice == NULL || cab == NULL)
@@ -697,11 +653,7 @@ int recuperar_registro_indice(FILE *arq_indice, CabecalhoBT *cab, int chave_busc
     return NULO;
 }
 
-// Remove 'chave' do índice, encolhendo a árvore se necessário.
-// Após a remoção recursiva, verifica se a raiz ficou vazia:
-//   - Se era folha e ficou vazia: a árvore inteira ficou vazia (noRaiz = NULO).
-//   - Se era interna e ficou sem chaves: o único filho restante vira a nova raiz.
-// Retorna true se a chave foi encontrada e removida, false caso contrário.
+// Remove 'chave' do índice, encolhendo a árvore se necessário. Após a remoção recursiva, verifica se a raiz ficou vazia Se era folha e ficou vazia a árvore inteira ficou vazia (noRaiz = NULO). Se era interna e ficou sem chaves o único filho restante vira a nova raiz. Retorna true se a chave foi encontrada e removida, false caso contrário.
 bool remover_registro_indice(FILE *arq_indice, CabecalhoBT *cab, int chave)
 {
     if (arq_indice == NULL || cab == NULL)
