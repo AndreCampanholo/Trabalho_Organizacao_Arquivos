@@ -4,31 +4,37 @@
 // Funcionalidade [11]: A partir de dois arquivos de dados de entrada (podem ser iguais), verifica a igualdade de dois registro a partir dos campos registro1.CodProxEstacao e registro2.CodEstacao e, caso positivo, imprime ambos
 void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2)
 {
-    Cabecalho *cabecalho1;
-    Cabecalho *cabecalho2;
+    Cabecalho cabecalho1;
+    Cabecalho cabecalho2;
 
-    // Caso seja informado o mesmo arquivo, abrir apenas uma vez, caso contrário abrir ambos
+    // Caso seja informado o mesmo arquivo, abrir duas vezes para manter os ponteiros de leitura independentes.
     FILE *f1, *f2;
-    if (strcmp(nome_bin1, nome_bin2) == 0)
-    {
-        abrir_binario(&f1, nome_bin1, "rb", cabecalho1, 0);
-        f2 = f1;
-    }
-    else
-    {
-        abrir_binario(&f1, nome_bin1, "rb", cabecalho1, 0);
-        abrir_binario(&f2, nome_bin2, "rb", cabecalho2, 0);
-    }
-    
+    abrir_binario(&f1, nome_bin1, "rb", &cabecalho1, 0);
+    abrir_binario(&f2, nome_bin2, "rb", &cabecalho2, 0);
+
     Registro registro_arquivo1, registro_arquivo2;
     bool encontrou = false;
-    
-    while(f1 != EOF) {
-        ler_registro(f1, &registro_arquivo1);
+
+    while (true)
+    {
+        int leitura1 = ler_registro(f1, &registro_arquivo1);
+        if (leitura1 == 0)
+            break;
+        if (leitura1 == -1)
+            continue;
+
         fseek(f2, TAMANHO_CABECALHO, SEEK_SET);
-        while(f2 != EOF) {
-            ler_registro(f2, &registro_arquivo2);
-            if(registro_arquivo1.codProxEstacao == registro_arquivo2.codEstacao) {
+
+        while (true)
+        {
+            int leitura2 = ler_registro(f2, &registro_arquivo2);
+            if (leitura2 == 0)
+                break;
+            if (leitura2 == -1)
+                continue;
+
+            if (registro_arquivo1.codProxEstacao == registro_arquivo2.codEstacao)
+            {
                 encontrou = true;
                 normalizar_campos_texto_registro(&registro_arquivo1);
                 normalizar_campos_texto_registro(&registro_arquivo2);
@@ -37,12 +43,9 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
         }
     }
 
-    if(!encontrou) printf("%s", MSG_INEXISTENTE);
+    if (!encontrou)
+        printf("%s", MSG_INEXISTENTE);
 
     fclose(f1);
-    if (strcmp(nome_bin1, nome_bin2) != 0)
-    {
-        fclose(f2);
-    }
-    
+    fclose(f2);
 }
