@@ -38,4 +38,10 @@ void inserir_registros_indice(char *nome_arquivo, char *arquivo_indice, int qtd_
 // Funcionalidade [10]: Remove logicamente registros do arquivo de dados e de índice de acordo com os critérios de busca informados pelo usuário    
 void deletar_registros_indice(char *nome_bin, char *indice_bin, int qtd_remocoes);
 
+// Funcionalidade [11]: A partir de dois arquivos de dados de entrada (podem ser iguais), utiliza loop aninhado para verificar a igualdade de dois registro a partir dos campos registro1.CodProxEstacao e registro2.CodEstacao e, caso positivo, imprime ambos
+void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2);
+
+// Funcionalidade [12]: A partir de dois arquivos de dados de entrada (podem ser iguais), utiliza um loop único e o arquivo de índice para verificar a igualdade de dois registro a partir dos campos registro1.CodProxEstacao e registro2.CodEstacao e, caso positivo, imprime ambos
+void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2);
+
 #endif
