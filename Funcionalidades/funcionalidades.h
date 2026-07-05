@@ -44,4 +44,7 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
 // Funcionalidade [12]: A partir de dois arquivos de dados de entrada (podem ser iguais), utiliza um loop único e o arquivo de índice para verificar a igualdade de dois registro a partir dos campos registro1.CodProxEstacao e registro2.CodEstacao e, caso positivo, imprime ambos
 void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2);
 
+// Funcionalidade [13]: a partir de um arquivo de dados desordenado retornar um arquivo ordenado pelo campo desejado (codEstacao ou codProxEstacao)
+void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado);
+
 #endif

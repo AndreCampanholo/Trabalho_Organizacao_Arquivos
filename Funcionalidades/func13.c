@@ -43,12 +43,15 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
         if(leitura == 0) 
             break;
         if(leitura == -1)
+            i--;
             continue;
 
         i++;
     }
 
     heap_sort(registros, campo_ordenacao, qtd_estacoes);
+
+    fseek(f2, TAMANHO_CABECALHO, SEEK_SET);
 
     int escrita;
     for(int j = 0; j < qtd_estacoes; j++) {
