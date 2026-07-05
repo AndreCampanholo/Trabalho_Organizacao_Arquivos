@@ -43,15 +43,40 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
 
     Registro registro1, registro2;
     int leitura1 = 1, leitura2 = 1;
-    while(leitura1 != 0 || leitura2 != 0) {
-        if(leitura1 != 0)
-            leitura1 = ler_registro(f1, &registro1);
-        if(leitura2 != 0)
-            leitura2 = ler_registro(f2, &registro2);
-        if(leitura1 == 0 && leitura2 == 0)
-            return;
-
-        //continuar
+    bool encontrou = false;
+    while(leitura1 != 0 && leitura2 != 0) {
+        leitura1 = ler_registro(f1, &registro1);
+        if(leitura1 == 0)
+            break;
+        if(leitura1 = -1)
+            continue;
+        leitura2 = ler_registro(f2, &registro2);
+        if(leitura1 == 0)
+            break;
+        if(leitura1 = -1)
+            continue;
+            
+        if(registro1.codProxEstacao == registro2.codEstacao) {
+            encontrou = false;
+            normalizar_campos_texto_registro(&registro1);
+            normalizar_campos_texto_registro(&registro2);
+            printf("%d %s %s %d %s", registro1.codEstacao, registro1.nomeEstacao, registro1.nomeLinha, registro1.codProxEstacao, registro2.nomeEstacao);
+        }
     }
 
+    if(!encontrou) {
+        printf(MSG_INEXISTENTE);
+        return;
+    }
+
+    fclose(f1);
+    fclose(f2);
+    if(remove("arquivo1_ordenado") != 0) {
+        printf(MSG_INEXISTENTE);
+        return;
+    }
+    if(remove("arquivo2_ordenado") != 0) {
+        printf(MSG_INEXISTENTE);
+        return;
+    }
 }
