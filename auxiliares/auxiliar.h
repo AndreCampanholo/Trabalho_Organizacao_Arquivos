@@ -208,4 +208,8 @@ void BinarioNaTela(char *arquivo);
 // Lê uma string delimitada por aspas da entrada padrão (função previamente fornecida).
 void ScanQuoteString(char *str);
 
+// Protótipos de funções para ordenação
+
+void heap_sort(Registro *registros, char *campo_ordenacao, int qtd_estacoes);
+
 #endif
