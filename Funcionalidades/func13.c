@@ -2,7 +2,7 @@
 #include "../auxiliares/auxiliar.h"
 
 // Funcionalidade [13]: a partir de um arquivo de dados desordenado retornar um arquivo ordenado pelo campo desejado (codEstacao ou codProxEstacao)
-void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado)
+void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado, bool imprimirBinarioNaTela)
 {
     if (nome_arquivo_entrada == NULL || campo_ordenacao == NULL || nome_arquivo_ordenado == NULL)
     {
@@ -32,7 +32,11 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     }
 
     cabecalho_ordenado.status = '0';
+    cabecalho_ordenado.proxRRN = 0;
+    cabecalho_ordenado.topo = -1;
+    cabecalho_ordenado.nroEstacoes = 0;
     cabecalho_ordenado.nroParesEstacoes = cabecalho_entrada.nroParesEstacoes;
+    escrever_cabecalho(f2, &cabecalho_ordenado);
 
     int qtd_estacoes = cabecalho_entrada.nroEstacoes;
     Registro *registros = (Registro *)calloc(qtd_estacoes, sizeof(Registro));
@@ -62,7 +66,8 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
         }
     }
 
-    BinarioNaTela(nome_arquivo_ordenado);
+    if(imprimirBinarioNaTela)
+        BinarioNaTela(nome_arquivo_ordenado);
 
     free(registros);
     fclose(f1);
