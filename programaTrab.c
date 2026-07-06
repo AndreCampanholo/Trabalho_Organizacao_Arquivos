@@ -131,7 +131,11 @@ int main(void)
         break;
 
     case 11: // func11.c: ordenação de dois arquivos binários via junção de loop aninhado
-        scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2);
+        if (scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2) != 4)
+        {
+            printf("%s\n", MSG_FALHA);
+            return 0;
+        }
         if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
         {
             printf("%s", MSG_FALHA);
@@ -142,7 +146,11 @@ int main(void)
         break;
 
     case 12:
-        scanf("%127s %127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2, indice_bin);
+        if (scanf("%127s %127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2, indice_bin) != 5)
+        {
+            printf("%s\n", MSG_FALHA);
+            return 0;
+        }
 
         if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
         {
@@ -153,24 +161,34 @@ int main(void)
         juncao_loop_unico(nome_bin1, campo1, nome_bin2, campo2, indice_bin);
         break;
 
-    case 13:
-        char arq_entrada[TAMANHO_TEXTO];
-        char campo_ordenacao[TAMANHO_TEXTO];
-        char arq_ordenado[TAMANHO_TEXTO];
-
-        scanf("%127s %127s %127s", arq_entrada, campo_ordenacao, arq_ordenado);
-
-        if (strcmp(campo_ordenacao, "codProxEstacao") != 0 && strcmp(campo_ordenacao, "codEstacao") != 0)
         {
-            printf("%s", MSG_FALHA);
+        case 13:
+
+            char arq_entrada[TAMANHO_TEXTO];
+            char campo_ordenacao[TAMANHO_TEXTO];
+            char arq_ordenado[TAMANHO_TEXTO];
+
+            if (scanf("%127s %127s %127s", arq_entrada, campo_ordenacao, arq_ordenado) != 3)
+            {
+                printf("%s\n", MSG_FALHA);
+                return 0;
+            }
+
+            if (strcmp(campo_ordenacao, "codProxEstacao") != 0 && strcmp(campo_ordenacao, "codEstacao") != 0)
+            {
+                printf("%s", MSG_FALHA);
+                return 0;
+            }
+
+            ordenarArquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1);
+            break;
+        }
+    case 14:
+        if (scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2) != 4)
+        {
+            printf("%s\n", MSG_FALHA);
             return 0;
         }
-
-        ordenarArquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1);
-        break;
-
-    case 14:
-        scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2);
 
         if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
         {
@@ -181,7 +199,7 @@ int main(void)
         juncao_ordenacao_intercalacao(nome_bin1, campo1, nome_bin2, campo2);
         break;
 
-    default : // Funcionalidade inválida
+    default: // Funcionalidade inválida
         printf("%s\n", MSG_FALHA);
     }
     return 0;

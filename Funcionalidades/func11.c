@@ -8,8 +8,11 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
 
     // Caso seja informado o mesmo arquivo, abrir duas vezes para manter os ponteiros de leitura independentes.
     FILE *f1, *f2;
-    abrir_binario(&f1, nome_bin1, "rb", &cabecalho1, 0);
-    abrir_binario(&f2, nome_bin2, "rb", &cabecalho2, 0);
+    if ((!abrir_binario(&f1, nome_bin1, "rb", &cabecalho1, 0)) || (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho2, 0)))
+    {
+        printf("%s\n", MSG_FALHA);
+        return;
+    }
 
     Registro registro_arquivo1, registro_arquivo2;
     bool encontrou = false;
@@ -37,7 +40,7 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
                 encontrou = true;
                 normalizar_campos_texto_registro(&registro_arquivo1);
                 normalizar_campos_texto_registro(&registro_arquivo2);
-                printf("%d %s %s %d %s", registro_arquivo1.codEstacao, registro_arquivo1.nomeEstacao, registro_arquivo1.nomeLinha, registro_arquivo1.codProxEstacao, registro_arquivo2.nomeEstacao);
+                printf("%d %s %s %d %s\n", registro_arquivo1.codEstacao, registro_arquivo1.nomeEstacao, registro_arquivo1.nomeLinha, registro_arquivo1.codProxEstacao, registro_arquivo2.nomeEstacao);
             }
         }
     }

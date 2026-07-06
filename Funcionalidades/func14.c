@@ -52,9 +52,9 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
         if (leitura1 == -1)
             continue;
         leitura2 = ler_registro(f2, &registro2);
-        if (leitura1 == 0)
+        if (leitura2 == 0)
             break;
-        if (leitura1 == -1)
+        if (leitura2 == -1)
             continue;
 
         if (registro1.codProxEstacao == registro2.codEstacao)
@@ -68,7 +68,7 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
 
     if (!encontrou)
     {
-        printf(MSG_INEXISTENTE);
+        printf("%s", MSG_INEXISTENTE);
         return;
     }
 
@@ -76,12 +76,12 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
     fclose(f2);
     if (remove("arquivo1_ordenado") != 0)
     {
-        printf(MSG_INEXISTENTE);
+        printf("%s", MSG_INEXISTENTE);
         return;
     }
     if (remove("arquivo2_ordenado") != 0)
     {
-        printf(MSG_INEXISTENTE);
+        printf("%s", MSG_INEXISTENTE);
         return;
     }
 }
