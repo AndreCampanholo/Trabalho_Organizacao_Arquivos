@@ -83,6 +83,12 @@ long rrn_para_offset(int rrn);
 // Lê um registro do arquivo. Retorna 1 (lido), -1 (removido, ponteiro avançado) ou 0 (erro/EOF).
 int ler_registro(FILE *arquivo, Registro *registro);
 
+// Lê todos os registros (exceto aqueles removidos logicamente) de um arquivo de dados para um vetor alocado dinamicamente
+// Função usada na func13.c e na func14.c  
+// Preenche *qtd com a quantidade de registros lidos
+// Retorna o vetor alocado ou NULL em caso de erro de abertura ou alocação (nesse caso *qtd é definido como -1).
+Registro *carregar_registros(char *nome_arquivo, int *qtd);
+
 // Escreve um registro no arquivo na posição atual do ponteiro. Retorna 1 em sucesso, 0 em falha.
 int escrever_registro(FILE *arquivo, Registro *registro);
 

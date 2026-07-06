@@ -23,7 +23,6 @@ int main(void)
 
     char campo1[TAMANHO_TEXTO], campo2[TAMANHO_TEXTO];
 
-    // Variáveis de quantidade declaradas no escopo do switch para evitar redeclaração
     int qtd_remocoes;
     int qtd_insercoes;
     int qtd_atualizacoes;
@@ -39,7 +38,7 @@ int main(void)
         criar_tabela(nome_csv, nome_bin1);
         break;
 
-    case 2: // func02: impressão de registros do .bin
+    case 2: // func02: impressão dos registros do .bin
         if (scanf("%127s", nome_bin1) != 1)
         {
             printf("%s\n", MSG_FALHA);
@@ -130,7 +129,7 @@ int main(void)
         deletar_registros_indice(nome_bin1, indice_bin, qtd_remocoes);
         break;
 
-    case 11: // func11.c: ordenação de dois arquivos binários via junção de loop aninhado
+    case 11: // func11.c: junção de loop aninhado (força bruta) entre dois arquivos de dados
         if (scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2) != 4)
         {
             printf("%s\n", MSG_FALHA);
@@ -145,7 +144,7 @@ int main(void)
         juncao_loop_aninhado(nome_bin1, campo1, nome_bin2, campo2);
         break;
 
-    case 12:
+    case 12: // func12.c: junção de loop único, usando o índice árvore-B de arquivo2
         if (scanf("%127s %127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2, indice_bin) != 5)
         {
             printf("%s\n", MSG_FALHA);
@@ -161,29 +160,29 @@ int main(void)
         juncao_loop_unico(nome_bin1, campo1, nome_bin2, campo2, indice_bin);
         break;
 
+    case 13: // func13.c: ordenação de um arquivo de dados na RAM e gravação do resultado no disco
+    {
+        char arq_entrada[TAMANHO_TEXTO];
+        char campo_ordenacao[TAMANHO_TEXTO];
+        char arq_ordenado[TAMANHO_TEXTO];
+
+        if (scanf("%127s %127s %127s", arq_entrada, campo_ordenacao, arq_ordenado) != 3)
         {
-        case 13:
-
-            char arq_entrada[TAMANHO_TEXTO];
-            char campo_ordenacao[TAMANHO_TEXTO];
-            char arq_ordenado[TAMANHO_TEXTO];
-
-            if (scanf("%127s %127s %127s", arq_entrada, campo_ordenacao, arq_ordenado) != 3)
-            {
-                printf("%s\n", MSG_FALHA);
-                return 0;
-            }
-
-            if (strcmp(campo_ordenacao, "codProxEstacao") != 0 && strcmp(campo_ordenacao, "codEstacao") != 0)
-            {
-                printf("%s", MSG_FALHA);
-                return 0;
-            }
-
-            ordenarArquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1);
-            break;
+            printf("%s\n", MSG_FALHA);
+            return 0;
         }
-    case 14:
+
+        if (strcmp(campo_ordenacao, "codProxEstacao") != 0 && strcmp(campo_ordenacao, "codEstacao") != 0)
+        {
+            printf("%s", MSG_FALHA);
+            return 0;
+        }
+
+        ordenarArquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1);
+        break;
+    }
+
+    case 14: // func14.c: junção ordenação-intercalação (merge-join) entre dois arquivos de dados
         if (scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2) != 4)
         {
             printf("%s\n", MSG_FALHA);

@@ -7,7 +7,7 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
     Cabecalho cabecalho_arquivo2;
     CabecalhoBT cabecalho_indice;
 
-    // Caso seja informado o mesmo arquivo, abrir duas vezes para manter os ponteiros de leitura independentes.
+    // Caso seja informado o mesmo arquivo (autojunção), abre-se duas vezes para manter os ponteiros de leitura de cada lado da junção independentes entre si
     FILE *f1, *f2, *f3;
     if ((!abrir_binario(&f1, nome_bin1, "rb", &cabecalho_arquivo1, 0)) || (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho_arquivo2, 0)) || (!abrir_binario_bt(&f3, nome_indice, "rb", &cabecalho_indice, 0)))
     {
@@ -24,9 +24,11 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
         int leitura1 = ler_registro(f1, &registro_arquivo1);
         if (leitura1 == 0)
             break;
-        if (leitura1 == -1)
+        if (leitura1 == -1) // registro logicamente removido (pula para o próximo)
             continue;
 
+        // Busca no arquivo de índice pelo codProxEstacao do registro_arquivo1
+        // Como codEstacao é uma chave primária única em arquivo2, há, no máximo, um resultado.
         int offset_encontrado_indice = recuperar_registro_indice(f3, &cabecalho_indice, registro_arquivo1.codProxEstacao);
         if (offset_encontrado_indice != NULO)
         {

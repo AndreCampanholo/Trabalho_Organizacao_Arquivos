@@ -564,6 +564,43 @@ int remover_registro_logico(FILE *arquivo, Cabecalho *cabecalho, long offset)
     return 1;
 }
 
+Registro *carregar_registros(char *nome_arquivo, int *qtd)
+{
+    Cabecalho cabecalho;
+    FILE *arquivo;
+    if (!abrir_binario(&arquivo, nome_arquivo, "rb", &cabecalho, 0))
+    {
+        *qtd = -1;
+        return NULL;
+    }
+
+    Registro *registros = (Registro *)calloc(cabecalho.proxRRN, sizeof(Registro));
+    if (registros == NULL && cabecalho.proxRRN > 0)
+    {
+        fclose(arquivo);
+        *qtd = -1;
+        return NULL;
+    }
+
+    int i = 0;
+    while (true)
+    {
+        Registro registro;
+        int leitura = ler_registro(arquivo, &registro);
+        if (leitura == 0)
+            break;
+        if (leitura == -1)
+            continue;
+
+        registros[i] = registro;
+        i++;
+    }
+
+    fclose(arquivo);
+    *qtd = i;
+    return registros;
+}
+
 // Troca os valores de dois registros
 void swap(Registro *a, Registro *b)
 {
@@ -638,7 +675,7 @@ void build_max_heap(Registro *registros, char *campo_ordenacao, int qtd_estacoes
     }
 }
 
-// Implementa o heap sort em todos os registros do arquivo de dados (em RAM) de acordo com o campo de ordenação informado.
+// Implementa o heap sort em todos os registros do arquivo de dados de acordo com o campo de ordenação informado.
 void heap_sort(Registro *registros, char *campo_ordenacao, int qtd_estacoes)
 {
     build_max_heap(registros, campo_ordenacao, qtd_estacoes);

@@ -6,7 +6,7 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
     Cabecalho cabecalho1;
     Cabecalho cabecalho2;
 
-    // Caso seja informado o mesmo arquivo, abrir duas vezes para manter os ponteiros de leitura independentes.
+    // Caso seja informado o mesmo arquivo (autojunção), abre-se duas vezes para manter os ponteiros de leitura de cada lado da junção independentes entre si
     FILE *f1, *f2;
     if ((!abrir_binario(&f1, nome_bin1, "rb", &cabecalho1, 0)) || (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho2, 0)))
     {
@@ -22,9 +22,10 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
         int leitura1 = ler_registro(f1, &registro_arquivo1);
         if (leitura1 == 0)
             break;
-        if (leitura1 == -1)
+        if (leitura1 == -1) // registro logicamente removido (pula para o próximo)
             continue;
 
+        // Reinicia o loop interno do início da seção de dados a cada registro externo
         fseek(f2, TAMANHO_CABECALHO, SEEK_SET);
 
         while (true)

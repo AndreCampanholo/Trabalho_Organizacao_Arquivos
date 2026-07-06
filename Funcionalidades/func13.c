@@ -24,14 +24,16 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
         printf("%s", MSG_FALHA);
         return;
     }
+    // f1 só foi aberto para o cabecalho_entrada e já é fechado, pois carregar_registros reabre o arquivo por conta própria para ler os registros
+    fclose(f1);
 
     if ((f2 = fopen(nome_arquivo_ordenado, "wb")) == NULL)
     {
-        fclose(f1);
         printf("%s", MSG_FALHA);
         return;
     }
 
+    // Escreve um cabeçalho provisório (status '0' = inconsistente) só para reservar o espaço no início do arquivo. Ressalta-se que os valores reais de proxRRN/nroEstacoes são gravados mais abaixo, antes de fechar o arquivo definitivamente
     cabecalho_ordenado.status = '0';
     cabecalho_ordenado.proxRRN = 0;
     cabecalho_ordenado.topo = -1;
@@ -39,23 +41,21 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     cabecalho_ordenado.nroParesEstacoes = cabecalho_entrada.nroParesEstacoes;
     escrever_cabecalho(f2, &cabecalho_ordenado);
 
-    int qtd_estacoes = cabecalho_entrada.nroEstacoes;
-    Registro *registros = (Registro *)calloc(qtd_estacoes, sizeof(Registro));
-
-    int i = 0;
-    while (true)
+    // Lê o arquivo inteiro (registros ativos) para a RAM
+    int qtd_lida;
+    Registro *registros = carregar_registros(nome_arquivo_entrada, &qtd_lida);
+    if (qtd_lida == -1)
     {
-        int leitura = ler_registro(f1, &registros[i]);
-        if (leitura == 0)
-            break;
-        if (leitura == -1)
-            continue;
-
-        i++;
+        printf("%s", MSG_FALHA);
+        fclose(f2);
+        return;
     }
+    int i = qtd_lida;
 
-    heap_sort(registros, campo_ordenacao, qtd_estacoes);
+    // Ordena em memória pelo campo pedido, usando o heap sort
+    heap_sort(registros, campo_ordenacao, i);
 
+    // Escreve os registros já ordenados de volta no arquivo de saída
     fseek(f2, TAMANHO_CABECALHO, SEEK_SET);
 
     int escrita;
@@ -65,18 +65,21 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
         if (!escrita)
         {
             printf("%s", MSG_FALHA);
+            free(registros);
+            fclose(f2);
             return;
         }
     }
-
-    if (imprimirBinarioNaTela)
-        BinarioNaTela(nome_arquivo_ordenado);
 
     cabecalho_ordenado.proxRRN = i;
     cabecalho_ordenado.topo = -1;
     cabecalho_ordenado.nroEstacoes = i;
 
     free(registros);
-    fclose(f1);
     fechar_binario_escrita(f2, &cabecalho_ordenado);
+
+    // A impressão só ocorre quando chamada diretamente pela funcionalidade [13]
+    // A [14] chama com imprimirBinarioNaTela = false
+    if (imprimirBinarioNaTela)
+        BinarioNaTela(nome_arquivo_ordenado);
 }
