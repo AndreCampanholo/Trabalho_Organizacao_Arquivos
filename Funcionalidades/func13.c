@@ -33,12 +33,10 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
         return;
     }
 
-    // Escreve um cabeçalho provisório (status '0' = inconsistente) só para reservar o espaço no início do arquivo. Ressalta-se que os valores reais de proxRRN/nroEstacoes são gravados mais abaixo, antes de fechar o arquivo definitivamente
+    cabecalho_ordenado = cabecalho_entrada;
     cabecalho_ordenado.status = '0';
-    cabecalho_ordenado.proxRRN = 0;
     cabecalho_ordenado.topo = -1;
-    cabecalho_ordenado.nroEstacoes = 0;
-    cabecalho_ordenado.nroParesEstacoes = cabecalho_entrada.nroParesEstacoes;
+    cabecalho_ordenado.proxRRN = 0;
     escrever_cabecalho(f2, &cabecalho_ordenado);
 
     // Lê o arquivo inteiro (registros ativos) para a RAM
@@ -73,7 +71,6 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
 
     cabecalho_ordenado.proxRRN = i;
     cabecalho_ordenado.topo = -1;
-    cabecalho_ordenado.nroEstacoes = i;
 
     free(registros);
     fechar_binario_escrita(f2, &cabecalho_ordenado);
