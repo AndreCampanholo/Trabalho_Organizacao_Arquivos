@@ -33,6 +33,7 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
         return;
     }
 
+    // Escreve um cabeçalho provisório (status '0' = inconsistente) só para reservar o espaço no início do arquivo. Ressalta-se que os valores reais de proxRRN/nroEstacoes são gravados mais abaixo, antes de fechar o arquivo definitivamente
     cabecalho_ordenado = cabecalho_entrada;
     cabecalho_ordenado.status = '0';
     cabecalho_ordenado.topo = -1;
