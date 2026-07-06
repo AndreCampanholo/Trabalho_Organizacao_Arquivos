@@ -1,4 +1,4 @@
-#include "../headers/auxiliar.h"
+#include "../headers/auxiliares.h"
 #include "../headers/bt.h"
 
 // Inicializa todos os campos de um nó com valores padrão/nulos.

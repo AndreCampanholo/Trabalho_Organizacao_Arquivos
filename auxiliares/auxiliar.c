@@ -1,4 +1,4 @@
-#include "../headers/auxiliar.h"
+#include "../headers/auxiliares.h"
 #include "../headers/bt.h"
 
 // Converte um RRN para o offset em bytes no arquivo binário, levando em conta o tamanho fixo do cabeçalho e de cada registro.
