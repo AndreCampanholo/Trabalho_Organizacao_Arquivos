@@ -1,4 +1,5 @@
-#include "../auxiliares/auxiliar.h"
+#include "../headers/funcionalidades.h"
+#include "../headers/auxiliares.h"
 
 void criar_tabela(char *nome_csv, char *nome_bin)
 {

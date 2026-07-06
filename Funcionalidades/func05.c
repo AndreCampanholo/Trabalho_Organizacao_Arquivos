@@ -1,4 +1,5 @@
-#include "../auxiliares/auxiliar.h"
+#include "../headers/funcionalidades.h"
+#include "../headers/auxiliares.h"
 
 void inserir_registros(char *nome_arquivo, int qtd_insercoes)
 {

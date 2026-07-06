@@ -1,4 +1,5 @@
-#include "../auxiliares/auxiliar.h"
+#include "../headers/funcionalidades.h"
+#include "../headers/auxiliares.h"
 
 void recuperar_registros_condicional(char *nome_arquivo_bin)
 {

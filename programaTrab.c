@@ -1,7 +1,7 @@
 // André Campanholo Paschoalini - 14558061
 // Eduardo Poltroniere da Silva - 16862892
 
-#include "funcionalidades/funcionalidades.h"
+#include "headers/funcionalidades.h"
 
 int main(void)
 {

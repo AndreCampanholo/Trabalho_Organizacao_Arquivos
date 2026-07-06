@@ -1,5 +1,5 @@
-#include "funcionalidades.h"
-#include "../auxiliares/auxiliar.h"
+#include "../headers/auxiliares.h"
+#include "../headers/funcionalidades.h"
 
 void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2, char *nome_indice)
 {

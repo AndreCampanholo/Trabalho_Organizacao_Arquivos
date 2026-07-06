@@ -1,5 +1,5 @@
-#include "funcionalidades.h"
-#include "../auxiliares/auxiliar.h"
+#include "../headers/funcionalidades.h"
+#include "../headers/auxiliares.h"
 
 void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2)
 {

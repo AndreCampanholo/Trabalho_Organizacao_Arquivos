@@ -1,5 +1,5 @@
-#include "../auxiliares/auxiliar.h"
-#include "../auxiliares/bt.h"
+#include "../headers/funcionalidades.h"
+#include "../headers/auxiliares.h"
 
 void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int qtd_insercoes)
 {

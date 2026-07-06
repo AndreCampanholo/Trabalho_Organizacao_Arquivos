@@ -1,5 +1,5 @@
-#include "funcionalidades.h"
-#include "../auxiliares/auxiliar.h"
+#include "../headers/funcionalidades.h"
+#include "../headers/auxiliares.h"
 
 void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado, bool imprimirBinarioNaTela)
 {

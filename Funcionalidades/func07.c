@@ -1,5 +1,5 @@
-#include "../auxiliares/auxiliar.h"
-#include "../auxiliares/bt.h"
+#include "../headers/funcionalidades.h"
+#include "../headers/auxiliares.h"
 
 void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
 {

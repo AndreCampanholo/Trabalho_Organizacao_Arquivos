@@ -1,5 +1,5 @@
-#include "auxiliar.h"
-#include "bt.h"
+#include "../headers/auxiliar.h"
+#include "../headers/bt.h"
 
 // Inicializa todos os campos de um nó com valores padrão/nulos.
 void bt_no_inicializar(NO *no)

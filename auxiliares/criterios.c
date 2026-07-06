@@ -1,4 +1,4 @@
-#include "auxiliar.h"
+#include "../headers/auxiliar.h"
 
 // O campo de texto é considerado nulo quando o seu tamanho é igual a 0 (ou quando a string for vazia).
 bool campo_nulo(char *valor, int tamanho)
