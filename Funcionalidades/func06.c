@@ -1,6 +1,5 @@
 #include "../auxiliares/auxiliar.h"
 
-// Funcionalidade [6]: Atualiza os registros para a versão informada pelo usuário.
 void atualizar_registros(char *nome_arquivo, int qtd_atualizacoes)
 {
 	// Validação dos parâmetros embutidos da função.

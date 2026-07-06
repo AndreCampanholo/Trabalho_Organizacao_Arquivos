@@ -1,7 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 #include "../auxiliares/bt.h"
 
-// Funcionalidade [10]: Remove logicamente registros do arquivo de dados e de índice de acordo com os critérios de busca informados pelo usuário
 void deletar_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int qtd_remocoes)
 {
     // Validação dos parâmetros recebidos pela função

@@ -45,6 +45,9 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
 void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2, char *nome_indice);
 
 // Funcionalidade [13]: a partir de um arquivo de dados desordenado retornar um arquivo ordenado pelo campo desejado (codEstacao ou codProxEstacao)
+// OBS: Criou-se um parâmetro booleano para permitir a impressão dos registros, após a ordenação, apenas na função 13 (Na 14 ele não deve imprimir imediatamente)
 void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado, bool imprimirBinarioNaTela);
+
+void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2);
 
 #endif

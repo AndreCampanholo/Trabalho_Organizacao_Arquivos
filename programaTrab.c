@@ -15,9 +15,13 @@ int main(void)
     getchar();
 
     char nome_csv[TAMANHO_TEXTO];
+
     char nome_bin1[TAMANHO_TEXTO];
     char nome_bin2[TAMANHO_TEXTO];
+
     char indice_bin[TAMANHO_TEXTO];
+
+    char campo1[TAMANHO_TEXTO], campo2[TAMANHO_TEXTO];
 
     // Variáveis de quantidade declaradas no escopo do switch para evitar redeclaração
     int qtd_remocoes;
@@ -127,17 +131,57 @@ int main(void)
         break;
 
     case 11: // func11.c: ordenação de dois arquivos binários via junção de loop aninhado
-        char campo1[TAMANHO_TEXTO], campo2[TAMANHO_TEXTO];
         scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2);
-        if(strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0) {
+        if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
+        {
             printf("%s", MSG_FALHA);
             return 0;
         }
-        
+
         juncao_loop_aninhado(nome_bin1, campo1, nome_bin2, campo2);
         break;
 
-    default: // Funcionalidade inválida
+    case 12:
+        scanf("%127s %127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2, indice_bin);
+
+        if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
+        {
+            printf("%s", MSG_FALHA);
+            return 0;
+        }
+
+        juncao_loop_unico(nome_bin1, campo1, nome_bin2, campo2, indice_bin);
+        break;
+
+    case 13:
+        char arq_entrada[TAMANHO_TEXTO];
+        char campo_ordenacao[TAMANHO_TEXTO];
+        char arq_ordenado[TAMANHO_TEXTO];
+
+        scanf("%127s %127s %127s", arq_entrada, campo_ordenacao, arq_ordenado);
+
+        if (strcmp(campo_ordenacao, "codProxEstacao") != 0 && strcmp(campo_ordenacao, "codEstacao") != 0)
+        {
+            printf("%s", MSG_FALHA);
+            return 0;
+        }
+
+        ordenarArquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1);
+        break;
+
+    case 14:
+        scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2);
+
+        if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
+        {
+            printf("%s", MSG_FALHA);
+            return 0;
+        }
+
+        juncao_ordenacao_intercalacao(nome_bin1, campo1, nome_bin2, campo2);
+        break;
+
+    default : // Funcionalidade inválida
         printf("%s\n", MSG_FALHA);
     }
     return 0;

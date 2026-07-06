@@ -1,8 +1,6 @@
 #include "funcionalidades.h"
 #include "../auxiliares/auxiliar.h"
-#include "../auxiliares/bt.h"
 
-// Funcionalidade [12]: A partir de dois arquivos de dados de entrada (podem ser iguais), verifica a igualdade de dois registro a partir dos campos registro1.CodProxEstacao e registro2.CodEstacao e, caso positivo, imprime ambos
 void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2, char *nome_indice)
 {
     Cabecalho cabecalho_arquivo1;
@@ -14,7 +12,6 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
     abrir_binario(&f1, nome_bin1, "rb", &cabecalho_arquivo1, 0);
     abrir_binario(&f2, nome_bin2, "rb", &cabecalho_arquivo2, 0);
     abrir_binario_bt(&f3, nome_indice, "rb", &cabecalho_indice, 0);
-
 
     Registro registro_arquivo1;
     Registro registro_proxEstacao;

@@ -1,6 +1,5 @@
 #include "../auxiliares/auxiliar.h"
 
-// Funcionalidade [3]: Imprime todos os registros que atendem aos critérios informados pelo usuário.
 void recuperar_registros_condicional(char *nome_arquivo_bin)
 {
     // Em cada consulta, o registro só é aceito quando ele atende a todos os critérios ao mesmo tempo

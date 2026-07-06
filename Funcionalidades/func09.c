@@ -1,7 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 #include "../auxiliares/bt.h"
 
-// Funcionalidade [9]: Insere os registros informados pelo usuário tanto no arquivo de dados quanto no arquivo de índice.
 void inserir_registros_indice(char *nome_arquivo, char *nome_arquivo_indice, int qtd_insercoes)
 {
     if (nome_arquivo == NULL || qtd_insercoes <= 0)

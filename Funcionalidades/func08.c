@@ -1,7 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 #include "../auxiliares/bt.h"
 
-// Funcionalidade [8]: Imprime todos os registros que atendem aos critérios informados pelo usuário. Caso o critério de busca seja codEstacao utiliza o arquivo de índice.
 void recuperar_registros_indice(char *nome_arquivo_bin, char *nome_arquivo_indice)
 {
     // Em cada consulta, o registro só é aceito quando ele atende a todos os critérios ao mesmo tempo

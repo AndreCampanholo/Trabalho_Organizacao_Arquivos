@@ -1,7 +1,6 @@
 #include "../auxiliares/auxiliar.h"
 #include "../auxiliares/bt.h"
 
-// Funcionalidade [7]: Cria um arquivo de índice com árvore B a partir de um arquivo de dados binário
 void criar_indice(char *nome_arquivo_dados, char *nome_arquivo_indice)
 {
     FILE *arquivo_dados;

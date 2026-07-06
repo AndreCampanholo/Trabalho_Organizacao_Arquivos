@@ -565,49 +565,64 @@ int remover_registro_logico(FILE *arquivo, Cabecalho *cabecalho, long offset)
 }
 
 // Troca os valores de dois registros
-void swap(Registro *a, Registro *b) {
+void swap(Registro *a, Registro *b)
+{
     Registro temp = *a;
     *a = *b;
     *b = temp;
 }
 
 // Compara o codEstacao de dois registros retornando (>0) se a > b ou (<0) de a < b
-int comparar_codEstacao(Registro a, Registro b) {
+int comparar_codEstacao(Registro a, Registro b)
+{
     return a.codEstacao - b.codEstacao;
 }
 
 // Compara o codProxEstacao de dois registros retornando (>0) se a > b ou (<0) de a < b. codProxEstacao pode ser nulo (-1) e valores nulos devem vir depois que não nulos, logo, devem ser considerados como maiores
-int comparar_codProxEstacao(Registro a, Registro b) {
-    if(a.codProxEstacao < 0) return 1;
-    if(b.codProxEstacao < 0) return -1;
+int comparar_codProxEstacao(Registro a, Registro b)
+{
+    if (a.codProxEstacao < 0)
+        return 1;
+    if (b.codProxEstacao < 0)
+        return -1;
     return a.codProxEstacao - b.codProxEstacao;
 }
 
 // Mantém a max heap recursivamente
-void heapify(Registro *registros, char *campo_ordenacao, int n, int i) {
+void heapify(Registro *registros, char *campo_ordenacao, int n, int i)
+{
     int maior = i;
-    int filho_esq = 2 * i + 1; 
-    int filho_dir = 2 * i + 2; 
+    int filho_esq = 2 * i + 1;
+    int filho_dir = 2 * i + 2;
 
-    if(strcmp(campo_ordenacao, "codEstacao") == 0) {
-        if (filho_esq < n && comparar_codEstacao(registros[filho_esq], registros[maior]) > 0) {
+    if (strcmp(campo_ordenacao, "codEstacao") == 0)
+    {
+        if (filho_esq < n && comparar_codEstacao(registros[filho_esq], registros[maior]) > 0)
+        {
             maior = filho_esq;
         }
-        if (filho_dir < n && comparar_codEstacao(registros[filho_dir], registros[maior]) > 0) {
+        if (filho_dir < n && comparar_codEstacao(registros[filho_dir], registros[maior]) > 0)
+        {
             maior = filho_dir;
         }
-        if (maior != i) {
+        if (maior != i)
+        {
             swap(&registros[i], &registros[maior]);
             heapify(registros, campo_ordenacao, n, maior);
         }
-    } else {
-        if (filho_esq < n && comparar_codProxEstacao(registros[filho_esq], registros[maior]) > 0) {
+    }
+    else
+    {
+        if (filho_esq < n && comparar_codProxEstacao(registros[filho_esq], registros[maior]) > 0)
+        {
             maior = filho_esq;
         }
-        if (filho_dir < n && comparar_codProxEstacao(registros[filho_dir], registros[maior]) > 0) {
+        if (filho_dir < n && comparar_codProxEstacao(registros[filho_dir], registros[maior]) > 0)
+        {
             maior = filho_dir;
         }
-        if (maior != i) {
+        if (maior != i)
+        {
             swap(&registros[i], &registros[maior]);
             heapify(registros, campo_ordenacao, n, maior);
         }
@@ -615,17 +630,21 @@ void heapify(Registro *registros, char *campo_ordenacao, int n, int i) {
 }
 
 // Constrói a max heap inicial
-void build_max_heap(Registro *registros, char *campo_ordenacao, int qtd_estacoes) {
-    for (int i = (qtd_estacoes / 2) - 1; i >= 0; i--) {
+void build_max_heap(Registro *registros, char *campo_ordenacao, int qtd_estacoes)
+{
+    for (int i = (qtd_estacoes / 2) - 1; i >= 0; i--)
+    {
         heapify(registros, campo_ordenacao, qtd_estacoes, i);
     }
 }
 
 // Implementa o heap sort em todos os registros do arquivo de dados (em RAM) de acordo com o campo de ordenação informado.
-void heap_sort(Registro *registros, char *campo_ordenacao, int qtd_estacoes) {
+void heap_sort(Registro *registros, char *campo_ordenacao, int qtd_estacoes)
+{
     build_max_heap(registros, campo_ordenacao, qtd_estacoes);
 
-    for (int i = qtd_estacoes - 1; i > 0; i--) {
+    for (int i = qtd_estacoes - 1; i > 0; i--)
+    {
         swap(&registros[0], &registros[i]);
         heapify(registros, campo_ordenacao, i, 0);
     }

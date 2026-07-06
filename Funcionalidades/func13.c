@@ -1,7 +1,6 @@
 #include "funcionalidades.h"
 #include "../auxiliares/auxiliar.h"
 
-// Funcionalidade [13]: a partir de um arquivo de dados desordenado retornar um arquivo ordenado pelo campo desejado (codEstacao ou codProxEstacao)
 void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado, bool imprimirBinarioNaTela)
 {
     if (nome_arquivo_entrada == NULL || campo_ordenacao == NULL || nome_arquivo_ordenado == NULL)
@@ -18,14 +17,16 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
 
     Cabecalho cabecalho_entrada;
     Cabecalho cabecalho_ordenado;
-     
+
     FILE *f1, *f2;
-    if(!abrir_binario(&f1, nome_arquivo_entrada, "rb", &cabecalho_entrada, 0)) {
+    if (!abrir_binario(&f1, nome_arquivo_entrada, "rb", &cabecalho_entrada, 0))
+    {
         printf("%s", MSG_FALHA);
         return;
     }
 
-    if(f2 = fopen(nome_arquivo_ordenado, "wb") == NULL) {
+    if ((f2 = fopen(nome_arquivo_ordenado, "wb")) == NULL)
+    {
         fclose(f1);
         printf("%s", MSG_FALHA);
         return;
@@ -42,12 +43,12 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     Registro *registros = (Registro *)calloc(qtd_estacoes, sizeof(Registro));
 
     int i = 0;
-    while(true) {
+    while (true)
+    {
         int leitura = ler_registro(f1, &registros[i]);
-        if(leitura == 0) 
+        if (leitura == 0)
             break;
-        if(leitura == -1)
-            i--;
+        if (leitura == -1)
             continue;
 
         i++;
@@ -58,22 +59,24 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     fseek(f2, TAMANHO_CABECALHO, SEEK_SET);
 
     int escrita;
-    for(int j = 0; j < qtd_estacoes; j++) {
+    for (int j = 0; j < i; j++)
+    {
         escrita = escrever_registro(f2, &registros[j]);
-        if(!escrita) {
+        if (!escrita)
+        {
             printf("%s", MSG_FALHA);
             return;
         }
     }
 
-    if(imprimirBinarioNaTela)
+    if (imprimirBinarioNaTela)
         BinarioNaTela(nome_arquivo_ordenado);
-
-    free(registros);
-    fclose(f1);
 
     cabecalho_ordenado.proxRRN = i;
     cabecalho_ordenado.topo = -1;
-    cabecalho_ordenado.nroEstacoes = i - 1;
+    cabecalho_ordenado.nroEstacoes = i;
+
+    free(registros);
+    fclose(f1);
     fechar_binario_escrita(f2, &cabecalho_ordenado);
 }
