@@ -54,9 +54,10 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     // Ordena em memória pelo campo pedido, usando o heap sort
     heap_sort(registros, campo_ordenacao, i);
 
-    // Escreve os registros já ordenados de volta no arquivo de saída
+    // Posiciona o ponteiro no início da seção de dados
     fseek(f2, TAMANHO_CABECALHO, SEEK_SET);
 
+    // Escreve os registros já ordenados de volta no arquivo de saída
     int escrita;
     for (int j = 0; j < i; j++)
     {
@@ -74,7 +75,7 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     cabecalho_ordenado.topo = -1;
 
     free(registros);
-    fechar_binario_escrita(f2, &cabecalho_ordenado);
+    fechar_binario_escrita(f2, &cabecalho_ordenado); // fecha o arquivo redefinindo o cabecalho para correta impressão com BinarioNaTela
 
     // A impressão só ocorre quando chamada diretamente pela funcionalidade [13]
     // A [14] chama com imprimirBinarioNaTela = false

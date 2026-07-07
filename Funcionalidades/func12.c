@@ -22,7 +22,7 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
     while (true)
     {
         int leitura1 = ler_registro(f1, &registro_arquivo1);
-        if (leitura1 == 0)
+        if (leitura1 == 0) // fim do arquivo
             break;
         if (leitura1 == -1) // registro logicamente removido (pula para o próximo)
             continue;
@@ -35,12 +35,13 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
             encontrou = true;
             fseek(f2, offset_encontrado_indice, SEEK_SET);
             ler_registro(f2, &registro_proxEstacao);
-            normalizar_campos_texto_registro(&registro_arquivo1);
+            normalizar_campos_texto_registro(&registro_arquivo1); // Adiciona '/0' ao final dos campos textuais (Strings)
             normalizar_campos_texto_registro(&registro_proxEstacao);
             printf("%d %s %s %d %s\n", registro_arquivo1.codEstacao, registro_arquivo1.nomeEstacao, registro_arquivo1.nomeLinha, registro_arquivo1.codProxEstacao, registro_proxEstacao.nomeEstacao);
         }
     }
 
+    // Se nenhum registro obedece à condição de junção, imprime mensagem de erro
     if (!encontrou)
         printf("%s", MSG_INEXISTENTE);
 

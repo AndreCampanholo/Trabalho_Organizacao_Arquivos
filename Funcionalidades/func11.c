@@ -20,7 +20,7 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
     while (true)
     {
         int leitura1 = ler_registro(f1, &registro_arquivo1);
-        if (leitura1 == 0)
+        if (leitura1 == 0) // fim do arquivo
             break;
         if (leitura1 == -1) // registro logicamente removido (pula para o próximo)
             continue;
@@ -32,20 +32,21 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
         {
             int leitura2 = ler_registro(f2, &registro_arquivo2);
             if (leitura2 == 0)
-                break;
+                break;          // idem acima
             if (leitura2 == -1)
                 continue;
 
             if (registro_arquivo1.codProxEstacao == registro_arquivo2.codEstacao)
             {
                 encontrou = true;
-                normalizar_campos_texto_registro(&registro_arquivo1);
+                normalizar_campos_texto_registro(&registro_arquivo1); // Adiciona '/0' ao final dos campos textuais (Strings)
                 normalizar_campos_texto_registro(&registro_arquivo2);
                 printf("%d %s %s %d %s\n", registro_arquivo1.codEstacao, registro_arquivo1.nomeEstacao, registro_arquivo1.nomeLinha, registro_arquivo1.codProxEstacao, registro_arquivo2.nomeEstacao);
             }
         }
     }
 
+    // Se nenhum registro obedece à condição de junção, imprime mensagem de erro
     if (!encontrou)
         printf("%s", MSG_INEXISTENTE);
 
