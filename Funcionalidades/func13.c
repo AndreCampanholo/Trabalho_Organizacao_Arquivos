@@ -1,17 +1,21 @@
 #include "../headers/funcionalidades.h"
 #include "../headers/auxiliares.h"
 
-void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado, bool imprimirBinarioNaTela)
+void ordenar_arquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado, bool imprimirBinarioNaTela, bool imprimir_erro, bool *sucesso)
 {
+    *sucesso = false;
+
     if (nome_arquivo_entrada == NULL || campo_ordenacao == NULL || nome_arquivo_ordenado == NULL)
     {
-        printf("%s", MSG_FALHA);
+        if (imprimir_erro)
+            printf("%s\n", MSG_FALHA);
         return;
     }
 
     if (strcmp(campo_ordenacao, "codProxEstacao") != 0 && strcmp(campo_ordenacao, "codEstacao") != 0)
     {
-        printf("%s", MSG_FALHA);
+        if (imprimir_erro)
+            printf("%s\n", MSG_FALHA);
         return;
     }
 
@@ -21,7 +25,8 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     FILE *f1, *f2;
     if (!abrir_binario(&f1, nome_arquivo_entrada, "rb", &cabecalho_entrada, 0))
     {
-        printf("%s", MSG_FALHA);
+        if (imprimir_erro)
+            printf("%s\n", MSG_FALHA);
         return;
     }
     // f1 só foi aberto para o cabecalho_entrada e já é fechado, pois carregar_registros reabre o arquivo por conta própria para ler os registros
@@ -29,7 +34,8 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
 
     if ((f2 = fopen(nome_arquivo_ordenado, "wb")) == NULL)
     {
-        printf("%s", MSG_FALHA);
+        if (imprimir_erro)
+            printf("%s\n", MSG_FALHA);
         return;
     }
 
@@ -45,33 +51,36 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     Registro *registros = carregar_registros(nome_arquivo_entrada, &qtd_lida);
     if (qtd_lida == -1)
     {
-        printf("%s", MSG_FALHA);
+        if (imprimir_erro)
+            printf("%s\n", MSG_FALHA);
         fclose(f2);
+        remove(nome_arquivo_ordenado);
         return;
     }
-    int i = qtd_lida;
 
-    // Ordena em memória pelo campo pedido, usando o heap sort
-    heap_sort(registros, campo_ordenacao, i);
+    // Ordena a partir do campo pedido, usando o heap sort
+    heap_sort(registros, campo_ordenacao, qtd_lida);
 
     // Posiciona o ponteiro no início da seção de dados
     fseek(f2, TAMANHO_CABECALHO, SEEK_SET);
 
     // Escreve os registros já ordenados de volta no arquivo de saída
     int escrita;
-    for (int j = 0; j < i; j++)
+    for (int j = 0; j < qtd_lida; j++)
     {
         escrita = escrever_registro(f2, &registros[j]);
         if (!escrita)
         {
-            printf("%s", MSG_FALHA);
+            if (imprimir_erro)
+                printf("%s\n", MSG_FALHA);
             free(registros);
             fclose(f2);
+            remove(nome_arquivo_ordenado);
             return;
         }
     }
 
-    cabecalho_ordenado.proxRRN = i;
+    cabecalho_ordenado.proxRRN = qtd_lida;
     cabecalho_ordenado.topo = -1;
 
     free(registros);
@@ -81,4 +90,6 @@ void ordenarArquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nom
     // A [14] chama com imprimirBinarioNaTela = false
     if (imprimirBinarioNaTela)
         BinarioNaTela(nome_arquivo_ordenado);
+
+    *sucesso = true;
 }

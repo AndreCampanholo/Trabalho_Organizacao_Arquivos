@@ -5,49 +5,47 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
 {
     if (nome_bin1 == NULL || nome_bin2 == NULL || campo1 == NULL || campo2 == NULL)
     {
-        printf("%s", MSG_FALHA);
+        printf("%s\n", MSG_FALHA);
         return;
     }
-    
+
     if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
     {
-        printf("%s", MSG_FALHA);
-        return 0;
-    }
-
-    Cabecalho cabecalho1, cabecalho2;
-    FILE *f1, *f2;
-    if (!abrir_binario(&f1, nome_bin1, "rb", &cabecalho1, 0))
-    {
-        printf("%s", MSG_FALHA);
+        printf("%s\n", MSG_FALHA);
         return;
     }
-    if (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho2, 0))
+
+    bool ok;
+
+    // Gera os arquivos temporários ordenados. A impressão do BinarioNaTela e das mensagens de erro é desabilitada, deixando a responsabilidade pelo tratamento de falhas para a funcionalidade [14] e evitando mensagens duplicadas
+    ordenar_arquivo(nome_bin1, campo1, "arq1_ord.bin", false, false, &ok);
+
+    if (!ok)
     {
-        fclose(f1);
-        printf("%s", MSG_FALHA);
+        printf("%s\n", MSG_FALHA);
         return;
     }
-    fclose(f1);
-    fclose(f2);
+    ordenar_arquivo(nome_bin2, campo2, "arq2_ord.bin", false, false, &ok);
 
-    // Gera as versões ordenadas em arquivos temporários, sem imprimir (imprimirBinarioNaTela = false)
-    ordenarArquivo(nome_bin1, campo1, "arquivo1_ordenado", false);
-    ordenarArquivo(nome_bin2, campo2, "arquivo2_ordenado", false);
+    if (!ok)
+    {
+        printf("%s\n", MSG_FALHA);
+        return;
+    }
 
-    // Consequência de decisão de projeto: ordenarArquivo já leu e ordenou esses registros na memória internamente, mas os libera antes de retornar. Por isso, é preciso relê-los do disco para ter o vetor ordenado disponível na memória para o merge-join
+    // A funcionalidade [13] gera arquivos binários ordenados e libera a memória utilizada. Assim, para executar o merge-join, os arquivos ordenados são carregados novamente para a RAM. Essa decisão de projeto mantém a funcionalidade [13] independente, ao custo de uma leitura adicional em disco
     int n1, n2;
-    Registro *regs1 = carregar_registros("arquivo1_ordenado", &n1);
+    Registro *regs1 = carregar_registros("arq1_ord.bin", &n1);
     if (n1 == -1)
     {
-        printf("%s", MSG_FALHA);
+        printf("%s\n", MSG_FALHA);
         return;
     }
-    Registro *regs2 = carregar_registros("arquivo2_ordenado", &n2);
+    Registro *regs2 = carregar_registros("arq2_ord.bin", &n2);
     if (n2 == -1)
     {
         free(regs1);
-        printf("%s", MSG_FALHA);
+        printf("%s\n", MSG_FALHA);
         return;
     }
 
@@ -96,14 +94,11 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
     }
 
     if (!encontrou)
-        printf("%s", MSG_INEXISTENTE);
+        printf("%s\n", MSG_INEXISTENTE);
 
     free(regs1);
     free(regs2);
 
-    if (remove("arquivo1_ordenado") != 0 || remove("arquivo2_ordenado") != 0)
-    {
-        printf("%s", MSG_FALHA);
-        return;
-    }
+    remove("arq1_ord.bin");
+    remove("arq2_ord.bin");
 }

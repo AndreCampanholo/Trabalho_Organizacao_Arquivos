@@ -3,15 +3,16 @@
 
 void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2)
 {
-    if(nome_bin1 == NULL || campo1 == NULL || nome_bin2 == NULL || campo2 == NULL) {
+    if (nome_bin1 == NULL || campo1 == NULL || nome_bin2 == NULL || campo2 == NULL)
+    {
         printf("%s", MSG_FALHA);
-        return 0;
+        return;
     }
 
     if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
     {
         printf("%s", MSG_FALHA);
-        return 0;
+        return;
     }
 
     Cabecalho cabecalho1;
@@ -19,8 +20,14 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
 
     // Caso seja informado o mesmo arquivo (autojunção), abre-se duas vezes para manter os ponteiros de leitura de cada lado da junção independentes entre si
     FILE *f1, *f2;
-    if ((!abrir_binario(&f1, nome_bin1, "rb", &cabecalho1, 0)) || (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho2, 0)))
+    if (!abrir_binario(&f1, nome_bin1, "rb", &cabecalho1, 0))
     {
+        printf("%s\n", MSG_FALHA);
+        return;
+    }
+    if (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho2, 0))
+    {
+        fclose(f1);
         printf("%s\n", MSG_FALHA);
         return;
     }
@@ -43,7 +50,7 @@ void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *
         {
             int leitura2 = ler_registro(f2, &registro_arquivo2);
             if (leitura2 == 0)
-                break;          // idem acima
+                break; // idem acima
             if (leitura2 == -1)
                 continue;
 

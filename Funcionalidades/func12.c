@@ -3,15 +3,16 @@
 
 void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2, char *nome_indice)
 {
-    if(nome_bin1 == NULL || campo1 == NULL || nome_bin2 == NULL || campo2 == NULL || nome_indice == NULL) {
-        printf("%s", MSG_FALHA);
-        return 0;
+    if (nome_bin1 == NULL || campo1 == NULL || nome_bin2 == NULL || campo2 == NULL || nome_indice == NULL)
+    {
+        printf("%s\n", MSG_FALHA);
+        return;
     }
 
     if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
     {
-        printf("%s", MSG_FALHA);
-        return 0;
+        printf("%s\n", MSG_FALHA);
+        return;
     }
 
     Cabecalho cabecalho_arquivo1;
@@ -20,8 +21,21 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
 
     // Caso seja informado o mesmo arquivo (autojunção), abre-se duas vezes para manter os ponteiros de leitura de cada lado da junção independentes entre si
     FILE *f1, *f2, *f3;
-    if ((!abrir_binario(&f1, nome_bin1, "rb", &cabecalho_arquivo1, 0)) || (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho_arquivo2, 0)) || (!abrir_binario_bt(&f3, nome_indice, "rb", &cabecalho_indice, 0)))
+    if (!abrir_binario(&f1, nome_bin1, "rb", &cabecalho_arquivo1, 0))
     {
+        printf("%s\n", MSG_FALHA);
+        return;
+    }
+    if (!abrir_binario(&f2, nome_bin2, "rb", &cabecalho_arquivo2, 0))
+    {
+        fclose(f1);
+        printf("%s\n", MSG_FALHA);
+        return;
+    }
+    if (!abrir_binario_bt(&f3, nome_indice, "rb", &cabecalho_indice, 0))
+    {
+        fclose(f1);
+        fclose(f2);
         printf("%s\n", MSG_FALHA);
         return;
     }
@@ -54,7 +68,7 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
 
     // Se nenhum registro obedece à condição de junção, imprime mensagem de erro
     if (!encontrou)
-        printf("%s", MSG_INEXISTENTE);
+        printf("%s\n", MSG_INEXISTENTE);
 
     fclose(f1);
     fclose(f2);

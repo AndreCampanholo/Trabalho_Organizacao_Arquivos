@@ -154,6 +154,7 @@ int main(void)
         char arq_entrada[TAMANHO_TEXTO];
         char campo_ordenacao[TAMANHO_TEXTO];
         char arq_ordenado[TAMANHO_TEXTO];
+        bool ok;
 
         if (scanf("%127s %127s %127s", arq_entrada, campo_ordenacao, arq_ordenado) != 3)
         {
@@ -161,7 +162,7 @@ int main(void)
             return 0;
         }
 
-        ordenarArquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1);
+        ordenar_arquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1, 1, &ok);
         break;
     }
 
