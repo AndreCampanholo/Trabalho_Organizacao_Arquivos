@@ -8,6 +8,12 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
         printf("%s", MSG_FALHA);
         return;
     }
+    
+    if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
+    {
+        printf("%s", MSG_FALHA);
+        return 0;
+    }
 
     Cabecalho cabecalho1, cabecalho2;
     FILE *f1, *f2;

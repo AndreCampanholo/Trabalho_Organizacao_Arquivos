@@ -161,12 +161,6 @@ int main(void)
             return 0;
         }
 
-        if (strcmp(campo_ordenacao, "codProxEstacao") != 0 && strcmp(campo_ordenacao, "codEstacao") != 0)
-        {
-            printf("%s", MSG_FALHA);
-            return 0;
-        }
-
         ordenarArquivo(arq_entrada, campo_ordenacao, arq_ordenado, 1);
         break;
     }
@@ -175,12 +169,6 @@ int main(void)
         if (scanf("%127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2) != 4)
         {
             printf("%s\n", MSG_FALHA);
-            return 0;
-        }
-
-        if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
-        {
-            printf("%s", MSG_FALHA);
             return 0;
         }
 
