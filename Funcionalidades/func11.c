@@ -3,6 +3,17 @@
 
 void juncao_loop_aninhado(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2)
 {
+    if(nome_bin1 == NULL || campo1 == NULL || nome_bin2 == NULL || campo2 == NULL) {
+        printf("%s", MSG_FALHA);
+        return 0;
+    }
+
+    if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
+    {
+        printf("%s", MSG_FALHA);
+        return 0;
+    }
+
     Cabecalho cabecalho1;
     Cabecalho cabecalho2;
 

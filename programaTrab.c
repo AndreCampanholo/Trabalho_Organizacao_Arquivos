@@ -135,11 +135,6 @@ int main(void)
             printf("%s\n", MSG_FALHA);
             return 0;
         }
-        if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
-        {
-            printf("%s", MSG_FALHA);
-            return 0;
-        }
 
         juncao_loop_aninhado(nome_bin1, campo1, nome_bin2, campo2);
         break;
@@ -148,12 +143,6 @@ int main(void)
         if (scanf("%127s %127s %127s %127s %127s", nome_bin1, campo1, nome_bin2, campo2, indice_bin) != 5)
         {
             printf("%s\n", MSG_FALHA);
-            return 0;
-        }
-
-        if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
-        {
-            printf("%s", MSG_FALHA);
             return 0;
         }
 

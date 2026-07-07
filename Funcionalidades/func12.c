@@ -3,6 +3,17 @@
 
 void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *campo2, char *nome_indice)
 {
+    if(nome_bin1 == NULL || campo1 == NULL || nome_bin2 == NULL || campo2 == NULL || nome_indice == NULL) {
+        printf("%s", MSG_FALHA);
+        return 0;
+    }
+
+    if (strcmp(campo1, "codProxEstacao") != 0 || strcmp(campo2, "codEstacao") != 0)
+    {
+        printf("%s", MSG_FALHA);
+        return 0;
+    }
+
     Cabecalho cabecalho_arquivo1;
     Cabecalho cabecalho_arquivo2;
     CabecalhoBT cabecalho_indice;
