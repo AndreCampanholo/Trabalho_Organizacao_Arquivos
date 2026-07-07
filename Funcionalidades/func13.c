@@ -84,10 +84,9 @@ void ordenar_arquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *no
     cabecalho_ordenado.topo = -1;
 
     free(registros);
-    fechar_binario_escrita(f2, &cabecalho_ordenado); // fecha o arquivo redefinindo o cabecalho para correta impressão com BinarioNaTela
+    fechar_binario_escrita(f2, &cabecalho_ordenado); // fecha o arquivo redefinindo o cabecalho para impressão do BinarioNaTela
 
     // A impressão só ocorre quando chamada diretamente pela funcionalidade [13]
-    // A [14] chama com imprimirBinarioNaTela = false
     if (imprimirBinarioNaTela)
         BinarioNaTela(nome_arquivo_ordenado);
 

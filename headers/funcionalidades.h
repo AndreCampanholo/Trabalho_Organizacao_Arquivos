@@ -47,7 +47,7 @@ void juncao_loop_unico(char *nome_bin1, char *campo1, char *nome_bin2, char *cam
 // Funcionalidade [13]: a partir de um arquivo de dados desordenado retornar um arquivo ordenado pelo campo desejado (codEstacao ou codProxEstacao)
 // OBS 1: criou-se um parâmetro booleano para permitir a impressão dos registros, após a ordenação, apenas na função 13 (Na 14 ele não deve imprimir imediatamente)
 // OBS 2: imprimir_erro: true = a própria funcionalidade imprime MSG_FALHA; false = apenas sinaliza a falha pelo parâmetro "sucesso".
-//* Decisão de Projeto: ordenar_arquivo lê, ordena, escreve em disco e libera o vetor internamente ao invés de devolver o vetor ordenado ao chamador
+//* Decisão de Projeto: ordenar_arquivo lê, ordena, escreve no disco e libera o vetor internamente ao invés de devolvê-lo ordenado ao chamador
 //* Ambas as soluções são válidas, já que devolver o vetor evitaria a releitura feita na func14.c, mas aumentaria o acoplamento entre as funcionalidades [13] e [14], além de transferir ao chamador a responsabilidade pela liberação da memória (free)
 //* Assim, optou-se por manter a simplicidade dos parâmetros e a independência da [13], aceitando essa releitura como um custo extra. Ressalta-se que a complexidade assintótica da [14] não é alterada pela decisão citada
 void ordenar_arquivo(char *nome_arquivo_entrada, char *campo_ordenacao, char *nome_arquivo_ordenado, bool imprimirBinarioNaTela, bool imprimir_erro, bool *sucesso);

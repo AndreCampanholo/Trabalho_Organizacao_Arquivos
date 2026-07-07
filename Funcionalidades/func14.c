@@ -50,7 +50,7 @@ void juncao_ordenacao_intercalacao(char *nome_bin1, char *campo1, char *nome_bin
     }
 
     // Merge-join: percorre os dois vetores ordenados simultaneamente com dois ponteiros (i para regs1, j para regs2), avançando sempre o lado de menor chave
-    // Quando as chaves empatam, delimita o grupo inteiro de ocorrências consecutivas daquela chave em cada lado ([inicioI,fimI) e [inicioJ,fimJ)) e gera as combinações entre os dois grupos
+    // Quando as chaves empatam, delimita o grupo inteiro de ocorrências consecutivas daquela chave em cada lado ([inicioI,fimI]) e ([inicioJ,fimJ]) e gera as combinações entre os dois grupos
     bool encontrou = false;
     int i = 0, j = 0;
     while (i < n1 && j < n2)
